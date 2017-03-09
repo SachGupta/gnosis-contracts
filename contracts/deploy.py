@@ -40,7 +40,10 @@ class Deploy:
             time.sleep(5)
 
     def replace_address(self, a):
-        return self.contract_addresses[a] if isinstance(a, basestring) and a in self.contract_addresses else a
+        if isinstance(a, list):
+            return [self.replace_address(i) for i in a]
+        else:
+            return self.contract_addresses[a] if isinstance(a, basestring) and a in self.contract_addresses else a
 
     def get_nonce(self):
         return int(self.json_rpc.eth_getTransactionCount(self.user_address)["result"][2:], 16)
@@ -71,7 +74,7 @@ class Deploy:
                 bytecode = bytecode.replace("__{}{}".format(library_name, "_" * (38 - len(library_name))), library_address[2:])
         return bytecode
 
-    def deploy_code(self, file_path, params, addresses):
+    def deploy_code(self, file_path, reference, params, addresses):
         if addresses:
             addresses = dict([(k, self.replace_address(v)) for k, v in addresses.iteritems()])
         language = "solidity" if file_path.endswith(".sol") else "serpent"
@@ -112,7 +115,10 @@ class Deploy:
         if self.verify_code and not self.code_is_valid(contract_address, bytecode):
             logging.info('Deploy of {} failed. Retry!'.format(file_path))
             self.deploy_code(file_path, params, addresses)
-        contract_name = file_path.split("/")[-1].split(".")[0]
+        if reference:
+            contract_name = reference
+        else:
+            contract_name = file_path.split("/")[-1].split(".")[0]
         self.contract_addresses[contract_name] = contract_address
         self.contract_abis[contract_name] = abi
         logging.info('Contract {} was created at address {}.'.format(file_path, contract_address))
@@ -121,7 +127,7 @@ class Deploy:
         contract_address = self.replace_address(contract)
         contract_abi = self.contract_abis[contract]
         translator = ContractTranslator(contract_abi)
-        data = translator.encode(name, [self.replace_address(p) for p in params]).encode("hex")
+        data = translator.encode(name, self.replace_address(params)).encode("hex")
         logging.info('Try to send {} transaction to contract {}.'.format(name, contract))
         if self.private_key:
             raw_tx = self.get_raw_transaction(data, contract_address)
@@ -165,6 +171,7 @@ class Deploy:
                 if instruction["type"] == "deployment":
                     self.deploy_code(
                         instruction["file"],
+                        instruction["reference"] if "reference" in instruction else None,
                         instruction["params"] if "params" in instruction else None,
                         instruction["addresses"] if "addresses" in instruction else None,
                     )
