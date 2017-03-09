@@ -10,6 +10,8 @@ class TestContract(AbstractTestContract):
     BACKER_2 = 2
     BLOCKS_PER_DAY = 5760
     TOTAL_TOKENS = 10000000 * 10**18
+    MAX_TOKENS_SOLD = 9000000 * 10**18
+    PREASSIGNED_TOKENS = 1000000 * 10**18
     WAITING_PERIOD = 60*60*24*7
     FUNDING_GOAL = 1250000
     MAX_GAS = 150000  # Kraken gas limit
@@ -27,29 +29,34 @@ class TestContract(AbstractTestContract):
             required_accounts
         )
         self.multisig_wallet = self.s.abi_contract(
-            self.pp.process('Wallets/MultiSigWalletWithDailyLimit.sol', add_dev_code=True, contract_dir=self.contract_dir),
+            self.pp.process(self.WALLETS_DIR + 'MultiSigWalletWithDailyLimit.sol', add_dev_code=True,
+                            contract_dir=self.contract_dir),
             language='solidity',
             constructor_parameters=constructor_parameters
         )
-        self.dutch_auction.setup(self.gnosis_token.address, self.multisig_wallet.address)
+        # Create dutch auction
+        self.dutch_auction.setup(self.gnosis_token.address,
+                                 self.multisig_wallet.address,
+                                 [self.multisig_wallet.address],
+                                 [self.PREASSIGNED_TOKENS])
         # Start auction
         start_auction_data = self.dutch_auction.translator.encode('startAuction', [])
         self.multisig_wallet.submitTransaction(self.dutch_auction.address, 0, start_auction_data, sender=keys[wa_1])
         # Setups cannot be done twice
         self.assertRaises(TransactionFailed, self.dutch_auction.setup, self.gnosis_token.address)
         # Bidder 1 places a bid in the first block after auction starts
-        self.assertEqual(self.dutch_auction.calcTokenPrice(), 20000 * 10**18 / 7500)
+        self.assertEqual(self.dutch_auction.calcTokenPrice(), 20000 * 10**18 / 7500 + 1)
         bidder_1 = 0
         value_1 = 500000 * 10**18  # 500k Ether
         self.s.block.set_balance(accounts[bidder_1], value_1*2)
         profiling = self.dutch_auction.bid(sender=keys[bidder_1], value=value_1, profiling=True)
         self.assertLessEqual(profiling['gas'], self.MAX_GAS)
-        self.assertEqual(self.dutch_auction.calcStopPrice(), value_1 / 9000000)
+        self.assertEqual(self.dutch_auction.calcStopPrice(), value_1 / 9000000 + 1)
         # A few blocks later
         self.s.block.number += self.BLOCKS_PER_DAY*2
-        self.assertEqual(self.dutch_auction.calcTokenPrice(), 20000 * 10**18 / (self.BLOCKS_PER_DAY*2 + 7500))
+        self.assertEqual(self.dutch_auction.calcTokenPrice(), 20000 * 10**18 / (self.BLOCKS_PER_DAY*2 + 7500) + 1)
         # Stop price didn't change
-        self.assertEqual(self.dutch_auction.calcStopPrice(), value_1 / 9000000)
+        self.assertEqual(self.dutch_auction.calcStopPrice(), value_1 / 9000000 + 1)
         # Spender places a bid in the name of bidder 2
         bidder_2 = 1
         spender = 9
@@ -57,11 +64,11 @@ class TestContract(AbstractTestContract):
         self.s.block.set_balance(accounts[spender], value_2*2)
         self.dutch_auction.bid(accounts[bidder_2], sender=keys[spender], value=value_2)
         # Stop price changed
-        self.assertEqual(self.dutch_auction.calcStopPrice(), (value_1 + value_2) / 9000000)
+        self.assertEqual(self.dutch_auction.calcStopPrice(), (value_1 + value_2) / 9000000 + 1)
         # A few blocks later
         self.s.block.number += self.BLOCKS_PER_DAY*3
-        self.assertEqual(self.dutch_auction.calcTokenPrice(), 20000 * 10 ** 18 / (self.BLOCKS_PER_DAY*5 + 7500))
-        self.assertEqual(self.dutch_auction.calcStopPrice(), (value_1 + value_2) / 9000000)
+        self.assertEqual(self.dutch_auction.calcTokenPrice(), 20000 * 10 ** 18 / (self.BLOCKS_PER_DAY*5 + 7500) + 1)
+        self.assertEqual(self.dutch_auction.calcStopPrice(), (value_1 + value_2) / 9000000 + 1)
         # Bidder 2 tries to send 0 bid
         self.assertRaises(TransactionFailed, self.dutch_auction.bid, sender=keys[bidder_2], value=0)
         # Bidder 3 places a bid
@@ -73,7 +80,7 @@ class TestContract(AbstractTestContract):
         refund_bidder_3 = (value_1 + value_2 + value_3) - self.FUNDING_GOAL * 10**18
         # Bidder 3 gets refund; but paid gas so balance isn't exactly 0.75M Ether
         self.assertGreater(self.s.block.get_balance(accounts[bidder_3]), 0.98 * (value_3 + refund_bidder_3))
-        self.assertEqual(self.dutch_auction.calcStopPrice(), (value_1 + value_2 + (value_3 - refund_bidder_3)) / 9000000)
+        self.assertEqual(self.dutch_auction.calcStopPrice(), (value_1 + value_2 + (value_3 - refund_bidder_3)) / 9000000 + 1)
         # Auction is over, no more bids are accepted
         self.assertRaises(TransactionFailed, self.dutch_auction.bid, sender=keys[bidder_3], value=value_3)
         self.assertEqual(self.dutch_auction.finalPrice(), self.dutch_auction.calcTokenPrice())
@@ -89,7 +96,9 @@ class TestContract(AbstractTestContract):
         self.assertEqual(self.gnosis_token.balanceOf(accounts[bidder_3]),
                          (value_3 - refund_bidder_3) * 10 ** 18 / self.dutch_auction.finalPrice())
         self.assertEqual(self.gnosis_token.balanceOf(self.multisig_wallet.address),
-                         self.TOTAL_TOKENS - self.dutch_auction.totalReceived() * 10 ** 18 / self.dutch_auction.finalPrice())
+                         self.PREASSIGNED_TOKENS + (
+                             self.MAX_TOKENS_SOLD - self.dutch_auction.totalReceived() * 10 ** 18
+                             / self.dutch_auction.finalPrice()))
         self.assertEqual(self.gnosis_token.totalSupply(), self.TOTAL_TOKENS)
         self.assertEqual(self.dutch_auction.totalReceived() / 1e18, self.FUNDING_GOAL)
         # Auction ended but trading is not possible yet, because there is one week pause after auction ends

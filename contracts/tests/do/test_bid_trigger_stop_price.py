@@ -13,6 +13,7 @@ class TestContract(AbstractTestContract):
     BACKER_2 = 2
     BLOCKS_PER_DAY = 5760
     TOTAL_TOKENS = 10000000 * 10**18
+    PREASSIGNED_TOKENS = 1000000 * 10**18
 
     def __init__(self, *args, **kwargs):
         super(TestContract, self).__init__(*args, **kwargs)
@@ -31,21 +32,24 @@ class TestContract(AbstractTestContract):
             language='solidity',
             constructor_parameters=constructor_parameters
         )
-        self.dutch_auction.setup(self.gnosis_token.address, self.multisig_wallet.address)
+        self.dutch_auction.setup(self.gnosis_token.address,
+                                 self.multisig_wallet.address,
+                                 [self.multisig_wallet.address],
+                                 [self.PREASSIGNED_TOKENS])
         # Start auction
         start_auction_data = self.dutch_auction.translator.encode('startAuction', [])
         self.multisig_wallet.submitTransaction(self.dutch_auction.address, 0, start_auction_data, sender=keys[wa_1])
         # Bidder 1 places a bid in the first block after auction starts
-        self.assertEqual(self.dutch_auction.calcTokenPrice(), 20000 * 10**18 / 7500)
+        self.assertEqual(self.dutch_auction.calcTokenPrice(), 20000 * 10**18 / 7500 + 1)
         bidder_1 = 0
         value_1 = 500000 * 10**18  # 500k Ether
         self.s.block.set_balance(accounts[bidder_1], value_1*2)
         self.dutch_auction.bid(sender=keys[bidder_1], value=value_1)
-        self.assertEqual(self.dutch_auction.calcStopPrice(), value_1 / 9000000)
+        self.assertEqual(self.dutch_auction.calcStopPrice(), value_1 / 9000000 + 1)
         # 60 days later
         days_later = self.BLOCKS_PER_DAY*60
         self.s.block.number += days_later
-        self.assertEqual(self.dutch_auction.calcTokenPrice(), 20000 * 10**18 / (days_later + 7500))
+        self.assertEqual(self.dutch_auction.calcTokenPrice(), 20000 * 10**18 / (days_later + 7500) + 1)
         self.assertGreater(self.dutch_auction.calcTokenPrice(), self.dutch_auction.calcStopPrice())
         # Bidder 2 places a bid
         bidder_2 = 1
@@ -53,7 +57,7 @@ class TestContract(AbstractTestContract):
         self.s.block.set_balance(accounts[bidder_2], value_2*2)
         self.dutch_auction.bid(sender=keys[bidder_2], value=value_2)
         # Stop price changed
-        self.assertEqual(self.dutch_auction.calcStopPrice(), (value_1 + value_2) / 9000000)
+        self.assertEqual(self.dutch_auction.calcStopPrice(), (value_1 + value_2) / 9000000 + 1)
         # Auction is instantly over since stop price already higher than token price
         self.assertRaises(TransactionFailed, self.dutch_auction.bid, sender=keys[bidder_2], value=1)
         self.assertLess(self.dutch_auction.calcTokenPrice(), self.dutch_auction.calcStopPrice())

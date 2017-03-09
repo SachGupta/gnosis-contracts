@@ -14,6 +14,7 @@ class TestContract(AbstractTestContract):
     BLOCKS_PER_DAY = 5760
     TOTAL_TOKENS = 10000000 * 10**18
     TOTAL_TOKENS_SOLD = 9000000
+    PREASSIGNED_TOKENS = 1000000 * 10**18
 
     def __init__(self, *args, **kwargs):
         super(TestContract, self).__init__(*args, **kwargs)
@@ -32,7 +33,10 @@ class TestContract(AbstractTestContract):
             language='solidity',
             constructor_parameters=constructor_parameters
         )
-        self.dutch_auction.setup(self.gnosis_token.address, self.multisig_wallet.address)
+        self.dutch_auction.setup(self.gnosis_token.address,
+                                 self.multisig_wallet.address,
+                                 [self.multisig_wallet.address],
+                                 [self.PREASSIGNED_TOKENS])
         # Start auction
         start_auction_data = self.dutch_auction.translator.encode('startAuction', [])
         self.multisig_wallet.submitTransaction(self.dutch_auction.address, 0, start_auction_data, sender=keys[wa_1])
@@ -41,10 +45,11 @@ class TestContract(AbstractTestContract):
         self.s.block.number += days_later
         # Bidder 1 places a bid in the first block after auction starts
         bidder_1 = 0
-        value_1 = self.dutch_auction.calcTokenPrice() * self.TOTAL_TOKENS_SOLD
+        value_1 = self.dutch_auction.calcTokenPrice() * self.TOTAL_TOKENS_SOLD - self.TOTAL_TOKENS_SOLD
         self.s.block.set_balance(accounts[bidder_1], value_1 * 2)
         self.dutch_auction.bid(sender=keys[bidder_1], value=value_1)
-        self.assertEqual(self.dutch_auction.calcStopPrice(), value_1 / 9000000)
+        self.assertEqual(self.dutch_auction.calcTokenPrice(), 20000 * 10 ** 18 / (7500 + days_later) + 1)
+        self.assertEqual(self.dutch_auction.calcStopPrice(), value_1 / 9000000 + 1)
         self.assertEqual(self.dutch_auction.calcTokenPrice(), self.dutch_auction.calcStopPrice())
         # Bidder 2 places a bid but fails because stop price was reached already
         bidder_2 = 1

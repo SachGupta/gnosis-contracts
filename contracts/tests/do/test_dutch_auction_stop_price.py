@@ -11,6 +11,7 @@ class TestContract(AbstractTestContract):
     BLOCKS_PER_DAY = 5760
     TOTAL_TOKENS = 10000000 * 10**18
     WAITING_PERIOD = 60*60*24*7
+    PREASSIGNED_TOKENS = 1000000 * 10**18
 
     def __init__(self, *args, **kwargs):
         super(TestContract, self).__init__(*args, **kwargs)
@@ -30,29 +31,32 @@ class TestContract(AbstractTestContract):
             language='solidity',
             constructor_parameters=constructor_parameters
         )
-        self.dutch_auction.setup(self.gnosis_token.address, self.multisig_wallet.address)
+        self.dutch_auction.setup(self.gnosis_token.address,
+                                 self.multisig_wallet.address,
+                                 [self.multisig_wallet.address],
+                                 [self.PREASSIGNED_TOKENS])
         # Start auction
         start_auction_data = self.dutch_auction.translator.encode('startAuction', [])
         self.multisig_wallet.submitTransaction(self.dutch_auction.address, 0, start_auction_data, sender=keys[wa_1])
         # Token is not launched yet
         self.assertFalse(self.dutch_auction.tokenLaunched())
         # Bidder 1 places a bid in the first block after auction starts
-        self.assertEqual(self.dutch_auction.calcTokenPrice(), 20000 * 10 ** 18 / 7500)
+        self.assertEqual(self.dutch_auction.calcTokenPrice(), 20000 * 10 ** 18 / 7500 + 1)
         bidder_1 = 0
         value_1 = 500000 * 10**18  # 500k Ether
         self.s.block.set_balance(accounts[bidder_1], value_1*2)
         self.dutch_auction.bid(sender=keys[bidder_1], value=value_1)
-        self.assertEqual(self.dutch_auction.calcStopPrice(), value_1 / 9000000)
+        self.assertEqual(self.dutch_auction.calcStopPrice(), value_1 / 9000000 + 1)
         # A few blocks later
         self.s.block.number += self.BLOCKS_PER_DAY*2
-        self.assertEqual(self.dutch_auction.calcTokenPrice(), 20000 * 10 ** 18 / (self.BLOCKS_PER_DAY * 2 + 7500))
+        self.assertEqual(self.dutch_auction.calcTokenPrice(), 20000 * 10 ** 18 / (self.BLOCKS_PER_DAY * 2 + 7500) + 1)
         # Bidder 2 places a bid
         bidder_2 = 1
         value_2 = 500000 * 10**18  # 1M Ether
         self.s.block.set_balance(accounts[bidder_2], value_2*2)
         self.dutch_auction.bid(sender=keys[bidder_2], value=value_2)
         # Stop price changed
-        self.assertEqual(self.dutch_auction.calcStopPrice(), (value_1 + value_2) / 9000000)
+        self.assertEqual(self.dutch_auction.calcStopPrice(), (value_1 + value_2) / 9000000 + 1)
         # Stop price is reached
         self.s.block.number += self.BLOCKS_PER_DAY*40
         # Auction is over, no more bids are accepted

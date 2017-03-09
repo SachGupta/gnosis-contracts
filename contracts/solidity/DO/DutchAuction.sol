@@ -15,8 +15,8 @@ contract DutchAuction {
      *  Constants
      */
     uint constant public CEILING = 1250000 ether;
-    uint constant public TOTAL_TOKENS = 10000000; // 10M
-    uint constant public MAX_TOKENS_SOLD = 9000000; // 9M
+    uint constant public TOTAL_TOKENS = 10000000 * 10**18; // 10M
+    uint constant public MAX_TOKENS_SOLD = 9000000 * 10**18; // 9M
     uint constant public WAITING_PERIOD = 7 days;
 
     /*
@@ -69,7 +69,7 @@ contract DutchAuction {
     }
 
     modifier timedTransitions() {
-        if (stage == Stages.AuctionStarted && calcTokenPrice() <= calcStopPrice()) {
+        if (stage == Stages.AuctionStarted && (calcTokenPrice() <= calcStopPrice() || totalReceived == CEILING)) {
             finalizeAuction();
         }
         _;
@@ -78,7 +78,7 @@ contract DutchAuction {
     /*
      *  Public functions
      */
-    /// @dev Contract constructor function sets start date.
+    /// @dev Contract constructor function sets owner.
     function DutchAuction()
         public
     {
@@ -88,7 +88,9 @@ contract DutchAuction {
     /// @dev Setup function sets external contracts' addresses.
     /// @param _gnosisToken Gnosis token address.
     /// @param _wallet Gnosis founders address.
-    function setup(address _gnosisToken, address _wallet)
+    /// @param owners Array of addresses receiving preassigned tokens.
+    /// @param tokens Array of preassigned token amounts.
+    function setup(address _gnosisToken, address _wallet, address[] owners, uint[] tokens)
         public
         isOwner
     {
@@ -98,6 +100,16 @@ contract DutchAuction {
         }
         wallet = _wallet;
         gnosisToken = Token(_gnosisToken);
+        // Assign tokens
+        uint totalPreassignedTokens = 0;
+        for (uint i=0; i<owners.length; i++) {
+            totalPreassignedTokens += tokens[i];
+            gnosisToken.transfer(owners[i], tokens[i]);
+        }
+        if (totalPreassignedTokens != TOTAL_TOKENS - MAX_TOKENS_SOLD) {
+            // Preassigned token count doesn't match minimum number of unsold tokens
+            throw;
+        }
     }
 
     /// @dev Starts auction and sets startBlock.
@@ -169,10 +181,9 @@ contract DutchAuction {
         }
         bids[receiver] += amount;
         totalReceived += amount;
-        if (totalReceived == CEILING) {
-            finalizeAuction();
-        }
         BidSubmission(receiver, amount);
+        // Update the state after investment is done to check if auction is over.
+        updateStage();
     }
 
     /// @dev Claims tokens for bidder after auction.
@@ -196,7 +207,7 @@ contract DutchAuction {
         public
         returns (uint)
     {
-        return totalReceived / MAX_TOKENS_SOLD;
+        return totalReceived * 10**18 / MAX_TOKENS_SOLD + 1;
     }
 
     /// @dev Calculates token price.
@@ -206,7 +217,7 @@ contract DutchAuction {
         public
         returns (uint)
     {
-        return 20000 * 1 ether / (block.number - startBlock + 7500);
+        return 20000 * 1 ether / (block.number - startBlock + 7500) + 1;
     }
 
     /*
@@ -224,7 +235,7 @@ contract DutchAuction {
         }
         uint soldTokens = totalReceived * 10**18 / finalPrice;
         // Auction contract transfers all unsold tokens to Gnosis inventory multisig
-        gnosisToken.transfer(wallet, TOTAL_TOKENS * 10**18 - soldTokens);
+        gnosisToken.transfer(wallet, MAX_TOKENS_SOLD - soldTokens);
         endTime = block.timestamp;
     }
 }
