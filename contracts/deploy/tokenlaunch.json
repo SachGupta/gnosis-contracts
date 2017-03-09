@@ -3,7 +3,7 @@
         "type": "deployment",
         "file": "Wallets/MultiSigWallet.sol",
         "params": [
-            ["dceceaf3fc5c0a63d195d69b1a90011b7b19650d", "598443f1880ef585b21f1d7585bd0577402861e5"],
+            ["{ADDRESS}", "{ADDRESS}"],
             2
         ]
     },
@@ -12,14 +12,14 @@
         "contract": "MultiSigWallet",
         "name": "owners",
         "params": [0],
-        "return": "dceceaf3fc5c0a63d195d69b1a90011b7b19650d"
+        "return": "{ADDRESS}"
     },
     {
         "type": "assertion",
         "contract": "MultiSigWallet",
         "name": "owners",
         "params": [1],
-        "return": "598443f1880ef585b21f1d7585bd0577402861e5"
+        "return": "{ADDRESS}"
     },
     {
         "type": "assertion",
@@ -37,11 +37,28 @@
         "params": ["DutchAuction"]
     },
     {
+        "type": "deployment",
+        "file": "DO/Vesting.sol",
+        "reference": "VESTING_1",
+        "params": ["{ADDRESS}", "MultiSigWallet", "GnosisToken"]
+    },
+    {
+        "type": "deployment",
+        "file": "DO/Vesting.sol",
+        "reference": "VESTING_2",
+        "params": ["{ADDRESS}", "MultiSigWallet", "GnosisToken"]
+    },
+    {
         "type": "transaction",
         "contract": "DutchAuction",
         "name": "setup",
         "params": [
-            "GnosisToken", "MultiSigWallet"
+            "GnosisToken", "MultiSigWallet", ["VESTING_1", "VESTING_2"], [500000000000000000000000, 500000000000000000000000]
         ]
+    },
+    {
+        "type": "deployment",
+        "file": "DO/ClaimProxy.sol",
+        "params": ["DutchAuction"]
     }
 ]
