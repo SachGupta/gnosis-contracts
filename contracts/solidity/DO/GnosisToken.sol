@@ -33,7 +33,7 @@ contract GnosisToken is StandardToken {
     /*
      *  Public functions
      */
-    /// @dev Contract constructor function sets owner.
+    /// @dev Contract constructor function sets dutch auction contract address and assigns all tokens to dutch auction.
     function GnosisToken(address _dutchAuction)
         public
     {
