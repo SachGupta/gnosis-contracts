@@ -12,6 +12,8 @@ class TestContract(AbstractTestContract):
     TOTAL_TOKENS = 10000000 * 10**18
     WAITING_PERIOD = 60*60*24*7
     PREASSIGNED_TOKENS = 1000000 * 10**18
+    FUNDING_GOAL = 250000 * 10**18
+    START_PRICE_FACTOR = 4000
 
     def __init__(self, *args, **kwargs):
         super(TestContract, self).__init__(*args, **kwargs)
@@ -35,24 +37,29 @@ class TestContract(AbstractTestContract):
                                  self.multisig_wallet.address,
                                  [self.multisig_wallet.address],
                                  [self.PREASSIGNED_TOKENS])
+        # Set funding goal
+        change_ceiling_data = self.dutch_auction.translator.encode('changeCeiling',
+                                                                   [self.FUNDING_GOAL, self.START_PRICE_FACTOR])
+        self.multisig_wallet.submitTransaction(self.dutch_auction.address, 0, change_ceiling_data, sender=keys[wa_1])
         # Start auction
         start_auction_data = self.dutch_auction.translator.encode('startAuction', [])
         self.multisig_wallet.submitTransaction(self.dutch_auction.address, 0, start_auction_data, sender=keys[wa_1])
         # Token is not launched yet
         self.assertFalse(self.dutch_auction.tokenLaunched())
         # Bidder 1 places a bid in the first block after auction starts
-        self.assertEqual(self.dutch_auction.calcTokenPrice(), 20000 * 10 ** 18 / 7500 + 1)
+        self.assertEqual(self.dutch_auction.calcTokenPrice(), self.START_PRICE_FACTOR * 10 ** 18 / 7500 + 1)
         bidder_1 = 0
-        value_1 = 500000 * 10**18  # 500k Ether
+        value_1 = 100000 * 10**18  # 100k Ether
         self.s.block.set_balance(accounts[bidder_1], value_1*2)
         self.dutch_auction.bid(sender=keys[bidder_1], value=value_1)
         self.assertEqual(self.dutch_auction.calcStopPrice(), value_1 / 9000000 + 1)
         # A few blocks later
         self.s.block.number += self.BLOCKS_PER_DAY*2
-        self.assertEqual(self.dutch_auction.calcTokenPrice(), 20000 * 10 ** 18 / (self.BLOCKS_PER_DAY * 2 + 7500) + 1)
+        self.assertEqual(self.dutch_auction.calcTokenPrice(),
+                         self.START_PRICE_FACTOR * 10 ** 18 / (self.BLOCKS_PER_DAY * 2 + 7500) + 1)
         # Bidder 2 places a bid
         bidder_2 = 1
-        value_2 = 500000 * 10**18  # 1M Ether
+        value_2 = 100000 * 10**18  # 100k Ether
         self.s.block.set_balance(accounts[bidder_2], value_2*2)
         self.dutch_auction.bid(sender=keys[bidder_2], value=value_2)
         # Stop price changed
@@ -78,8 +85,8 @@ class TestContract(AbstractTestContract):
             self.TOTAL_TOKENS - self.dutch_auction.totalReceived() * 10 ** 18 / self.dutch_auction.finalPrice())
         self.assertEqual(self.gnosis_token.totalSupply(), self.TOTAL_TOKENS)
         # All funds went to the multisig wallet
-        self.assertEqual(self.s.block.get_balance(self.multisig_wallet.address), 1000000 * 10**18)
-        # Token is not launched yet, as a week cooldown period still has to pass
+        self.assertEqual(self.s.block.get_balance(self.multisig_wallet.address), value_1 + value_2)
+        # Token is not launched yet, as a week cool-down period still has to pass
         self.assertFalse(self.dutch_auction.tokenLaunched())
         # We wait for one week, token is launched now
         self.s.block.timestamp += self.WAITING_PERIOD + 1

@@ -13,8 +13,9 @@ class TestContract(AbstractTestContract):
     MAX_TOKENS_SOLD = 9000000 * 10**18
     PREASSIGNED_TOKENS = 1000000 * 10**18
     WAITING_PERIOD = 60*60*24*7
-    FUNDING_GOAL = 1250000
     MAX_GAS = 150000  # Kraken gas limit
+    FUNDING_GOAL = 250000 * 10**18
+    START_PRICE_FACTOR = 4000
 
     def __init__(self, *args, **kwargs):
         super(TestContract, self).__init__(*args, **kwargs)
@@ -46,12 +47,16 @@ class TestContract(AbstractTestContract):
             language='solidity',
             constructor_parameters=[self.dutch_auction.address]
         )
+        # Set funding goal
+        change_ceiling_data = self.dutch_auction.translator.encode('changeCeiling',
+                                                                   [self.FUNDING_GOAL, self.START_PRICE_FACTOR])
+        self.multisig_wallet.submitTransaction(self.dutch_auction.address, 0, change_ceiling_data, sender=keys[wa_1])
         # Start auction
         start_auction_data = self.dutch_auction.translator.encode('startAuction', [])
         self.multisig_wallet.submitTransaction(self.dutch_auction.address, 0, start_auction_data, sender=keys[wa_1])
         # Bidder 1 places a bid in the first block after auction starts
         bidder_1 = 0
-        value_1 = 500000 * 10**18  # 500k Ether
+        value_1 = 100000 * 10**18  # 100k Ether
         self.s.block.set_balance(accounts[bidder_1], value_1*2)
         self.dutch_auction.bid(sender=keys[bidder_1], value=value_1)
         # A few blocks later
@@ -59,18 +64,18 @@ class TestContract(AbstractTestContract):
         # Spender places a bid in the name of bidder 2
         bidder_2 = 1
         spender = 9
-        value_2 = 500000 * 10**18  # 500k Ether
+        value_2 = 100000 * 10**18  # 100k Ether
         self.s.block.set_balance(accounts[spender], value_2*2)
         self.dutch_auction.bid(accounts[bidder_2], sender=keys[spender], value=value_2)
         # A few blocks later
         self.s.block.number += self.BLOCKS_PER_DAY*3
         # Bidder 3 places a bid
         bidder_3 = 2
-        value_3 = 750000 * 10 ** 18  # 750k Ether
+        value_3 = 100000 * 10 ** 18  # 100k Ether
         self.s.block.set_balance(accounts[bidder_3], value_3*2)
         profiling = self.dutch_auction.bid(sender=keys[bidder_3], value=value_3, profiling=True)
         self.assertLessEqual(profiling['gas'], self.MAX_GAS)
-        refund_bidder_3 = (value_1 + value_2 + value_3) - self.FUNDING_GOAL * 10**18
+        refund_bidder_3 = (value_1 + value_2 + value_3) - self.FUNDING_GOAL
         # Claim all tokens via proxy
         self.claim_proxy.claimTokensFor([accounts[bidder_1], accounts[bidder_2], accounts[bidder_3]])
         # Confirm token balances

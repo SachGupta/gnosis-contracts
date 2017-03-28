@@ -14,7 +14,6 @@ contract DutchAuction {
     /*
      *  Constants
      */
-    uint constant public CEILING = 1250000 ether;
     uint constant public TOTAL_TOKENS = 10000000 * 10**18; // 10M
     uint constant public MAX_TOKENS_SOLD = 9000000 * 10**18; // 9M
     uint constant public WAITING_PERIOD = 7 days;
@@ -25,6 +24,8 @@ contract DutchAuction {
     Token public gnosisToken;
     address public wallet;
     address public owner;
+    uint public ceiling;
+    uint public startPriceFactor;
     uint public startBlock;
     uint public endTime;
     uint public totalReceived;
@@ -69,7 +70,7 @@ contract DutchAuction {
     }
 
     modifier timedTransitions() {
-        if (stage == Stages.AuctionStarted && (calcTokenPrice() <= calcStopPrice() || totalReceived == CEILING)) {
+        if (stage == Stages.AuctionStarted && (calcTokenPrice() <= calcStopPrice() || totalReceived == ceiling)) {
             finalizeAuction();
         }
         _;
@@ -83,6 +84,8 @@ contract DutchAuction {
         public
     {
         owner = msg.sender;
+        ceiling = 250000 ether;
+        startPriceFactor = 4000;
     }
 
     /// @dev Setup function sets external contracts' addresses.
@@ -120,6 +123,18 @@ contract DutchAuction {
     {
         stage = Stages.AuctionStarted;
         startBlock = block.number;
+    }
+
+    /// @dev Changes auction ceiling and start price factor before auction is started.
+    /// @param _ceiling Updated auction ceiling.
+    /// @param _startPriceFactor Updated start price factor.
+    function changeCeiling(uint _ceiling, uint _startPriceFactor)
+        public
+        isWallet
+        atStage(Stages.AuctionDeployed)
+    {
+        ceiling = _ceiling;
+        startPriceFactor = _startPriceFactor;
     }
 
     /// @dev Returns if one week after auction passed.
@@ -161,13 +176,22 @@ contract DutchAuction {
         payable
         timedTransitions
         atStage(Stages.AuctionStarted)
+        returns (uint amount)
     {
         if (receiver == 0) {
             receiver = msg.sender;
         }
-        uint amount = msg.value;
-        if (totalReceived + amount > CEILING) {
-            amount = CEILING - totalReceived;
+        amount = msg.value;
+        // Prevent that more than 90% of tokens are sold. Only relevant if cap not reached.
+        uint maxEtherBasedOnTokenPrice = 9000000 * calcTokenPrice() - totalReceived;
+        uint maxEtherBasedOnTotalReceived = ceiling - totalReceived;
+        uint maxEther = maxEtherBasedOnTokenPrice;
+        if (maxEtherBasedOnTotalReceived < maxEtherBasedOnTokenPrice) {
+            maxEther = maxEtherBasedOnTotalReceived;
+        }
+        // Only invest maximum possible amount.
+        if (amount > maxEther) {
+            amount = maxEther;
             // Send change back
             if (!receiver.send(msg.value - amount)) {
                 // Sending failed
@@ -217,7 +241,7 @@ contract DutchAuction {
         public
         returns (uint)
     {
-        return 20000 * 1 ether / (block.number - startBlock + 7500) + 1;
+        return startPriceFactor * 1 ether / (block.number - startBlock + 7500) + 1;
     }
 
     /*
@@ -227,7 +251,7 @@ contract DutchAuction {
         private
     {
         stage = Stages.AuctionEnded;
-        if (totalReceived == CEILING) {
+        if (totalReceived == ceiling) {
             finalPrice = calcTokenPrice();
         }
         else {

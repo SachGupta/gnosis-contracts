@@ -13,9 +13,10 @@ class TestContract(AbstractTestContract):
     MAX_TOKENS_SOLD = 9000000 * 10**18
     PREASSIGNED_TOKENS = 1000000 * 10**18
     WAITING_PERIOD = 60*60*24*7
-    FUNDING_GOAL = 1250000
     MAX_GAS = 150000  # Kraken gas limit
     ONE_YEAR = 60*60*24*365
+    FUNDING_GOAL = 250000 * 10**18
+    START_PRICE_FACTOR = 4000
 
     def __init__(self, *args, **kwargs):
         super(TestContract, self).__init__(*args, **kwargs)
@@ -52,6 +53,10 @@ class TestContract(AbstractTestContract):
                                  self.multisig_wallet.address,
                                  [self.vesting_1.address, self.vesting_2.address],
                                  [self.PREASSIGNED_TOKENS/2, self.PREASSIGNED_TOKENS/2])
+        # Set funding goal
+        change_ceiling_data = self.dutch_auction.translator.encode('changeCeiling',
+                                                                   [self.FUNDING_GOAL, self.START_PRICE_FACTOR])
+        self.multisig_wallet.submitTransaction(self.dutch_auction.address, 0, change_ceiling_data, sender=keys[wa_1])
         # Start auction
         start_auction_data = self.dutch_auction.translator.encode('startAuction', [])
         self.multisig_wallet.submitTransaction(self.dutch_auction.address, 0, start_auction_data, sender=keys[wa_1])
