@@ -14,6 +14,7 @@ class TestContract(AbstractTestContract):
     PREASSIGNED_TOKENS = 1000000 * 10**18
     FUNDING_GOAL = 250000 * 10**18
     START_PRICE_FACTOR = 4000
+    MAX_TOKENS_SOLD = 9000000
 
     def __init__(self, *args, **kwargs):
         super(TestContract, self).__init__(*args, **kwargs)
@@ -52,7 +53,7 @@ class TestContract(AbstractTestContract):
         value_1 = 100000 * 10**18  # 100k Ether
         self.s.block.set_balance(accounts[bidder_1], value_1*2)
         self.dutch_auction.bid(sender=keys[bidder_1], value=value_1)
-        self.assertEqual(self.dutch_auction.calcStopPrice(), value_1 / 9000000 + 1)
+        self.assertEqual(self.dutch_auction.calcStopPrice(), value_1 / self.MAX_TOKENS_SOLD + 1)
         # A few blocks later
         self.s.block.number += self.BLOCKS_PER_DAY*2
         self.assertEqual(self.dutch_auction.calcTokenPrice(),
@@ -63,7 +64,7 @@ class TestContract(AbstractTestContract):
         self.s.block.set_balance(accounts[bidder_2], value_2*2)
         self.dutch_auction.bid(sender=keys[bidder_2], value=value_2)
         # Stop price changed
-        self.assertEqual(self.dutch_auction.calcStopPrice(), (value_1 + value_2) / 9000000 + 1)
+        self.assertEqual(self.dutch_auction.calcStopPrice(), (value_1 + value_2) / self.MAX_TOKENS_SOLD + 1)
         # Stop price is reached
         self.s.block.number += self.BLOCKS_PER_DAY*40
         # Auction is over, no more bids are accepted

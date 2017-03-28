@@ -17,6 +17,7 @@ class TestContract(AbstractTestContract):
     PREASSIGNED_TOKENS = 1000000 * 10**18
     FUNDING_GOAL = 250000 * 10**18
     START_PRICE_FACTOR = 4000
+    MAX_TOKENS_SOLD = 9000000
 
     def __init__(self, *args, **kwargs):
         super(TestContract, self).__init__(*args, **kwargs)
@@ -56,7 +57,7 @@ class TestContract(AbstractTestContract):
         self.dutch_auction.bid(sender=keys[bidder_1], value=value_1)
         self.assertEqual(self.dutch_auction.calcTokenPrice(),
                          self.START_PRICE_FACTOR * 10 ** 18 / (7500 + days_later) + 1)
-        self.assertEqual(self.dutch_auction.calcStopPrice(), value_1 / 9000000 + 1)
+        self.assertEqual(self.dutch_auction.calcStopPrice(), value_1 / self.MAX_TOKENS_SOLD + 1)
         self.assertEqual(self.dutch_auction.calcTokenPrice(), self.dutch_auction.calcStopPrice())
         # Bidder 2 places a bid but fails because stop price was reached already
         bidder_2 = 1
