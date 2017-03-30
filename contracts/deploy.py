@@ -159,9 +159,10 @@ class Deploy:
         return_value = self.replace_address(return_value)
         contract_abi = self.contract_abis[contract]
         translator = ContractTranslator(contract_abi)
-        data = translator.encode(name, [self.replace_address(p) for p in params]).encode("hex")
+        data = "0x" + translator.encode(name, [self.replace_address(p) for p in params]).encode("hex")
         logging.info('Try to assert return value of {} in contract {}.'.format(name, contract))
-        bc_return_val = self.json_rpc.eth_call(to_address=contract_address, data=data)["result"]
+        response = self.json_rpc.eth_call(from_address=self.user_address, to_address=contract_address, data=data)
+        bc_return_val = response["result"]
         result_decoded = translator.decode(name, bc_return_val[2:].decode("hex"))
         result_decoded = result_decoded if len(result_decoded) > 1 else result_decoded[0]
         if isinstance(return_value, int):
@@ -210,7 +211,7 @@ class Deploy:
 @click.option('-verify_code', default='false', help='Verify code deployments with test deployment')
 @click.option('-contract_dir', default='solidity/', help='Import directory')
 @click.option('-gas', default='4712388', help='Transaction gas')
-@click.option('-gas_price', default='50000000000', help='Transaction gas price')
+@click.option('-gas_price', default='20000000000', help='Transaction gas price')
 @click.option('-private_key', help='Private key as hex to sign transactions')
 def setup(f, protocol, host, port, add_dev_code, verify_code, contract_dir, gas, gas_price, private_key):
     deploy = Deploy(protocol, host, port, add_dev_code, verify_code, contract_dir, gas, gas_price, private_key)
