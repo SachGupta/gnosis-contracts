@@ -121,7 +121,7 @@ class Deploy:
             contract_name = file_path.split("/")[-1].split(".")[0]
         self.contract_addresses[contract_name] = contract_address
         self.contract_abis[contract_name] = abi
-        logging.info('Contract {} was created at address {}.'.format(file_path, contract_address))
+        logging.info('Contract {} was created at address {}.'.format(reference if reference else file_path, contract_address))
 
     def send_transaction(self, contract, name, params):
         contract_address = self.replace_address(contract)
@@ -148,6 +148,12 @@ class Deploy:
         self.wait_for_transaction_receipt(transaction_hash)
         logging.info('Transaction {} for contract {} completed.'.format(name, contract))
 
+    @staticmethod
+    def strip_0x(string):
+        if string.startswith("0x"):
+            return string[2:]
+        return string
+
     def assert_call(self, contract, name, params, return_value):
         contract_address = self.replace_address(contract)
         return_value = self.replace_address(return_value)
@@ -158,7 +164,10 @@ class Deploy:
         bc_return_val = self.json_rpc.eth_call(to_address=contract_address, data=data)["result"]
         result_decoded = translator.decode(name, bc_return_val[2:].decode("hex"))
         result_decoded = result_decoded if len(result_decoded) > 1 else result_decoded[0]
-        assert result_decoded == return_value
+        if isinstance(return_value, int):
+            assert result_decoded == return_value
+        else:
+            assert result_decoded.lower() == self.strip_0x(return_value.lower())
         logging.info('Assertion successful for return value of {} in contract {}.'.format(name, contract))
 
     def process(self, f):
