@@ -171,6 +171,7 @@ contract DutchAuction {
     }
 
     /// @dev Allows to send a bid to the auction.
+    /// @param receiver Bid will be assigned to this address if set.
     function bid(address receiver)
         public
         payable
@@ -211,6 +212,7 @@ contract DutchAuction {
     }
 
     /// @dev Claims tokens for bidder after auction.
+    /// @param receiver Tokens will be assigned to this address if set.
     function claimTokens(address receiver)
         public
         timedTransitions
