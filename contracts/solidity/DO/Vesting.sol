@@ -5,15 +5,11 @@ import "Tokens/AbstractToken.sol";
 contract Vesting {
 
     /*
-     *  Constants
-     */
-    uint constant public vestingPeriod = 4 years;
-
-    /*
      *  Storage
      */
     address public owner;
     address public wallet;
+    uint public vestingPeriod;
     uint public startDate;
     uint public withdrawnTokens;
 
@@ -40,12 +36,14 @@ contract Vesting {
     /// @dev Constructor function sets contract owner and wallet address, which is allowed to withdraw all tokens anytime.
     /// @param _owner Vesting contract owner.
     /// @param _wallet Gnosis multisig wallet address.
+    /// @param _vestingPeriod Vesting period in seconds.
     /// @param _startDate Start date of vesting period (cliff).
-    function Vesting(address _owner, address _wallet, uint _startDate)
+    function Vesting(address _owner, address _wallet, uint _vestingPeriod, uint _startDate)
         public
     {
         owner = _owner;
         wallet = _wallet;
+        vestingPeriod = _vestingPeriod;
         startDate = _startDate;
         if (startDate == 0)
             startDate = now;

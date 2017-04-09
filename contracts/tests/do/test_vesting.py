@@ -17,6 +17,7 @@ class TestContract(AbstractTestContract):
     ONE_YEAR = 60*60*24*365
     FUNDING_GOAL = 250000 * 10**18
     START_PRICE_FACTOR = 4000
+    FOUR_YEARS = 4 * ONE_YEAR
 
     def __init__(self, *args, **kwargs):
         super(TestContract, self).__init__(*args, **kwargs)
@@ -42,12 +43,16 @@ class TestContract(AbstractTestContract):
                                                              add_dev_code=True,
                                                              contract_dir=self.contract_dir),
                                              language='solidity',
-                                             constructor_parameters=[accounts[0], self.multisig_wallet.address])
+                                             constructor_parameters=[accounts[0],
+                                                                     self.multisig_wallet.address,
+                                                                     self.FOUR_YEARS])
         self.vesting_2 = self.s.abi_contract(self.pp.process(self.DO_DIR + 'Vesting.sol',
                                                              add_dev_code=True,
                                                              contract_dir=self.contract_dir),
                                              language='solidity',
-                                             constructor_parameters=[accounts[1], self.multisig_wallet.address])
+                                             constructor_parameters=[accounts[1],
+                                                                     self.multisig_wallet.address,
+                                                                     self.FOUR_YEARS])
         # Create Gnosis token
         self.gnosis_token = self.s.abi_contract(self.pp.process(self.gnosis_token_name,
                                                                 add_dev_code=True,
