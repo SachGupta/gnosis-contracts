@@ -22,8 +22,7 @@ contract ClaimProxy {
     function claimTokensFor(address[] receivers)
         public
     {
-        for (uint i=0; i<receivers.length; i++) {
+        for (uint i=0; i<receivers.length; i++)
             dutchAuction.claimTokens(receivers[i]);
-        }
     }
 }
