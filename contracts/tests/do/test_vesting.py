@@ -20,7 +20,7 @@ class TestContract(AbstractTestContract):
 
     def __init__(self, *args, **kwargs):
         super(TestContract, self).__init__(*args, **kwargs)
-        self.deploy_contracts = [self.gnosis_token_name, self.dutch_auction_name]
+        self.deploy_contracts = [self.dutch_auction_name]
 
     def test(self):
         start_date = self.s.block.timestamp
@@ -42,19 +42,27 @@ class TestContract(AbstractTestContract):
                                                              add_dev_code=True,
                                                              contract_dir=self.contract_dir),
                                              language='solidity',
-                                             constructor_parameters=[accounts[0], self.multisig_wallet.address, self.gnosis_token.address])
+                                             constructor_parameters=[accounts[0], self.multisig_wallet.address])
         self.vesting_2 = self.s.abi_contract(self.pp.process(self.DO_DIR + 'Vesting.sol',
                                                              add_dev_code=True,
                                                              contract_dir=self.contract_dir),
                                              language='solidity',
-                                             constructor_parameters=[accounts[1], self.multisig_wallet.address, self.gnosis_token.address])
+                                             constructor_parameters=[accounts[1], self.multisig_wallet.address])
+        # Create Gnosis token
+        self.gnosis_token = self.s.abi_contract(self.pp.process(self.gnosis_token_name,
+                                                                add_dev_code=True,
+                                                                contract_dir=self.contract_dir),
+                                                language='solidity',
+                                                constructor_parameters=(self.dutch_auction.address,
+                                                                        [self.vesting_1.address,
+                                                                         self.vesting_2.address],
+                                                                        [self.PREASSIGNED_TOKENS / 2,
+                                                                         self.PREASSIGNED_TOKENS / 2]))
         # Create dutch auction
         self.dutch_auction.setup(self.gnosis_token.address,
-                                 self.multisig_wallet.address,
-                                 [self.vesting_1.address, self.vesting_2.address],
-                                 [self.PREASSIGNED_TOKENS/2, self.PREASSIGNED_TOKENS/2])
+                                 self.multisig_wallet.address)
         # Set funding goal
-        change_ceiling_data = self.dutch_auction.translator.encode('changeCeiling',
+        change_ceiling_data = self.dutch_auction.translator.encode('changeSettings',
                                                                    [self.FUNDING_GOAL, self.START_PRICE_FACTOR])
         self.multisig_wallet.submitTransaction(self.dutch_auction.address, 0, change_ceiling_data, sender=keys[wa_1])
         # Start auction
@@ -68,27 +76,27 @@ class TestContract(AbstractTestContract):
         # We wait for one week
         self.s.block.timestamp += self.WAITING_PERIOD + 1
         # Token is launched
-        self.assertTrue(self.dutch_auction.tokenLaunched())
+        self.assertEqual(self.dutch_auction.updateStage(), 3)
         # Test vesting
         self.assertEqual(self.gnosis_token.balanceOf(self.vesting_1.address), self.PREASSIGNED_TOKENS/2)
         self.assertEqual(self.gnosis_token.balanceOf(self.vesting_2.address), self.PREASSIGNED_TOKENS/2)
         # After one year, 1/4 of shares can be withdrawn
         self.s.block.timestamp = start_date + self.ONE_YEAR
-        self.assertEqual(self.vesting_1.calcMaxWithdraw(), self.PREASSIGNED_TOKENS/2/4)
-        self.assertEqual(self.vesting_2.calcMaxWithdraw(), self.PREASSIGNED_TOKENS/2/4)
+        self.assertEqual(self.vesting_1.calcMaxWithdraw(self.gnosis_token.address), self.PREASSIGNED_TOKENS/2/4)
+        self.assertEqual(self.vesting_2.calcMaxWithdraw(self.gnosis_token.address), self.PREASSIGNED_TOKENS/2/4)
         # After two years, 1/2 of shares can be withdrawn
         self.s.block.timestamp += self.ONE_YEAR
-        self.assertEqual(self.vesting_1.calcMaxWithdraw(), self.PREASSIGNED_TOKENS/2/2)
-        self.assertEqual(self.vesting_2.calcMaxWithdraw(), self.PREASSIGNED_TOKENS/2/2)
+        self.assertEqual(self.vesting_1.calcMaxWithdraw(self.gnosis_token.address), self.PREASSIGNED_TOKENS/2/2)
+        self.assertEqual(self.vesting_2.calcMaxWithdraw(self.gnosis_token.address), self.PREASSIGNED_TOKENS/2/2)
         # Owner withdraws shares
-        self.vesting_1.withdraw(accounts[8], self.vesting_1.calcMaxWithdraw())
-        self.assertEqual(self.vesting_1.calcMaxWithdraw(), 0)
+        self.vesting_1.withdraw(self.gnosis_token.address, accounts[8], self.vesting_1.calcMaxWithdraw(self.gnosis_token.address))
+        self.assertEqual(self.vesting_1.calcMaxWithdraw(self.gnosis_token.address), 0)
         self.assertEqual(self.gnosis_token.balanceOf(self.vesting_1.address), self.PREASSIGNED_TOKENS/4)
         # Wallet withdraws remaining tokens
-        wallet_withdraw_data = self.vesting_1.translator.encode('walletWithdraw', [])
+        wallet_withdraw_data = self.vesting_1.translator.encode('walletWithdraw', [self.gnosis_token.address])
         old_balance = self.gnosis_token.balanceOf(self.multisig_wallet.address)
         old_vesting_balance = self.gnosis_token.balanceOf(self.vesting_1.address)
         self.multisig_wallet.submitTransaction(self.vesting_1.address, 0, wallet_withdraw_data, sender=keys[wa_1])
-        self.assertEqual(self.vesting_1.calcMaxWithdraw(), 0)
+        self.assertEqual(self.vesting_1.calcMaxWithdraw(self.gnosis_token.address), 0)
         self.assertEqual(self.gnosis_token.balanceOf(self.vesting_1.address), 0)
         self.assertEqual(self.gnosis_token.balanceOf(self.multisig_wallet.address), old_balance + old_vesting_balance)

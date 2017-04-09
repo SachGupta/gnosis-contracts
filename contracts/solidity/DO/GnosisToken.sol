@@ -1,6 +1,5 @@
 pragma solidity 0.4.4;
 import "Tokens/StandardToken.sol";
-import "DO/AbstractDutchAuction.sol";
 
 
 /// @title Gnosis token contract - Holds tokens of Gnosis.
@@ -15,55 +14,23 @@ contract GnosisToken is StandardToken {
     uint8 constant public decimals = 18;
 
     /*
-     *  External contracts
-     */
-    DutchAuction public dutchAuction;
-
-    /*
-     *  Modifiers
-     */
-    modifier tokenLaunched() {
-        if (!dutchAuction.tokenLaunched() && msg.sender != address(dutchAuction)) {
-            // Token was not launched yet and sender is not auction contract
-            throw;
-        }
-        _;
-    }
-
-    /*
      *  Public functions
      */
     /// @dev Contract constructor function sets dutch auction contract address and assigns all tokens to dutch auction.
-    function GnosisToken(address _dutchAuction)
+    /// @param dutchAuction Address of dutch auction contract.
+    /// @param owners Array of addresses receiving preassigned tokens.
+    /// @param tokens Array of preassigned token amounts.
+    function GnosisToken(address dutchAuction, address[] owners, uint[] tokens)
         public
     {
         totalSupply = 10000000 * 10**18;
-        dutchAuction = DutchAuction(_dutchAuction);
-        balances[_dutchAuction] = totalSupply;
-    }
-
-    /// @dev Transfers sender's tokens to a given address. Returns success.
-    /// @param to Address of token receiver.
-    /// @param value Number of tokens to transfer.
-    /// @return Returns success of function call.
-    function transfer(address to, uint256 value)
-        public
-        tokenLaunched
-        returns (bool)
-    {
-        return super.transfer(to, value);
-    }
-
-    /// @dev Allows allowed third party to transfer tokens from one address to another. Returns success.
-    /// @param from Address from where tokens are withdrawn.
-    /// @param to Address to where tokens are sent.
-    /// @param value Number of tokens to transfer.
-    /// @return Returns success of function call.
-    function transferFrom(address from, address to, uint256 value)
-        public
-        tokenLaunched
-        returns (bool)
-    {
-        return super.transferFrom(from, to, value);
+        balances[dutchAuction] = 9000000 * 10**18;
+        uint assignedTokens = balances[dutchAuction];
+        for (uint i=0; i<owners.length; i++) {
+            balances[owners[i]] += tokens[i];
+            assignedTokens += tokens[i];
+        }
+        if (assignedTokens != totalSupply)
+            throw;
     }
 }

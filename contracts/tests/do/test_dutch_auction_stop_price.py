@@ -18,7 +18,7 @@ class TestContract(AbstractTestContract):
 
     def __init__(self, *args, **kwargs):
         super(TestContract, self).__init__(*args, **kwargs)
-        self.deploy_contracts = [self.gnosis_token_name, self.dutch_auction_name]
+        self.deploy_contracts = [self.dutch_auction_name]
 
     def test(self):
         # Create mist wallet
@@ -34,19 +34,26 @@ class TestContract(AbstractTestContract):
             language='solidity',
             constructor_parameters=constructor_parameters
         )
+        # Create Gnosis token
+        self.gnosis_token = self.s.abi_contract(self.pp.process(self.gnosis_token_name,
+                                                                add_dev_code=True,
+                                                                contract_dir=self.contract_dir),
+                                                language='solidity',
+                                                constructor_parameters=(self.dutch_auction.address,
+                                                                        [self.multisig_wallet.address],
+                                                                        [self.PREASSIGNED_TOKENS]))
+        # Create dutch auction
         self.dutch_auction.setup(self.gnosis_token.address,
-                                 self.multisig_wallet.address,
-                                 [self.multisig_wallet.address],
-                                 [self.PREASSIGNED_TOKENS])
+                                 self.multisig_wallet.address)
         # Set funding goal
-        change_ceiling_data = self.dutch_auction.translator.encode('changeCeiling',
+        change_ceiling_data = self.dutch_auction.translator.encode('changeSettings',
                                                                    [self.FUNDING_GOAL, self.START_PRICE_FACTOR])
         self.multisig_wallet.submitTransaction(self.dutch_auction.address, 0, change_ceiling_data, sender=keys[wa_1])
         # Start auction
         start_auction_data = self.dutch_auction.translator.encode('startAuction', [])
         self.multisig_wallet.submitTransaction(self.dutch_auction.address, 0, start_auction_data, sender=keys[wa_1])
         # Token is not launched yet
-        self.assertFalse(self.dutch_auction.tokenLaunched())
+        self.assertEqual(self.dutch_auction.stage(), 1)
         # Bidder 1 places a bid in the first block after auction starts
         self.assertEqual(self.dutch_auction.calcTokenPrice(), self.START_PRICE_FACTOR * 10 ** 18 / 7500 + 1)
         bidder_1 = 0
@@ -73,6 +80,14 @@ class TestContract(AbstractTestContract):
         self.assertLess(self.dutch_auction.calcTokenPrice(), self.dutch_auction.calcStopPrice())
         # There is no money left in the contract
         self.assertEqual(self.s.block.get_balance(self.dutch_auction.address), 0)
+        # Update stage after stop price is reached
+        self.dutch_auction.updateStage()
+        # Token is not launched yet, as a week cool-down period still has to pass
+        self.assertEqual(self.dutch_auction.stage(), 2)
+        # We wait for one week, token is launched now
+        self.s.block.timestamp += self.WAITING_PERIOD + 1
+        self.dutch_auction.updateStage()
+        self.assertEqual(self.dutch_auction.stage(), 3)
         # Everyone gets their tokens
         self.dutch_auction.claimTokens(sender=keys[bidder_1])
         self.dutch_auction.claimTokens(sender=keys[bidder_2])
@@ -87,8 +102,4 @@ class TestContract(AbstractTestContract):
         self.assertEqual(self.gnosis_token.totalSupply(), self.TOTAL_TOKENS)
         # All funds went to the multisig wallet
         self.assertEqual(self.s.block.get_balance(self.multisig_wallet.address), value_1 + value_2)
-        # Token is not launched yet, as a week cool-down period still has to pass
-        self.assertFalse(self.dutch_auction.tokenLaunched())
-        # We wait for one week, token is launched now
-        self.s.block.timestamp += self.WAITING_PERIOD + 1
-        self.assertTrue(self.dutch_auction.tokenLaunched())
+

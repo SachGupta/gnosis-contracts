@@ -19,7 +19,7 @@ class TestContract(AbstractTestContract):
 
     def __init__(self, *args, **kwargs):
         super(TestContract, self).__init__(*args, **kwargs)
-        self.deploy_contracts = [self.gnosis_token_name, self.dutch_auction_name]
+        self.deploy_contracts = [self.dutch_auction_name]
 
     def test(self):
         # Create wallet
@@ -35,26 +35,32 @@ class TestContract(AbstractTestContract):
             language='solidity',
             constructor_parameters=constructor_parameters
         )
+        # Create Gnosis token
+        self.gnosis_token = self.s.abi_contract(self.pp.process(self.gnosis_token_name,
+                                                                add_dev_code=True,
+                                                                contract_dir=self.contract_dir),
+                                                language='solidity',
+                                                constructor_parameters=(self.dutch_auction.address,
+                                                                        [self.multisig_wallet.address],
+                                                                        [self.PREASSIGNED_TOKENS]))
         # Create dutch auction
         self.dutch_auction.setup(self.gnosis_token.address,
-                                 self.multisig_wallet.address,
-                                 [self.multisig_wallet.address],
-                                 [self.PREASSIGNED_TOKENS])
+                                 self.multisig_wallet.address)
         # Change funding goal
         self.assertEqual(self.dutch_auction.ceiling(), self.FUNDING_GOAL)
-        self.assertEqual(self.dutch_auction.startPriceFactor(), self.START_PRICE_FACTOR)
+        self.assertEqual(self.dutch_auction.priceFactor(), self.START_PRICE_FACTOR)
         self.FUNDING_GOAL = 260000 * 10**18
         self.START_PRICE_FACTOR = 5000
-        change_ceiling_data = self.dutch_auction.translator.encode('changeCeiling',
+        change_ceiling_data = self.dutch_auction.translator.encode('changeSettings',
                                                                    [self.FUNDING_GOAL, self.START_PRICE_FACTOR])
         self.multisig_wallet.submitTransaction(self.dutch_auction.address, 0, change_ceiling_data, sender=keys[wa_1])
         self.assertEqual(self.dutch_auction.ceiling(), self.FUNDING_GOAL)
-        self.assertEqual(self.dutch_auction.startPriceFactor(), self.START_PRICE_FACTOR)
+        self.assertEqual(self.dutch_auction.priceFactor(), self.START_PRICE_FACTOR)
         # Start auction
         start_auction_data = self.dutch_auction.translator.encode('startAuction', [])
         self.multisig_wallet.submitTransaction(self.dutch_auction.address, 0, start_auction_data, sender=keys[wa_1])
         # After auction started, funding goal cannot be changed anymore
-        change_ceiling_data = self.dutch_auction.translator.encode('changeCeiling', [1])
+        change_ceiling_data = self.dutch_auction.translator.encode('changeSettings', [1])
         self.multisig_wallet.submitTransaction(self.dutch_auction.address, 0, change_ceiling_data, sender=keys[wa_1])
         self.assertEqual(self.dutch_auction.ceiling(), self.FUNDING_GOAL)
         # Setups cannot be done twice
@@ -104,6 +110,18 @@ class TestContract(AbstractTestContract):
         self.assertEqual(self.dutch_auction.finalPrice(), self.dutch_auction.calcTokenPrice())
         # There is no money left in the contract
         self.assertEqual(self.s.block.get_balance(self.dutch_auction.address), 0)
+        # Auction ended but trading is not possible yet, because there is one week pause after auction ends
+        # We wait for one week
+        self.s.block.timestamp += self.WAITING_PERIOD
+        self.assertRaises(TransactionFailed,
+                          self.dutch_auction.claimTokens,
+                          sender=keys[bidder_1])
+        # Go past one week
+        self.s.block.timestamp += 1
+        # Bidder 1 claim his tokens after the waiting period is over
+        self.dutch_auction.claimTokens(sender=keys[bidder_1])
+        self.assertEqual(self.gnosis_token.balanceOf(accounts[bidder_1]),
+                         value_1 * 10 ** 18 / self.dutch_auction.finalPrice())
         # Spender is triggering the claiming process for bidder 2
         self.dutch_auction.claimTokens(accounts[bidder_2], sender=keys[spender])
         # Bidder 3 claims his tokens
@@ -115,34 +133,15 @@ class TestContract(AbstractTestContract):
                          (value_3 - refund_bidder_3) * 10 ** 18 / self.dutch_auction.finalPrice())
         self.assertEqual(self.gnosis_token.balanceOf(self.multisig_wallet.address),
                          self.PREASSIGNED_TOKENS + (
-                             self.MAX_TOKENS_SOLD * 10**18 - self.dutch_auction.totalReceived() * 10 ** 18
+                             self.MAX_TOKENS_SOLD * 10 ** 18 - self.dutch_auction.totalReceived() * 10 ** 18
                              / self.dutch_auction.finalPrice()))
         self.assertEqual(self.gnosis_token.totalSupply(), self.TOTAL_TOKENS)
         self.assertEqual(self.dutch_auction.totalReceived(), self.FUNDING_GOAL)
-        # Auction ended but trading is not possible yet, because there is one week pause after auction ends
+        # Token is launched
+        self.assertEqual(self.dutch_auction.stage(), 3)
+        # Shares can be traded now. Backer 3 transfers 1000 shares to backer 4.
         transfer_shares = 1000
         bidder_4 = 3
-        self.assertRaises(TransactionFailed,
-                          self.gnosis_token.transfer,
-                          accounts[bidder_4],
-                          transfer_shares,
-                          sender=keys[bidder_3])
-        # We wait for one week
-        self.s.block.timestamp += self.WAITING_PERIOD
-        self.assertRaises(TransactionFailed,
-                          self.gnosis_token.transfer,
-                          accounts[bidder_4],
-                          transfer_shares,
-                          sender=keys[bidder_3])
-        # Go past one week
-        self.s.block.timestamp += 1
-        # Token is launched
-        self.assertTrue(self.dutch_auction.tokenLaunched())
-        # Bidder 1 claim his tokens after the waiting period is over
-        self.dutch_auction.claimTokens(sender=keys[bidder_1])
-        self.assertEqual(self.gnosis_token.balanceOf(accounts[bidder_1]),
-                         value_1 * 10 ** 18 / self.dutch_auction.finalPrice())
-        # Shares can be traded now. Backer 3 transfers 1000 shares to backer 4.
         self.assertTrue(self.gnosis_token.transfer(accounts[bidder_4], transfer_shares, sender=keys[bidder_3]))
         self.assertEqual(self.gnosis_token.balanceOf(accounts[bidder_4]), transfer_shares)
         # Also transferFrom works now.

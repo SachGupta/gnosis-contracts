@@ -19,7 +19,7 @@ class TestContract(AbstractTestContract):
 
     def __init__(self, *args, **kwargs):
         super(TestContract, self).__init__(*args, **kwargs)
-        self.deploy_contracts = [self.gnosis_token_name, self.dutch_auction_name]
+        self.deploy_contracts = [self.dutch_auction_name]
 
     def test(self):
         # Create wallet
@@ -35,11 +35,17 @@ class TestContract(AbstractTestContract):
             language='solidity',
             constructor_parameters=constructor_parameters
         )
+        # Create Gnosis token
+        self.gnosis_token = self.s.abi_contract(self.pp.process(self.gnosis_token_name,
+                                                                add_dev_code=True,
+                                                                contract_dir=self.contract_dir),
+                                                language='solidity',
+                                                constructor_parameters=(self.dutch_auction.address,
+                                                                        [self.multisig_wallet.address],
+                                                                        [self.PREASSIGNED_TOKENS]))
         # Create dutch auction
         self.dutch_auction.setup(self.gnosis_token.address,
-                                 self.multisig_wallet.address,
-                                 [self.multisig_wallet.address],
-                                 [self.PREASSIGNED_TOKENS])
+                                 self.multisig_wallet.address)
         #
         self.claim_proxy = self.s.abi_contract(
             self.pp.process(self.DO_DIR + 'ClaimProxy.sol', add_dev_code=True,
@@ -48,7 +54,7 @@ class TestContract(AbstractTestContract):
             constructor_parameters=[self.dutch_auction.address]
         )
         # Set funding goal
-        change_ceiling_data = self.dutch_auction.translator.encode('changeCeiling',
+        change_ceiling_data = self.dutch_auction.translator.encode('changeSettings',
                                                                    [self.FUNDING_GOAL, self.START_PRICE_FACTOR])
         self.multisig_wallet.submitTransaction(self.dutch_auction.address, 0, change_ceiling_data, sender=keys[wa_1])
         # Start auction
@@ -76,6 +82,8 @@ class TestContract(AbstractTestContract):
         profiling = self.dutch_auction.bid(sender=keys[bidder_3], value=value_3, profiling=True)
         self.assertLessEqual(profiling['gas'], self.MAX_GAS)
         refund_bidder_3 = (value_1 + value_2 + value_3) - self.FUNDING_GOAL
+        # We wait for one week
+        self.s.block.timestamp += self.WAITING_PERIOD + 1
         # Claim all tokens via proxy
         self.claim_proxy.claimTokensFor([accounts[bidder_1], accounts[bidder_2], accounts[bidder_3]])
         # Confirm token balances
