@@ -78,12 +78,15 @@ contract DutchAuction {
      *  Public functions
      */
     /// @dev Contract constructor function sets owner.
-    function DutchAuction()
+    function DutchAuction(uint _celling, uint _priceFactor)
         public
     {
+        if (_celling == 0 || _priceFactor == 0)
+            // Arguments are null.
+            throw;
         owner = msg.sender;
-        ceiling = 250000 ether;
-        priceFactor = 4000;
+        ceiling = _celling;
+        priceFactor = _priceFactor;
     }
 
     /// @dev Setup function sets external contracts' addresses.
