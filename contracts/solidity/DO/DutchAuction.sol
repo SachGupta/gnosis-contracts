@@ -129,7 +129,7 @@ contract DutchAuction {
         timedTransitions
         returns (uint)
     {
-        if (stage == Stages.AuctionEnded)
+        if (stage == Stages.AuctionEnded || stage == Stages.TradingStarted)
             return finalPrice;
         return calcTokenPrice();
     }
