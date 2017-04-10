@@ -72,8 +72,6 @@ class TestContract(AbstractTestContract):
         self.assertRaises(TransactionFailed, self.dutch_auction.bid, sender=keys[bidder_2], value=1)
         # There is no money left in the contract
         self.assertEqual(self.s.block.get_balance(self.dutch_auction.address), 0)
-        # Update stage after stop price is reached
-        self.dutch_auction.updateStage()
         # Token is not launched yet, as a week cool-down period still has to pass
         self.assertEqual(self.dutch_auction.updateStage(), 2)
         # We wait for one week, token is launched now

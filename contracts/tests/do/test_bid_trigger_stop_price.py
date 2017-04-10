@@ -81,8 +81,6 @@ class TestContract(AbstractTestContract):
         self.assertLess(self.dutch_auction.calcTokenPrice(), self.dutch_auction.calcStopPrice())
         # There is no money left in the contract
         self.assertEqual(self.s.block.get_balance(self.dutch_auction.address), 0)
-        # Update stage after stop price is reached
-        self.dutch_auction.updateStage()
         # We wait for one week
         self.s.block.timestamp += self.WAITING_PERIOD + 1
         # Everyone gets their tokens

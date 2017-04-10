@@ -176,8 +176,8 @@ contract DutchAuction {
             throw;
         bids[receiver] += amount;
         totalReceived += amount;
-        if (totalReceived == ceiling)
-            // Finalize auction if funding goal is reached
+        if (maxEther == amount)
+            // When maxEther is equal to the big amount the auction is ended and finalizeAuction is triggered.
             finalizeAuction();
         BidSubmission(receiver, amount);
     }
