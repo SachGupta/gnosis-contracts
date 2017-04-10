@@ -93,8 +93,8 @@ contract DutchAuction {
         public
         isOwner
     {
-        if (wallet != 0 || address(gnosisToken) != 0)
-            // Setup was executed already
+        if (address(gnosisToken) != 0 || wallet != 0 || _gnosisToken == 0 || _wallet == 0)
+            // Setup was executed already or arguments are null.
             throw;
         wallet = _wallet;
         gnosisToken = Token(_gnosisToken);

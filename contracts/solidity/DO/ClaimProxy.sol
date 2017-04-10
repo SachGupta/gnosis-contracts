@@ -16,6 +16,9 @@ contract ClaimProxy {
     function ClaimProxy(address _dutchAuction)
         public
     {
+        if (_dutchAuction == 0)
+            // Address should not be null.
+            throw;
         dutchAuction = DutchAuction(_dutchAuction);
     }
 

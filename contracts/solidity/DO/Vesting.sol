@@ -41,6 +41,9 @@ contract Vesting {
     function Vesting(address _owner, address _wallet, uint _vestingPeriod, uint _startDate)
         public
     {
+        if (_owner == 0 || _wallet == 0 || _vestingPeriod == 0)
+            // Arguments are null.
+            throw;
         owner = _owner;
         wallet = _wallet;
         vestingPeriod = _vestingPeriod;
