@@ -4,7 +4,9 @@ import json
 
 pp = PreProcessor()
 contracts = ['DO/DutchAuction.sol',
-             'DO/GnosisToken.sol']
+             'DO/GnosisToken.sol',
+             'DO/ClaimProxy.sol',
+             'DO/Vesting.sol']
 contract_dir = 'solidity/'
 
 for contract_name in contracts:
