@@ -153,6 +153,7 @@ contract DutchAuction {
         atStage(Stages.AuctionStarted)
         returns (uint amount)
     {
+        // If a bid is done on behalf of a user via ShapeShift, the receiver address is set.
         if (receiver == 0)
             receiver = msg.sender;
         amount = msg.value;
@@ -164,7 +165,7 @@ contract DutchAuction {
         // Only invest maximum possible amount.
         if (amount > maxEther) {
             amount = maxEther;
-            // Send change back
+            // Send change back to receiver address. In case of a ShapeShift bid the user receives the change back directly.
             if (!receiver.send(msg.value - amount))
                 // Sending failed
                 throw;
