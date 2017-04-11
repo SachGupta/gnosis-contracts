@@ -47,7 +47,7 @@ class AbstractTestContract(TestCase):
         self.outcome_token_library_name = self.EVENT_MANAGER_DIR + 'OutcomeTokenLibrary.sol'
         self.do_name = self.DO_DIR + 'DO.sol'
         self.dutch_auction_name = self.DO_DIR + 'DutchAuction.sol'
-        self.gnosis_token_name = self.DO_DIR + 'GnosisToken.sol'
+        self.gnosis_token_name = self.TOKENS_DIR + 'GnosisToken.sol'
         self.ether_token_name = self.TOKENS_DIR + 'EtherToken.sol'
         self.hunchgame_name = self.MARKET_MANAGERS_DIR + 'HunchGameMarketFactory.sol'
         self.hunchgame_token_name = self.TOKENS_DIR + 'HunchGameToken.sol'
