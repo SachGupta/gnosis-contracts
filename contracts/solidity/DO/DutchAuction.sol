@@ -79,17 +79,17 @@ contract DutchAuction {
      */
     /// @dev Contract constructor function sets owner.
     /// @param _wallet Gnosis wallet.
-    /// @param _celling Auction celling.
+    /// @param _ceiling Auction ceiling.
     /// @param _priceFactor Auction price factor.
-    function DutchAuction(address _wallet, uint _celling, uint _priceFactor)
+    function DutchAuction(address _wallet, uint _ceiling, uint _priceFactor)
         public
     {
-        if (_wallet == 0 || _celling == 0 || _priceFactor == 0)
+        if (_wallet == 0 || _ceiling == 0 || _priceFactor == 0)
             // Arguments are null.
             throw;
         owner = msg.sender;
         wallet = _wallet;
-        ceiling = _celling;
+        ceiling = _ceiling;
         priceFactor = _priceFactor;
     }
 
