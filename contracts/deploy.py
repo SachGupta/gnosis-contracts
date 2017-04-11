@@ -165,7 +165,7 @@ class Deploy:
         bc_return_val = response["result"]
         result_decoded = translator.decode(name, bc_return_val[2:].decode("hex"))
         result_decoded = result_decoded if len(result_decoded) > 1 else result_decoded[0]
-        if isinstance(return_value, int):
+        if isinstance(return_value, int) or isinstance(return_value, long):
             assert result_decoded == return_value
         else:
             assert result_decoded.lower() == self.strip_0x(return_value.lower())
