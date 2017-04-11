@@ -21,7 +21,6 @@ class TestContract(AbstractTestContract):
 
     def __init__(self, *args, **kwargs):
         super(TestContract, self).__init__(*args, **kwargs)
-        self.deploy_contracts = [self.dutch_auction_name]
 
     def test(self):
         start_date = self.s.block.timestamp
@@ -53,6 +52,14 @@ class TestContract(AbstractTestContract):
                                              constructor_parameters=[accounts[1],
                                                                      self.multisig_wallet.address,
                                                                      self.FOUR_YEARS])
+        # Create dutch auction
+        self.dutch_auction = self.s.abi_contract(self.pp.process(self.dutch_auction_name,
+                                                                 add_dev_code=True,
+                                                                 contract_dir=self.contract_dir),
+                                                 constructor_parameters=(self.multisig_wallet.address,
+                                                                         250000 * 10 ** 18,
+                                                                         4000),
+                                                 language='solidity')
         # Create Gnosis token
         self.gnosis_token = self.s.abi_contract(self.pp.process(self.gnosis_token_name,
                                                                 add_dev_code=True,
@@ -63,9 +70,8 @@ class TestContract(AbstractTestContract):
                                                                          self.vesting_2.address],
                                                                         [self.PREASSIGNED_TOKENS / 2,
                                                                          self.PREASSIGNED_TOKENS / 2]))
-        # Create dutch auction
-        self.dutch_auction.setup(self.gnosis_token.address,
-                                 self.multisig_wallet.address)
+        # Setup dutch auction
+        self.dutch_auction.setup(self.gnosis_token.address)
         # Set funding goal
         change_ceiling_data = self.dutch_auction.translator.encode('changeSettings',
                                                                    [self.FUNDING_GOAL, self.START_PRICE_FACTOR])

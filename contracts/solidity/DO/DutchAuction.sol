@@ -78,28 +78,30 @@ contract DutchAuction {
      *  Public functions
      */
     /// @dev Contract constructor function sets owner.
-    function DutchAuction(uint _celling, uint _priceFactor)
+    /// @param _wallet Gnosis wallet.
+    /// @param _celling Auction celling.
+    /// @param _priceFactor Auction price factor.
+    function DutchAuction(address _wallet, uint _celling, uint _priceFactor)
         public
     {
-        if (_celling == 0 || _priceFactor == 0)
+        if (_wallet == 0 || _celling == 0 || _priceFactor == 0)
             // Arguments are null.
             throw;
         owner = msg.sender;
+        wallet = _wallet;
         ceiling = _celling;
         priceFactor = _priceFactor;
     }
 
     /// @dev Setup function sets external contracts' addresses.
     /// @param _gnosisToken Gnosis token address.
-    /// @param _wallet Gnosis founders address.
-    function setup(address _gnosisToken, address _wallet)
+    function setup(address _gnosisToken)
         public
         isOwner
     {
-        if (address(gnosisToken) != 0 || wallet != 0 || _gnosisToken == 0 || _wallet == 0)
+        if (address(gnosisToken) != 0 || _gnosisToken == 0)
             // Setup was executed already or arguments are null.
             throw;
-        wallet = _wallet;
         gnosisToken = Token(_gnosisToken);
     }
 

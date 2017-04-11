@@ -67,12 +67,6 @@ class AbstractTestContract(TestCase):
             self.do = self.s.abi_contract(self.pp.process(self.do_name,
                                                           add_dev_code=True,
                                                           contract_dir=self.contract_dir), language='solidity')
-        if self.dutch_auction_name in self.deploy_contracts:
-            self.dutch_auction = self.s.abi_contract(self.pp.process(self.dutch_auction_name,
-                                                                     add_dev_code=True,
-                                                                     contract_dir=self.contract_dir),
-                                                     constructor_parameters=(250000*10**18, 4000),
-                                                     language='solidity')
         if self.outcome_token_library_name in self.deploy_contracts:
             self.outcome_token_library = self.s.abi_contract(self.pp.process(self.outcome_token_library_name,
                                                                              add_dev_code=True,

@@ -19,7 +19,6 @@ class TestContract(AbstractTestContract):
 
     def __init__(self, *args, **kwargs):
         super(TestContract, self).__init__(*args, **kwargs)
-        self.deploy_contracts = [self.dutch_auction_name]
 
     def test(self):
         # Create wallet
@@ -35,6 +34,14 @@ class TestContract(AbstractTestContract):
             language='solidity',
             constructor_parameters=constructor_parameters
         )
+        # Create dutch auction
+        self.dutch_auction = self.s.abi_contract(self.pp.process(self.dutch_auction_name,
+                                                                 add_dev_code=True,
+                                                                 contract_dir=self.contract_dir),
+                                                 constructor_parameters=(self.multisig_wallet.address,
+                                                                         250000 * 10 ** 18,
+                                                                         4000),
+                                                 language='solidity')
         # Create Gnosis token
         self.gnosis_token = self.s.abi_contract(self.pp.process(self.gnosis_token_name,
                                                                 add_dev_code=True,
@@ -43,9 +50,9 @@ class TestContract(AbstractTestContract):
                                                 constructor_parameters=(self.dutch_auction.address,
                                                                         [self.multisig_wallet.address],
                                                                         [self.PREASSIGNED_TOKENS]))
-        # Create dutch auction
-        self.dutch_auction.setup(self.gnosis_token.address,
-                                 self.multisig_wallet.address)
+
+        # Setup dutch auction
+        self.dutch_auction.setup(self.gnosis_token.address)
         # Change funding goal
         self.assertEqual(self.dutch_auction.ceiling(), self.FUNDING_GOAL)
         self.assertEqual(self.dutch_auction.priceFactor(), self.START_PRICE_FACTOR)
