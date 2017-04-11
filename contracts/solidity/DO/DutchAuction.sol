@@ -30,7 +30,7 @@ contract DutchAuction {
     uint public totalReceived;
     uint public finalPrice;
     mapping (address => uint) public bids;
-    Stages public stage = Stages.AuctionDeployed;
+    Stages public stage;
 
     /*
      *  Enums
@@ -91,6 +91,7 @@ contract DutchAuction {
         wallet = _wallet;
         ceiling = _ceiling;
         priceFactor = _priceFactor;
+        stage = Stages.AuctionDeployed;
     }
 
     /// @dev Setup function sets external contracts' addresses.
