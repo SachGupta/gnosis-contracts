@@ -2,6 +2,7 @@ pragma solidity 0.4.4;
 import "DO/AbstractDutchAuction.sol";
 
 
+/// @title Claim proxy contract - allows to claim GNO tokens for multiple receivers at once.
 contract ClaimProxy {
 
     /*
@@ -13,6 +14,7 @@ contract ClaimProxy {
      *  Public functions
      */
     /// @dev Contract constructor function dutch auction contract address.
+    /// @param _dutchAuction Dutch auction address.
     function ClaimProxy(address _dutchAuction)
         public
     {
@@ -22,6 +24,8 @@ contract ClaimProxy {
         dutchAuction = DutchAuction(_dutchAuction);
     }
 
+    /// @dev Allows to claim GNO on behalf of bidders.
+    /// @param receivers Array of bidder addresses.
     function claimTokensFor(address[] receivers)
         public
     {
