@@ -69,7 +69,7 @@ contract DutchAuction {
     modifier timedTransitions() {
         if (stage == Stages.AuctionStarted && calcTokenPrice() <= calcStopPrice())
             finalizeAuction();
-        if (stage == Stages.AuctionEnded && block.timestamp > endTime + WAITING_PERIOD)
+        if (stage == Stages.AuctionEnded && now > endTime + WAITING_PERIOD)
             stage = Stages.TradingStarted;
         _;
     }
@@ -236,6 +236,6 @@ contract DutchAuction {
         uint soldTokens = totalReceived * 10**18 / finalPrice;
         // Auction contract transfers all unsold tokens to Gnosis inventory multisig
         gnosisToken.transfer(wallet, MAX_TOKENS_SOLD - soldTokens);
-        endTime = block.timestamp;
+        endTime = now;
     }
 }
