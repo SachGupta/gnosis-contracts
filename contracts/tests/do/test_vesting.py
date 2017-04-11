@@ -72,6 +72,9 @@ class TestContract(AbstractTestContract):
                                                                          self.PREASSIGNED_TOKENS / 2]))
         # Setup dutch auction
         self.dutch_auction.setup(self.gnosis_token.address)
+        # Setup vesting contracts
+        self.vesting_1.setup(self.gnosis_token.address)
+        self.vesting_2.setup(self.gnosis_token.address)
         # Set funding goal
         change_ceiling_data = self.dutch_auction.translator.encode('changeSettings',
                                                                    [self.FUNDING_GOAL, self.START_PRICE_FACTOR])
@@ -93,21 +96,21 @@ class TestContract(AbstractTestContract):
         self.assertEqual(self.gnosis_token.balanceOf(self.vesting_2.address), self.PREASSIGNED_TOKENS/2)
         # After one year, 1/4 of shares can be withdrawn
         self.s.block.timestamp = start_date + self.ONE_YEAR
-        self.assertEqual(self.vesting_1.calcMaxWithdraw(self.gnosis_token.address), self.PREASSIGNED_TOKENS/2/4)
-        self.assertEqual(self.vesting_2.calcMaxWithdraw(self.gnosis_token.address), self.PREASSIGNED_TOKENS/2/4)
+        self.assertEqual(self.vesting_1.calcMaxWithdraw(), self.PREASSIGNED_TOKENS/2/4)
+        self.assertEqual(self.vesting_2.calcMaxWithdraw(), self.PREASSIGNED_TOKENS/2/4)
         # After two years, 1/2 of shares can be withdrawn
         self.s.block.timestamp += self.ONE_YEAR
-        self.assertEqual(self.vesting_1.calcMaxWithdraw(self.gnosis_token.address), self.PREASSIGNED_TOKENS/2/2)
-        self.assertEqual(self.vesting_2.calcMaxWithdraw(self.gnosis_token.address), self.PREASSIGNED_TOKENS/2/2)
+        self.assertEqual(self.vesting_1.calcMaxWithdraw(), self.PREASSIGNED_TOKENS/2/2)
+        self.assertEqual(self.vesting_2.calcMaxWithdraw(), self.PREASSIGNED_TOKENS/2/2)
         # Owner withdraws shares
-        self.vesting_1.withdraw(self.gnosis_token.address, accounts[8], self.vesting_1.calcMaxWithdraw(self.gnosis_token.address))
-        self.assertEqual(self.vesting_1.calcMaxWithdraw(self.gnosis_token.address), 0)
+        self.vesting_1.withdraw(accounts[8], self.vesting_1.calcMaxWithdraw())
+        self.assertEqual(self.vesting_1.calcMaxWithdraw(), 0)
         self.assertEqual(self.gnosis_token.balanceOf(self.vesting_1.address), self.PREASSIGNED_TOKENS/4)
         # Wallet withdraws remaining tokens
-        wallet_withdraw_data = self.vesting_1.translator.encode('walletWithdraw', [self.gnosis_token.address])
+        wallet_withdraw_data = self.vesting_1.translator.encode('walletWithdraw', [])
         old_balance = self.gnosis_token.balanceOf(self.multisig_wallet.address)
         old_vesting_balance = self.gnosis_token.balanceOf(self.vesting_1.address)
         self.multisig_wallet.submitTransaction(self.vesting_1.address, 0, wallet_withdraw_data, sender=keys[wa_1])
-        self.assertEqual(self.vesting_1.calcMaxWithdraw(self.gnosis_token.address), 0)
+        self.assertEqual(self.vesting_1.calcMaxWithdraw(), 0)
         self.assertEqual(self.gnosis_token.balanceOf(self.vesting_1.address), 0)
         self.assertEqual(self.gnosis_token.balanceOf(self.multisig_wallet.address), old_balance + old_vesting_balance)

@@ -2,16 +2,19 @@ pragma solidity 0.4.4;
 import "Tokens/AbstractToken.sol";
 
 
+/// @title Vesting contract - allows to vest tokens over time.
 contract Vesting {
 
     /*
      *  Storage
      */
     address public owner;
+    address public receiver;
     address public wallet;
     uint public vestingPeriod;
     uint public startDate;
     uint public withdrawnTokens;
+    Token public token;
 
     /*
      *  Modifiers
@@ -19,6 +22,13 @@ contract Vesting {
     modifier isOwner() {
         if (msg.sender != owner)
             // Only owner is allowed to proceed
+            throw;
+        _;
+    }
+
+    modifier isReceiver() {
+        if (msg.sender != receiver)
+            // Only receiver is allowed to proceed
             throw;
         _;
     }
@@ -34,17 +44,18 @@ contract Vesting {
      *  Public functions
      */
     /// @dev Constructor function sets contract owner and wallet address, which is allowed to withdraw all tokens anytime.
-    /// @param _owner Vesting contract owner.
+    /// @param _receiver Receiver of vested tokens.
     /// @param _wallet Gnosis multisig wallet address.
     /// @param _vestingPeriod Vesting period in seconds.
     /// @param _startDate Start date of vesting period (cliff).
-    function Vesting(address _owner, address _wallet, uint _vestingPeriod, uint _startDate)
+    function Vesting(address _receiver, address _wallet, uint _vestingPeriod, uint _startDate)
         public
     {
-        if (_owner == 0 || _wallet == 0 || _vestingPeriod == 0)
+        if (_receiver == 0 || _wallet == 0 || _vestingPeriod == 0)
             // Arguments are null.
             throw;
-        owner = _owner;
+        owner = msg.sender;
+        receiver = _receiver;
         wallet = _wallet;
         vestingPeriod = _vestingPeriod;
         startDate = _startDate;
@@ -52,39 +63,50 @@ contract Vesting {
             startDate = now;
     }
 
-    /// @dev Transfers tokens to a given address.
-    /// @param token Token address.
-    /// @param _to Address of token receiver.
-    /// @param _value Number of tokens to transfer.
-    function withdraw(address token, address _to, uint256 _value)
+    /// @dev Setup function sets external contracts' addresses.
+    /// @param _token Token address.
+    function setup(address _token)
         public
         isOwner
     {
-        uint maxTokens = calcMaxWithdraw(token);
+        if (address(token) != 0 || _token == 0)
+            // Setup was executed already or arguments are null.
+            throw;
+        token = Token(_token);
+    }
+
+    /// @dev Transfers tokens to a given address.
+    /// @param _to Address of token receiver.
+    /// @param _value Number of tokens to transfer.
+    function withdraw(address _to, uint256 _value)
+        public
+        isReceiver
+    {
+        uint maxTokens = calcMaxWithdraw();
         if (_value > maxTokens)
             throw;
         withdrawnTokens += _value;
-        Token(token).transfer(_to, _value);
+        token.transfer(_to, _value);
     }
 
     /// @dev Transfers all tokens to multisig wallet.
-    /// @param token Token address.
-    function walletWithdraw(address token)
+    function walletWithdraw()
         public
         isWallet
     {
-        uint balance = Token(token).balanceOf(this);
+        uint balance = token.balanceOf(this);
         withdrawnTokens += balance;
-        Token(token).transfer(wallet, balance);
+        token.transfer(wallet, balance);
     }
 
     /// @dev Calculates the maximum amount of vested tokens.
-    function calcMaxWithdraw(address token)
+    /// @return Number of vested tokens to withdraw.
+    function calcMaxWithdraw()
         public
         constant
         returns (uint)
     {
-        uint maxTokens = (Token(token).balanceOf(this) + withdrawnTokens) * (now - startDate) / vestingPeriod;
+        uint maxTokens = (token.balanceOf(this) + withdrawnTokens) * (now - startDate) / vestingPeriod;
         if (withdrawnTokens >= maxTokens || startDate > now)
             return 0;
         return maxTokens - withdrawnTokens;
