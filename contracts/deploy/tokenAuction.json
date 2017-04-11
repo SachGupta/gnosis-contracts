@@ -76,25 +76,25 @@
   {
     "type": "deployment",
     "file": "DO/Vesting.sol",
-    "reference": "VESTING_MARTIN",
+    "reference": "DISBURSEMENT_1",
     "params": ["5210c4dcd7eb899a1274fd6471adec9896ae05aa", "MULTISIG_GNOSIS", 126144000]
   },
   {
     "type": "deployment",
     "file": "DO/Vesting.sol",
-    "reference": "VESTING_STEFAN",
+    "reference": "DISBURSEMENT_2",
     "params": ["9f7dfab2222a473284205cddf08a677726d786a0", "MULTISIG_GNOSIS", 126144000]
   },
   {
     "type": "deployment",
     "file": "DO/Vesting.sol",
-    "reference": "VESTING_MATT",
+    "reference": "DISBURSEMENT_3",
     "params": ["6750adbb477d0310f395da2ad93abe4b9bfd1c87", "MULTISIG_GNOSIS", 126144000]
   },
   {
     "type": "deployment",
     "file": "DO/Vesting.sol",
-    "reference": "VESTING_DENIS",
+    "reference": "DISBURSEMENT_4",
     "params": ["31cba7ad3483f9bff236df556e1c3695736a9615", "MULTISIG_GNOSIS", 126144000]
   },
   {
@@ -108,10 +108,10 @@
         "9f7dfab2222a473284205cddf08a677726d786a0",
         "6750adbb477d0310f395da2ad93abe4b9bfd1c87",
         "31cba7ad3483f9bff236df556e1c3695736a9615",
-        "VESTING_MARTIN",
-        "VESTING_STEFAN",
-        "VESTING_MATT",
-        "VESTING_DENIS",
+        "DISBURSEMENT_1",
+        "DISBURSEMENT_2",
+        "DISBURSEMENT_3",
+        "DISBURSEMENT_4",
         "9f7dfab2222a473284205cddf08a677726d786a0"
       ],
       [
@@ -142,49 +142,49 @@
   },
   {
     "type": "transaction",
-    "contract": "VESTING_MARTIN",
+    "contract": "DISBURSEMENT_1",
     "name": "setup",
     "params": ["GnosisToken"]
   },
   {
     "type": "assertion",
-    "contract": "VESTING_MARTIN",
+    "contract": "DISBURSEMENT_1",
     "name": "token",
     "return": "GnosisToken"
   },
   {
     "type": "transaction",
-    "contract": "VESTING_STEFAN",
+    "contract": "DISBURSEMENT_2",
     "name": "setup",
     "params": ["GnosisToken"]
   },
   {
     "type": "assertion",
-    "contract": "VESTING_STEFAN",
+    "contract": "DISBURSEMENT_2",
     "name": "token",
     "return": "GnosisToken"
   },
   {
     "type": "transaction",
-    "contract": "VESTING_MATT",
+    "contract": "DISBURSEMENT_3",
     "name": "setup",
     "params": ["GnosisToken"]
   },
   {
     "type": "assertion",
-    "contract": "VESTING_MATT",
+    "contract": "DISBURSEMENT_3",
     "name": "token",
     "return": "GnosisToken"
   },
   {
     "type": "transaction",
-    "contract": "VESTING_DENIS",
+    "contract": "DISBURSEMENT_4",
     "name": "setup",
     "params": ["GnosisToken"]
   },
   {
     "type": "assertion",
-    "contract": "VESTING_DENIS",
+    "contract": "DISBURSEMENT_4",
     "name": "token",
     "return": "GnosisToken"
   },
