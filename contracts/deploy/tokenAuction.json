@@ -99,7 +99,7 @@
   },
   {
     "type": "deployment",
-    "file": "DO/GnosisToken.sol",
+    "file": "Tokens/GnosisToken.sol",
     "params": [
       "DutchAuction",
       [
