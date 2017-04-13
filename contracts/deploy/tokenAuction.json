@@ -75,25 +75,25 @@
   },
   {
     "type": "deployment",
-    "file": "DO/Vesting.sol",
+    "file": "DO/Disbursement.sol",
     "reference": "DISBURSEMENT_1",
     "params": ["5210c4dcd7eb899a1274fd6471adec9896ae05aa", "MULTISIG_GNOSIS", 126144000]
   },
   {
     "type": "deployment",
-    "file": "DO/Vesting.sol",
+    "file": "DO/Disbursement.sol",
     "reference": "DISBURSEMENT_2",
     "params": ["9f7dfab2222a473284205cddf08a677726d786a0", "MULTISIG_GNOSIS", 126144000]
   },
   {
     "type": "deployment",
-    "file": "DO/Vesting.sol",
+    "file": "DO/Disbursement.sol",
     "reference": "DISBURSEMENT_3",
     "params": ["6750adbb477d0310f395da2ad93abe4b9bfd1c87", "MULTISIG_GNOSIS", 126144000]
   },
   {
     "type": "deployment",
-    "file": "DO/Vesting.sol",
+    "file": "DO/Disbursement.sol",
     "reference": "DISBURSEMENT_4",
     "params": ["31cba7ad3483f9bff236df556e1c3695736a9615", "MULTISIG_GNOSIS", 126144000]
   },

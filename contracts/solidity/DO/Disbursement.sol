@@ -2,8 +2,8 @@ pragma solidity 0.4.4;
 import "Tokens/AbstractToken.sol";
 
 
-/// @title Vesting contract - allows to vest tokens over time.
-contract Vesting {
+/// @title Disbursement contract - allows to distribute tokens over time.
+contract Disbursement {
 
     /*
      *  Storage
@@ -11,7 +11,7 @@ contract Vesting {
     address public owner;
     address public receiver;
     address public wallet;
-    uint public vestingPeriod;
+    uint public disbursementPeriod;
     uint public startDate;
     uint public withdrawnTokens;
     Token public token;
@@ -46,18 +46,18 @@ contract Vesting {
     /// @dev Constructor function sets contract owner and wallet address, which is allowed to withdraw all tokens anytime.
     /// @param _receiver Receiver of vested tokens.
     /// @param _wallet Gnosis multisig wallet address.
-    /// @param _vestingPeriod Vesting period in seconds.
-    /// @param _startDate Start date of vesting period (cliff).
-    function Vesting(address _receiver, address _wallet, uint _vestingPeriod, uint _startDate)
+    /// @param _disbursementPeriod Vesting period in seconds.
+    /// @param _startDate Start date of disbursement period (cliff).
+    function Disbursement(address _receiver, address _wallet, uint _disbursementPeriod, uint _startDate)
         public
     {
-        if (_receiver == 0 || _wallet == 0 || _vestingPeriod == 0)
+        if (_receiver == 0 || _wallet == 0 || _disbursementPeriod == 0)
             // Arguments are null.
             throw;
         owner = msg.sender;
         receiver = _receiver;
         wallet = _wallet;
-        vestingPeriod = _vestingPeriod;
+        disbursementPeriod = _disbursementPeriod;
         startDate = _startDate;
         if (startDate == 0)
             startDate = now;
@@ -106,7 +106,7 @@ contract Vesting {
         constant
         returns (uint)
     {
-        uint maxTokens = (token.balanceOf(this) + withdrawnTokens) * (now - startDate) / vestingPeriod;
+        uint maxTokens = (token.balanceOf(this) + withdrawnTokens) * (now - startDate) / disbursementPeriod;
         if (withdrawnTokens >= maxTokens || startDate > now)
             return 0;
         return maxTokens - withdrawnTokens;
