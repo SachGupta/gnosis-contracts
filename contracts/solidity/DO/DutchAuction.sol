@@ -225,7 +225,7 @@ contract DutchAuction {
         public
         returns (uint)
     {
-        return priceFactor * 1 ether / (block.number - startBlock + 7500) + 1;
+        return priceFactor * 10**18 / (block.number - startBlock + 7500) + 1;
     }
 
     /*
