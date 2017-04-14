@@ -170,13 +170,13 @@ contract DutchAuction {
             receiver = msg.sender;
         amount = msg.value;
         // Prevent that more than 90% of tokens are sold. Only relevant if cap not reached.
-        uint maxEther = (MAX_TOKENS_SOLD / 10**18) * calcTokenPrice() - totalReceived;
-        uint maxEtherBasedOnTotalReceived = ceiling - totalReceived;
-        if (maxEtherBasedOnTotalReceived < maxEther)
-            maxEther = maxEtherBasedOnTotalReceived;
+        uint maxWei = (MAX_TOKENS_SOLD / 10**18) * calcTokenPrice() - totalReceived;
+        uint maxWeiBasedOnTotalReceived = ceiling - totalReceived;
+        if (maxWeiBasedOnTotalReceived < maxWei)
+            maxWei = maxWeiBasedOnTotalReceived;
         // Only invest maximum possible amount.
-        if (amount > maxEther) {
-            amount = maxEther;
+        if (amount > maxWei) {
+            amount = maxWei;
             // Send change back to receiver address. In case of a ShapeShift bid the user receives the change back directly.
             if (!receiver.send(msg.value - amount))
                 // Sending failed
@@ -188,8 +188,8 @@ contract DutchAuction {
             throw;
         bids[receiver] += amount;
         totalReceived += amount;
-        if (maxEther == amount)
-            // When maxEther is equal to the big amount the auction is ended and finalizeAuction is triggered.
+        if (maxWei == amount)
+            // When maxWei is equal to the big amount the auction is ended and finalizeAuction is triggered.
             finalizeAuction();
         BidSubmission(receiver, amount);
     }
