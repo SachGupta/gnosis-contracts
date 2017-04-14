@@ -145,7 +145,7 @@ class TestContract(AbstractTestContract):
         self.assertEqual(self.gnosis_token.totalSupply(), self.TOTAL_TOKENS)
         self.assertEqual(self.dutch_auction.totalReceived(), self.FUNDING_GOAL)
         # Token is launched
-        self.assertEqual(self.dutch_auction.stage(), 3)
+        self.assertEqual(self.dutch_auction.stage(), 4)
         # Shares can be traded now. Backer 3 transfers 1000 shares to backer 4.
         transfer_shares = 1000
         bidder_4 = 3

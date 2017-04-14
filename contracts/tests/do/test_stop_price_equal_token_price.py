@@ -79,10 +79,10 @@ class TestContract(AbstractTestContract):
         # There is no money left in the contract
         self.assertEqual(self.s.block.get_balance(self.dutch_auction.address), 0)
         # Token is not launched yet, as a week cool-down period still has to pass
-        self.assertEqual(self.dutch_auction.updateStage(), 2)
+        self.assertEqual(self.dutch_auction.updateStage(), 3)
         # We wait for one week, token is launched now
         self.s.block.timestamp += self.WAITING_PERIOD + 1
-        self.assertEqual(self.dutch_auction.updateStage(), 3)
+        self.assertEqual(self.dutch_auction.updateStage(), 4)
         # Everyone gets their tokens
         self.dutch_auction.claimTokens(sender=keys[bidder_1])
         # Confirm token balances

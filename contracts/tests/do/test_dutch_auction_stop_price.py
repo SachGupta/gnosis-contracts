@@ -59,7 +59,7 @@ class TestContract(AbstractTestContract):
         start_auction_data = self.dutch_auction.translator.encode('startAuction', [])
         self.multisig_wallet.submitTransaction(self.dutch_auction.address, 0, start_auction_data, sender=keys[wa_1])
         # Token is not launched yet
-        self.assertEqual(self.dutch_auction.stage(), 1)
+        self.assertEqual(self.dutch_auction.stage(), 2)
         # Bidder 1 places a bid in the first block after auction starts
         self.assertEqual(self.dutch_auction.calcTokenPrice(), self.START_PRICE_FACTOR * 10 ** 18 / 7500 + 1)
         bidder_1 = 0
@@ -89,11 +89,11 @@ class TestContract(AbstractTestContract):
         # Update stage after stop price is reached
         self.dutch_auction.updateStage()
         # Token is not launched yet, as a week cool-down period still has to pass
-        self.assertEqual(self.dutch_auction.stage(), 2)
+        self.assertEqual(self.dutch_auction.stage(), 3)
         # We wait for one week, token is launched now
         self.s.block.timestamp += self.WAITING_PERIOD + 1
         self.dutch_auction.updateStage()
-        self.assertEqual(self.dutch_auction.stage(), 3)
+        self.assertEqual(self.dutch_auction.stage(), 4)
         # Everyone gets their tokens
         self.dutch_auction.claimTokens(sender=keys[bidder_1])
         self.dutch_auction.claimTokens(sender=keys[bidder_2])

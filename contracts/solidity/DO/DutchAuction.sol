@@ -37,6 +37,7 @@ contract DutchAuction {
      */
     enum Stages {
         AuctionDeployed,
+        AuctionSetUp,
         AuctionStarted,
         AuctionEnded,
         TradingStarted
@@ -99,18 +100,23 @@ contract DutchAuction {
     function setup(address _gnosisToken)
         public
         isOwner
+        atStage(Stages.AuctionDeployed)
     {
-        if (address(gnosisToken) != 0 || _gnosisToken == 0)
-            // Setup was executed already or arguments are null.
+        if (_gnosisToken == 0)
+            // Argument is null.
             throw;
         gnosisToken = Token(_gnosisToken);
+        // Validate token balance
+        if (gnosisToken.balanceOf(this) != MAX_TOKENS_SOLD)
+            throw;
+        stage = Stages.AuctionSetUp;
     }
 
     /// @dev Starts auction and sets startBlock.
     function startAuction()
         public
         isWallet
-        atStage(Stages.AuctionDeployed)
+        atStage(Stages.AuctionSetUp)
     {
         stage = Stages.AuctionStarted;
         startBlock = block.number;
@@ -122,7 +128,7 @@ contract DutchAuction {
     function changeSettings(uint _ceiling, uint _priceFactor)
         public
         isWallet
-        atStage(Stages.AuctionDeployed)
+        atStage(Stages.AuctionSetUp)
     {
         ceiling = _ceiling;
         priceFactor = _priceFactor;

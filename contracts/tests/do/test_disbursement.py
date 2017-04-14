@@ -90,7 +90,7 @@ class TestContract(AbstractTestContract):
         # We wait for one week
         self.s.block.timestamp += self.WAITING_PERIOD + 1
         # Token is launched
-        self.assertEqual(self.dutch_auction.updateStage(), 3)
+        self.assertEqual(self.dutch_auction.updateStage(), 4)
         # Test disbursement
         self.assertEqual(self.gnosis_token.balanceOf(self.disbursement_1.address), self.PREASSIGNED_TOKENS/2)
         self.assertEqual(self.gnosis_token.balanceOf(self.disbursement_2.address), self.PREASSIGNED_TOKENS/2)
