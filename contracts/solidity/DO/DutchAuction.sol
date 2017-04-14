@@ -61,7 +61,7 @@ contract DutchAuction {
 
     modifier isWallet() {
         if (msg.sender != wallet)
-            // Only owner is allowed to proceed
+            // Only wallet is allowed to proceed
             throw;
         _;
     }
