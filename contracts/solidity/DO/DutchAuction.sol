@@ -67,6 +67,12 @@ contract DutchAuction {
         _;
     }
 
+    modifier isValidPayload() {
+        if (msg.data.length != 4 && msg.data.length != 36)
+            throw;
+        _;
+    }
+
     modifier timedTransitions() {
         if (stage == Stages.AuctionStarted && calcTokenPrice() <= calcStopPrice())
             finalizeAuction();
@@ -161,6 +167,7 @@ contract DutchAuction {
     function bid(address receiver)
         public
         payable
+        isValidPayload
         timedTransitions
         atStage(Stages.AuctionStarted)
         returns (uint amount)
@@ -198,6 +205,7 @@ contract DutchAuction {
     /// @param receiver Tokens will be assigned to this address if set.
     function claimTokens(address receiver)
         public
+        isValidPayload
         timedTransitions
         atStage(Stages.TradingStarted)
     {
