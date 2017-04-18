@@ -40,9 +40,9 @@ contract Disbursement {
         _;
     }
 
-    modifier isSetUp(bool isReady) {
-        if (address(token) > 0 && !isReady || address(token) == 0 && isReady)
-            // Contract not in expected state
+    modifier isSetUp() {
+        if (address(token) == 0)
+            // Contract is not set up
             throw;
         _;
     }
@@ -75,10 +75,9 @@ contract Disbursement {
     function setup(address _token)
         public
         isOwner
-        isSetUp(false)
     {
-        if (_token == 0)
-            // Argument is null.
+        if (address(token) != 0 || _token == 0)
+            // Setup was executed already or address is null.
             throw;
         token = Token(_token);
     }
@@ -89,7 +88,7 @@ contract Disbursement {
     function withdraw(address _to, uint256 _value)
         public
         isReceiver
-        isSetUp(true)
+        isSetUp
     {
         uint maxTokens = calcMaxWithdraw();
         if (_value > maxTokens)
@@ -102,7 +101,7 @@ contract Disbursement {
     function walletWithdraw()
         public
         isWallet
-        isSetUp(true)
+        isSetUp
     {
         uint balance = token.balanceOf(this);
         withdrawnTokens += balance;
