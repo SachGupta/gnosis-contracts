@@ -15,7 +15,7 @@ logging.basicConfig(level=logging.INFO)
 
 class Deploy:
 
-    def __init__(self, protocol, host, port, add_dev_code, verify_code, contract_dir, gas, gas_price, private_key):
+    def __init__(self, protocol, host, port, add_dev_code, verify_code, optimize, contract_dir, gas, gas_price, private_key):
         self.pp = PreProcessor()
         self.s = t.state()
         self.s.block.number = 1150000  # Homestead
@@ -27,6 +27,7 @@ class Deploy:
             self.user_address = self.json_rpc.eth_coinbase()["result"]
         self.add_dev_code = add_dev_code == 'true'
         self.verify_code = verify_code == 'true'
+        self.optimize = optimize == 'true'
         self.contract_dir = contract_dir
         self.gas = int(gas)
         self.gas_price = int(gas_price)
@@ -60,9 +61,8 @@ class Deploy:
         locally_deployed_code = self.s.block.get_code(locally_deployed_code_address).encode("hex")
         return deployed_code == "0x" + locally_deployed_code
 
-    @staticmethod
-    def compile_code(code, language):
-        combined = languages[language].combined(code)
+    def compile_code(self, code, language):
+        combined = languages[language].combined(code, optimize=self.optimize)
         compiled_code = combined[-1][1]["bin_hex"]
         abi = combined[-1][1]["abi"]
         return compiled_code, abi
@@ -209,12 +209,13 @@ class Deploy:
 @click.option('-port', default='8545', help='Ethereum server port')
 @click.option('-add_dev_code', default='false', help='Add admin methods')
 @click.option('-verify_code', default='false', help='Verify code deployments with test deployment')
+@click.option('-optimize', default='false', help='Use the solidity optimizer to compile code')
 @click.option('-contract_dir', default='solidity/', help='Import directory')
 @click.option('-gas', default='4712388', help='Transaction gas')
 @click.option('-gas_price', default='20000000000', help='Transaction gas price')
 @click.option('-private_key', help='Private key as hex to sign transactions')
-def setup(f, protocol, host, port, add_dev_code, verify_code, contract_dir, gas, gas_price, private_key):
-    deploy = Deploy(protocol, host, port, add_dev_code, verify_code, contract_dir, gas, gas_price, private_key)
+def setup(f, protocol, host, port, add_dev_code, verify_code, optimize, contract_dir, gas, gas_price, private_key):
+    deploy = Deploy(protocol, host, port, add_dev_code, verify_code, optimize, contract_dir, gas, gas_price, private_key)
     deploy.process(f)
 
 if __name__ == '__main__':
