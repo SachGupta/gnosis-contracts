@@ -52,7 +52,7 @@
     "type": "deployment",
     "file": "DO/DutchAuction.sol",
     "params": [
-      "MULTISIG_GNOSIS", 284000000000000000000000, 5114
+      "MULTISIG_GNOSIS", 250000000000000000000000, 4500
     ]
   },
   {
@@ -65,13 +65,13 @@
     "type": "assertion",
     "contract": "DutchAuction",
     "name": "ceiling",
-    "return": 284000000000000000000000
+    "return": 250000000000000000000000
   },
   {
     "type": "assertion",
     "contract": "DutchAuction",
     "name": "priceFactor",
-    "return": 5114
+    "return": 4500
   },
   {
     "type": "deployment",
