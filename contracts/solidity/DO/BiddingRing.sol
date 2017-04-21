@@ -130,9 +130,9 @@ contract BiddingRing {
         // Calc. percentage of tokens for sender
         amount = totalTokens * contribution / totalContributions;
         gnosisToken.transfer(msg.sender, amount);
-        // Send possible refund share
+        // Send possible refund share, don't throw to make sure tokens are transferred
         uint refund = totalBalance * contribution / totalContributions;
-        if (refund > 0 && !msg.sender.send(refund))
-            throw;
+        if (refund > 0)
+            msg.sender.send(refund);
     }
 }
