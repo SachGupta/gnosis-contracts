@@ -1,0 +1,19 @@
+[
+  {
+    "type": "deployment",
+    "file": "DO/BiddingRing.sol",
+    "params": ["1d0DcC8d8BcaFa8e8502BEaEeF6CBD49d3AFFCDC", 100000000000000000]
+  },
+  {
+    "type": "assertion",
+    "contract": "BiddingRing",
+    "name": "dutchAuction",
+    "return": "1d0DcC8d8BcaFa8e8502BEaEeF6CBD49d3AFFCDC"
+  },
+  {
+    "type": "assertion",
+    "contract": "BiddingRing",
+    "name": "maxPrice",
+    "return": 100000000000000000
+  }
+]
