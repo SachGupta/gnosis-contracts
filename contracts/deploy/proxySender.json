@@ -1,0 +1,13 @@
+[
+  {
+    "type": "deployment",
+    "file": "DO/ProxySender.sol",
+    "params": ["1d0DcC8d8BcaFa8e8502BEaEeF6CBD49d3AFFCDC"]
+  },
+  {
+    "type": "assertion",
+    "contract": "ProxySender",
+    "name": "dutchAuction",
+    "return": "1d0DcC8d8BcaFa8e8502BEaEeF6CBD49d3AFFCDC"
+  }
+]
