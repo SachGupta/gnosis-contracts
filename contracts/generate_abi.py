@@ -6,7 +6,8 @@ pp = PreProcessor()
 contracts = ['DO/DutchAuction.sol',
              'Tokens/GnosisToken.sol',
              'DO/ClaimProxy.sol',
-             'DO/Disbursement.sol']
+             'DO/Disbursement.sol',
+             'DO/BiddingRing.sol']
 contract_dir = 'solidity/'
 
 for contract_name in contracts:

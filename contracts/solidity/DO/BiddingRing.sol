@@ -67,7 +67,7 @@ contract BiddingRing {
             RefundReceived(msg.value);
         else if (stage == Stages.ContributionsCollection)
             contribute();
-        else if(stage == Stages.TokensClaimed)
+        else if (stage == Stages.TokensClaimed)
             transfer();
         else
             throw;
