@@ -95,17 +95,25 @@ class TestContract(AbstractTestContract):
         # Transfer claimed tokens
         total_tokens = self.gnosis_token.balanceOf(self.proxy_sender.address)
         total_refund = self.s.block.get_balance(self.gnosis_token.address)
-        self.proxy_sender.transfer(sender=keys[bidder_1])
+        self.proxy_sender.transferTokens(sender=keys[bidder_1])
+        self.proxy_sender.transferRefunds(sender=keys[bidder_1])
         self.assertEqual(self.gnosis_token.balanceOf(self.proxy_sender.address),
                          total_tokens - (total_tokens * 10 / 32))
         self.assertEqual(self.s.block.get_balance(self.gnosis_token.address),
                          total_refund - (total_refund * 10 / 32))
+        # You have to claim tokens first
+        self.assertRaises(TransactionFailed, self.proxy_sender.transferRefunds, sender=keys[bidder_2])
         self.s.send(keys[bidder_2], self.proxy_sender.address, 0)
+        # Claim refunds
+        self.proxy_sender.transferRefunds(sender=keys[bidder_2])
+        # Refunds can only be claimed once
+        self.assertEqual(self.proxy_sender.transferRefunds(sender=keys[bidder_2]), 0)
         self.assertEqual(self.gnosis_token.balanceOf(self.proxy_sender.address),
                          total_tokens - (total_tokens * 10 / 32) - (total_tokens * 12 / 32))
         self.assertEqual(self.s.block.get_balance(self.gnosis_token.address),
                          total_refund - (total_refund * 10 / 32) - (total_refund * 12 / 32))
-        self.proxy_sender.transfer(sender=keys[bidder_3])
+        self.proxy_sender.transferTokens(sender=keys[bidder_3])
+        self.proxy_sender.transferRefunds(sender=keys[bidder_3])
         self.assertEqual(self.gnosis_token.balanceOf(self.proxy_sender.address),
                          total_tokens - (total_tokens * 10 / 32) - (total_tokens * 12 / 32) - (total_tokens * 10 / 32))
         self.assertEqual(self.s.block.get_balance(self.gnosis_token.address),

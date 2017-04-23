@@ -116,12 +116,16 @@ class TestContract(AbstractTestContract):
         # Transfer claimed tokens
         total_tokens = self.gnosis_token.balanceOf(self.bidding_ring.address)
         total_refund = self.s.block.get_balance(self.gnosis_token.address)
-        self.bidding_ring.transfer(sender=keys[bidder_1])
+        self.bidding_ring.transferTokens(sender=keys[bidder_1])
+        self.bidding_ring.transferRefunds(sender=keys[bidder_1])
         self.assertEqual(self.gnosis_token.balanceOf(self.bidding_ring.address),
                          total_tokens - (total_tokens * 10 / 32))
         self.assertEqual(self.s.block.get_balance(self.gnosis_token.address),
                          total_refund - (total_refund * 10 / 32))
+        # Tokens have to be transferred first
+        self.assertRaises(TransactionFailed, self.bidding_ring.transferRefunds, sender=keys[bidder_2])
         self.s.send(keys[bidder_2], self.bidding_ring.address, 0)
+        self.bidding_ring.transferRefunds(sender=keys[bidder_1])
         self.assertEqual(self.gnosis_token.balanceOf(self.bidding_ring.address),
                          total_tokens - (total_tokens * 10 / 32) - (total_tokens * 12 / 32))
         self.assertEqual(self.s.block.get_balance(self.gnosis_token.address),

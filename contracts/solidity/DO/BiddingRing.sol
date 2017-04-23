@@ -32,6 +32,7 @@ contract BiddingRing {
     uint public totalTokens;
     uint public totalBalance;
     mapping (address => uint) public contributions;
+    mapping (address => bool) public tokensSent;
     Stages public stage;
 
     enum Stages {
@@ -68,7 +69,7 @@ contract BiddingRing {
         else if (stage == Stages.ContributionsCollection)
             contribute();
         else if (stage == Stages.TokensClaimed)
-            transfer();
+            transferTokens();
         else
             throw;
     }
@@ -120,19 +121,31 @@ contract BiddingRing {
         stage = Stages.TokensClaimed;
     }
 
-    function transfer()
+    function transferTokens()
         public
         atStage(Stages.TokensClaimed)
         returns (uint amount)
     {
+        if (tokensSent[msg.sender])
+            throw;
+        tokensSent[msg.sender] = true;
+        // Calc. percentage of tokens for sender
+        amount = totalTokens * contributions[msg.sender] / totalContributions;
+        gnosisToken.transfer(msg.sender, amount);
+    }
+
+    function transferRefunds()
+        public
+        atStage(Stages.TokensClaimed)
+        returns (uint amount)
+    {
+        if (!tokensSent[msg.sender])
+            throw;
         uint contribution = contributions[msg.sender];
         contributions[msg.sender] = 0;
         // Calc. percentage of tokens for sender
-        amount = totalTokens * contribution / totalContributions;
-        gnosisToken.transfer(msg.sender, amount);
-        // Send possible refund share, don't throw to make sure tokens are transferred
-        uint refund = totalBalance * contribution / totalContributions;
-        if (refund > 0)
-            msg.sender.send(refund);
+        amount = totalBalance * contribution / totalContributions;
+        if (amount > 0 && !msg.sender.send(amount))
+            throw;
     }
 }
