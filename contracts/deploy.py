@@ -47,7 +47,7 @@ class Deploy:
             return self.contract_addresses[a] if isinstance(a, basestring) and a in self.contract_addresses else a
 
     def get_nonce(self):
-        return int(self.json_rpc.eth_getTransactionCount(self.user_address)["result"][2:], 16)
+        return int(self.json_rpc.eth_getTransactionCount(self.user_address, default_block="pending")["result"][2:], 16)
 
     def get_raw_transaction(self, data, contract_address=''):
         nonce = self.get_nonce()
@@ -123,9 +123,11 @@ class Deploy:
         self.contract_abis[contract_name] = abi
         logging.info('Contract {} was created at address {}.'.format(reference if reference else file_path, contract_address))
 
-    def send_transaction(self, contract, name, params):
+    def send_transaction(self, contract, name, params, abi):
         contract_address = self.replace_address(contract)
-        contract_abi = self.contract_abis[contract]
+        contract_abi = self.contract_abis[contract] if contract in self.contract_abis else [abi]
+        if not name:
+            name = abi["name"]
         translator = ContractTranslator(contract_abi)
         data = translator.encode(name, self.replace_address(params)).encode("hex")
         logging.info('Try to send {} transaction to contract {}.'.format(name, contract))
@@ -188,8 +190,9 @@ class Deploy:
                 elif instruction["type"] == "transaction":
                     self.send_transaction(
                         instruction["contract"],
-                        instruction["name"],
+                        instruction["name"] if "name" in instruction else None,
                         instruction["params"] if "params" in instruction else [],
+                        instruction["abi"] if "abi" in instruction else None
                     )
                 elif instruction["type"] == "assertion":
                     self.assert_call(
