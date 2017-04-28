@@ -67,8 +67,11 @@ contract DutchAuction {
         _;
     }
 
-    modifier isValidPayload() {
-        if (msg.data.length != 4 && msg.data.length != 36)
+    modifier isValidPayload(address receiver) {
+        if (   msg.data.length != 4 && msg.data.length != 36
+            || receiver == address(this)
+            || receiver == address(gnosisToken))
+            // Payload length has to have correct length and receiver should not be dutch auction or gnosis token contract
             throw;
         _;
     }
@@ -167,7 +170,7 @@ contract DutchAuction {
     function bid(address receiver)
         public
         payable
-        isValidPayload
+        isValidPayload(receiver)
         timedTransitions
         atStage(Stages.AuctionStarted)
         returns (uint amount)
@@ -205,7 +208,7 @@ contract DutchAuction {
     /// @param receiver Tokens will be assigned to this address if set.
     function claimTokens(address receiver)
         public
-        isValidPayload
+        isValidPayload(receiver)
         timedTransitions
         atStage(Stages.TradingStarted)
     {

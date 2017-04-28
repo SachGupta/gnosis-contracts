@@ -91,6 +91,12 @@ class TestContract(AbstractTestContract):
         spender = 9
         value_2 = 100000 * 10**18  # 100k Ether
         self.s.block.set_balance(accounts[spender], value_2*2)
+        # Spender accidentally defines dutch auction contract as receiver
+        self.assertRaises(
+            TransactionFailed, self.dutch_auction.bid, self.dutch_auction.address, sender=keys[spender], value=value_2)
+        # Spender accidentally defines token contract as receiver
+        self.assertRaises(
+            TransactionFailed, self.dutch_auction.bid, self.gnosis_token.address, sender=keys[spender], value=value_2)
         self.dutch_auction.bid(accounts[bidder_2], sender=keys[spender], value=value_2)
         # Stop price changed
         self.assertEqual(self.dutch_auction.calcStopPrice(), (value_1 + value_2) / self.MAX_TOKENS_SOLD + 1)
