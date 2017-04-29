@@ -46,8 +46,7 @@ contract MultiSigWalletWithDailyLimit is MultiSigWallet {
     /// @param transactionId Transaction ID.
     function executeTransaction(uint transactionId)
         public
-        ownerExists(msg.sender)
-        transactionExists(transactionId)
+        confirmed(transactionId, msg.sender)
         notExecuted(transactionId)
     {
         Transaction tx = transactions[transactionId];
