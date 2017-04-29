@@ -1,8 +1,7 @@
 [
   {
     "type": "transaction",
-    "contract": "23dc1de110f4cf44c31442490e9187405a608ad8",
-    "name": "claimTokensFor",
+    "to": "23dc1de110f4cf44c31442490e9187405a608ad8",
     "abi": {"inputs": [{"type": "address[]", "name": "receivers"}], "constant": false, "name": "claimTokensFor", "payable": false, "outputs": [], "type": "function"},
     "params": [
       [

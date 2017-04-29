@@ -1,12 +1,12 @@
 pragma solidity 0.4.10;
-import "Tokens/AbstractToken.sol";
+import "AbstractToken.sol";
 
 
 /// @title Standard token contract - Standard token interface implementation.
 contract StandardToken is Token {
 
     /*
-     *  Data structures
+     *  Storage
      */
     mapping (address => uint256) balances;
     mapping (address => mapping (address => uint256)) allowed;
@@ -23,10 +23,9 @@ contract StandardToken is Token {
         public
         returns (bool)
     {
-        if (balances[msg.sender] < _value) {
+        if (balances[msg.sender] < _value)
             // Balance too low
             throw;
-        }
         balances[msg.sender] -= _value;
         balances[_to] += _value;
         Transfer(msg.sender, _to, _value);
@@ -42,10 +41,9 @@ contract StandardToken is Token {
         public
         returns (bool)
     {
-        if (balances[_from] < _value || allowed[_from][msg.sender] < _value) {
+        if (balances[_from] < _value || allowed[_from][msg.sender] < _value)
             // Balance or allowance too low
             throw;
-        }
         balances[_to] += _value;
         balances[_from] -= _value;
         allowed[_from][msg.sender] -= _value;
@@ -66,9 +64,6 @@ contract StandardToken is Token {
         return true;
     }
 
-    /*
-     * Read functions
-     */
     /// @dev Returns number of allowed tokens for given address.
     /// @param _owner Address of token owner.
     /// @param _spender Address of token spender.

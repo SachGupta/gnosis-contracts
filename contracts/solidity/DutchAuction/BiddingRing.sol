@@ -1,30 +1,26 @@
 pragma solidity 0.4.10;
+import "Tokens/AbstractToken.sol";
+import "AbstractDutchAuction.sol";
 
 
-contract DutchAuction {
-    function bid(address receiver) payable returns (uint);
-    function claimTokens(address receiver);
-    function stage() returns (uint);
-    function calcTokenPrice() constant public returns (uint);
-    Token public gnosisToken;
-}
-
-
-contract Token {
-    function transfer(address to, uint256 value) returns (bool success);
-    function balanceOf(address owner) constant returns (uint256 balance);
-}
-
-
+/// @title Bidding ring contract - allows participants to coordinate around one price and bid together.
 contract BiddingRing {
 
+    /*
+     *  Events
+     */
     event BidSubmission(address indexed sender, uint256 amount);
-    event RefundSubmission(address indexed sender, uint256 amount);
-    event RefundReceived(uint256 amount);
+    event RefundReceived(address indexed sender, uint256 amount);
 
+    /*
+     *  Constants
+     */
     uint public constant AUCTION_STARTED = 2;
     uint public constant TRADING_STARTED = 4;
 
+    /*
+     *  Storage
+     */
     DutchAuction public dutchAuction;
     Token public gnosisToken;
     uint public maxPrice;
@@ -35,18 +31,42 @@ contract BiddingRing {
     mapping (address => bool) public tokensSent;
     Stages public stage;
 
+    /*
+     *  Enums
+     */
     enum Stages {
         ContributionsCollection,
         ContributionsSent,
         TokensClaimed
     }
 
+    /*
+     *  Modifiers
+     */
     modifier atStage(Stages _stage) {
         if (stage != _stage)
             throw;
         _;
     }
 
+    /// @dev Fallback function allows to submit a bid and transfer tokens later on.
+    function()
+        payable
+    {
+        if (stage == Stages.ContributionsCollection)
+            contribute();
+        else if (stage == Stages.TokensClaimed)
+            transferTokens();
+        else
+            throw;
+    }
+
+    /*
+     *  Public functions
+     */
+    /// @dev Constructor sets dutch auction and gnosis token address and max price paid by the bidding ring.
+    /// @param _dutchAuction Address of dutch auction contract.
+    /// @param _maxPrice Maximum price paid by participants.
     function BiddingRing(address _dutchAuction, uint _maxPrice)
         public
     {
@@ -60,20 +80,7 @@ contract BiddingRing {
         stage = Stages.ContributionsCollection;
     }
 
-    function()
-        public
-        payable
-    {
-        if (msg.sender == address(dutchAuction))
-            RefundReceived(msg.value);
-        else if (stage == Stages.ContributionsCollection)
-            contribute();
-        else if (stage == Stages.TokensClaimed)
-            transferTokens();
-        else
-            throw;
-    }
-
+    /// @dev Collects ether and updates contributions.
     function contribute()
         public
         payable
@@ -84,6 +91,7 @@ contract BiddingRing {
         BidSubmission(msg.sender, msg.value);
     }
 
+    /// @dev Refunds ether and updates contributions.
     function refund()
         public
         atStage(Stages.ContributionsCollection)
@@ -91,11 +99,12 @@ contract BiddingRing {
         uint contribution = contributions[msg.sender];
         contributions[msg.sender] = 0;
         totalContributions -= contribution;
-        RefundSubmission(msg.sender, contribution);
+        RefundReceived(msg.sender, contribution);
         if (!msg.sender.send(contribution))
             throw;
     }
 
+    /// @dev Allows to send the collected ether to the auction contract when max price is reached.
     function bidProxy()
         public
         atStage(Stages.ContributionsCollection)
@@ -108,6 +117,7 @@ contract BiddingRing {
         dutchAuction.bid.value(this.balance)(0);
     }
 
+    /// @dev Allows to claim all tokens for the proxy contract.
     function claimProxy()
         public
         atStage(Stages.ContributionsSent)
@@ -121,6 +131,8 @@ contract BiddingRing {
         stage = Stages.TokensClaimed;
     }
 
+    /// @dev Transfers tokens to the participant.
+    /// @return Returns token amount.
     function transferTokens()
         public
         atStage(Stages.TokensClaimed)
@@ -134,6 +146,8 @@ contract BiddingRing {
         gnosisToken.transfer(msg.sender, amount);
     }
 
+    /// @dev Transfers refunds to the participant.
+    /// @return Returns refund amount.
     function transferRefunds()
         public
         atStage(Stages.TokensClaimed)

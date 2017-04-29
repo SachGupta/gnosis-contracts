@@ -5,15 +5,15 @@
     "params": ["1d0DcC8d8BcaFa8e8502BEaEeF6CBD49d3AFFCDC", 100000000000000000]
   },
   {
-    "type": "assertion",
-    "contract": "BiddingRing",
+    "type": "call",
+    "to": "BiddingRing",
     "name": "dutchAuction",
-    "return": "1d0DcC8d8BcaFa8e8502BEaEeF6CBD49d3AFFCDC"
+    "assertion": "1d0DcC8d8BcaFa8e8502BEaEeF6CBD49d3AFFCDC"
   },
   {
-    "type": "assertion",
-    "contract": "BiddingRing",
+    "type": "call",
+    "to": "BiddingRing",
     "name": "maxPrice",
-    "return": 100000000000000000
+    "assertion": 100000000000000000
   }
 ]

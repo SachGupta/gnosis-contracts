@@ -1,28 +1,25 @@
 pragma solidity 0.4.10;
+import "Tokens/AbstractToken.sol";
+import "AbstractDutchAuction.sol";
 
 
-contract DutchAuction {
-    function bid(address receiver) payable returns (uint);
-    function claimTokens(address receiver);
-    function stage() returns (uint);
-    Token public gnosisToken;
-}
-
-
-contract Token {
-    function transfer(address to, uint256 value) returns (bool success);
-    function balanceOf(address owner) constant returns (uint256 balance);
-}
-
-
+/// @title Proxy sender contract - allows to participate in the auction by sending ETH to the contract.
 contract ProxySender {
 
+    /*
+     *  Events
+     */
     event BidSubmission(address indexed sender, uint256 amount);
-    event RefundReceived(uint256 amount);
 
+    /*
+     *  Constants
+     */
     uint public constant AUCTION_STARTED = 2;
     uint public constant TRADING_STARTED = 4;
 
+    /*
+     *  Storage
+     */
     DutchAuction public dutchAuction;
     Token public gnosisToken;
     uint totalContributions;
@@ -32,17 +29,40 @@ contract ProxySender {
     mapping (address => bool) public tokensSent;
     Stages public stage;
 
+    /*
+     *  Enums
+     */
     enum Stages {
         ContributionsCollection,
         TokensClaimed
     }
 
+    /*
+     *  Modifiers
+     */
     modifier atStage(Stages _stage) {
         if (stage != _stage)
             throw;
         _;
     }
 
+    /// @dev Fallback function allows to submit a bid and transfer tokens later on.
+    function()
+        payable
+    {
+        if (stage == Stages.ContributionsCollection)
+            contribute();
+        else if (stage == Stages.TokensClaimed)
+            transferTokens();
+        else
+            throw;
+    }
+
+    /*
+     *  Public functions
+     */
+    /// @dev Constructor sets dutch auction and gnosis token address.
+    /// @param _dutchAuction Address of dutch auction contract.
     function ProxySender(address _dutchAuction)
         public
     {
@@ -53,20 +73,7 @@ contract ProxySender {
         stage = Stages.ContributionsCollection;
     }
 
-    function()
-        public
-        payable
-    {
-        if (msg.sender == address(dutchAuction))
-            RefundReceived(msg.value);
-        else if (stage == Stages.ContributionsCollection)
-            contribute();
-        else if (stage == Stages.TokensClaimed)
-            transferTokens();
-        else
-            throw;
-    }
-
+    /// @dev Forwards ETH to the auction contract and updates contributions.
     function contribute()
         public
         payable
@@ -81,6 +88,7 @@ contract ProxySender {
         BidSubmission(msg.sender, msg.value);
     }
 
+    /// @dev Allows to claim all tokens for the proxy contract.
     function claimProxy()
         public
         atStage(Stages.ContributionsCollection)
@@ -94,6 +102,8 @@ contract ProxySender {
         stage = Stages.TokensClaimed;
     }
 
+    /// @dev Transfers tokens to the participant.
+    /// @return Returns token amount.
     function transferTokens()
         public
         atStage(Stages.TokensClaimed)
@@ -107,6 +117,8 @@ contract ProxySender {
         gnosisToken.transfer(msg.sender, amount);
     }
 
+    /// @dev Transfers refunds to the participant.
+    /// @return Returns refund amount.
     function transferRefunds()
         public
         atStage(Stages.TokensClaimed)

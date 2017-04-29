@@ -5,9 +5,9 @@
     "params": ["1d0DcC8d8BcaFa8e8502BEaEeF6CBD49d3AFFCDC"]
   },
   {
-    "type": "assertion",
-    "contract": "ProxySender",
-    "name": "dutchAuction",
-    "return": "1d0DcC8d8BcaFa8e8502BEaEeF6CBD49d3AFFCDC"
+    "type": "call",
+    "to": "ProxySender",
+    "abi": {"inputs": [], "constant": true, "name": "dutchAuction", "payable": false, "outputs": [{"type": "address", "name": ""}], "type": "function"},
+    "assertion": "1d0DcC8d8BcaFa8e8502BEaEeF6CBD49d3AFFCDC"
   }
 ]

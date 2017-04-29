@@ -2,7 +2,7 @@
   {
     "type": "deployment",
     "file": "Wallets/MultiSigWalletWithDailyLimit.sol",
-    "reference": "MULTISIG_GNOSIS",
+    "label": "MULTISIG_GNOSIS",
     "params": [
       [
         "9f7dfab2222a473284205cddf08a677726d786a0",
@@ -15,86 +15,86 @@
     ]
   },
   {
-    "type": "assertion",
-    "contract": "MULTISIG_GNOSIS",
+    "type": "call",
+    "to": "MULTISIG_GNOSIS",
     "name": "owners",
     "params": [0],
-    "return": "9f7dfab2222a473284205cddf08a677726d786a0"
+    "assertion": "9f7dfab2222a473284205cddf08a677726d786a0"
   },
   {
-    "type": "assertion",
-    "contract": "MULTISIG_GNOSIS",
+    "type": "call",
+    "to": "MULTISIG_GNOSIS",
     "name": "owners",
     "params": [1],
-    "return": "5210c4dcd7eb899a1274fd6471adec9896ae05aa"
+    "assertion": "5210c4dcd7eb899a1274fd6471adec9896ae05aa"
   },
   {
-    "type": "assertion",
-    "contract": "MULTISIG_GNOSIS",
+    "type": "call",
+    "to": "MULTISIG_GNOSIS",
     "name": "owners",
     "params": [2],
-    "return": "1d805bC00b8fa3c96aE6C8FA97B2FD24B19a9801"
+    "assertion": "1d805bC00b8fa3c96aE6C8FA97B2FD24B19a9801"
   },
   {
-    "type": "assertion",
-    "contract": "MULTISIG_GNOSIS",
+    "type": "call",
+    "to": "MULTISIG_GNOSIS",
     "name": "owners",
     "params": [3],
-    "return": "AcA7bD07A8c207f7964261c2Cf1e0FbFcff37836"
+    "assertion": "AcA7bD07A8c207f7964261c2Cf1e0FbFcff37836"
   },
   {
-    "type": "assertion",
-    "contract": "MULTISIG_GNOSIS",
+    "type": "call",
+    "to": "MULTISIG_GNOSIS",
     "name": "required",
-    "return": 2
+    "assertion": 2
   },
   {
     "type": "deployment",
-    "file": "DO/DutchAuction.sol",
+    "file": "DutchAuction/DutchAuction.sol",
     "params": [
       "MULTISIG_GNOSIS", 250000000000000000000000, 4500
     ]
   },
   {
-    "type": "assertion",
-    "contract": "DutchAuction",
+    "type": "call",
+    "to": "DutchAuction",
     "name": "wallet",
-    "return": "MULTISIG_GNOSIS"
+    "assertion": "MULTISIG_GNOSIS"
   },
   {
-    "type": "assertion",
-    "contract": "DutchAuction",
+    "type": "call",
+    "to": "DutchAuction",
     "name": "ceiling",
-    "return": 250000000000000000000000
+    "assertion": 250000000000000000000000
   },
   {
-    "type": "assertion",
-    "contract": "DutchAuction",
+    "type": "call",
+    "to": "DutchAuction",
     "name": "priceFactor",
-    "return": 4500
+    "assertion": 4500
   },
   {
     "type": "deployment",
-    "file": "DO/Disbursement.sol",
-    "reference": "DISBURSEMENT_1",
+    "file": "DutchAuction/Disbursement.sol",
+    "label": "DISBURSEMENT_1",
     "params": ["5210c4dcd7eb899a1274fd6471adec9896ae05aa", "MULTISIG_GNOSIS", 126144000]
   },
   {
     "type": "deployment",
-    "file": "DO/Disbursement.sol",
-    "reference": "DISBURSEMENT_2",
+    "file": "DutchAuction/Disbursement.sol",
+    "label": "DISBURSEMENT_2",
     "params": ["9f7dfab2222a473284205cddf08a677726d786a0", "MULTISIG_GNOSIS", 126144000]
   },
   {
     "type": "deployment",
-    "file": "DO/Disbursement.sol",
-    "reference": "DISBURSEMENT_3",
+    "file": "DutchAuction/Disbursement.sol",
+    "label": "DISBURSEMENT_3",
     "params": ["6750adbb477d0310f395da2ad93abe4b9bfd1c87", "MULTISIG_GNOSIS", 126144000]
   },
   {
     "type": "deployment",
-    "file": "DO/Disbursement.sol",
-    "reference": "DISBURSEMENT_4",
+    "file": "DutchAuction/Disbursement.sol",
+    "label": "DISBURSEMENT_4",
     "params": ["31cba7ad3483f9bff236df556e1c3695736a9615", "MULTISIG_GNOSIS", 126144000]
   },
   {
@@ -130,67 +130,67 @@
   },
   {
     "type": "transaction",
-    "contract": "DutchAuction",
+    "to": "DutchAuction",
     "name": "setup",
     "params": ["GnosisToken"]
   },
   {
-    "type": "assertion",
-    "contract": "DutchAuction",
+    "type": "call",
+    "to": "DutchAuction",
     "name": "gnosisToken",
-    "return": "GnosisToken"
+    "assertion": "GnosisToken"
   },
   {
     "type": "transaction",
-    "contract": "DISBURSEMENT_1",
+    "to": "DISBURSEMENT_1",
     "name": "setup",
     "params": ["GnosisToken"]
   },
   {
-    "type": "assertion",
-    "contract": "DISBURSEMENT_1",
+    "type": "call",
+    "to": "DISBURSEMENT_1",
     "name": "token",
-    "return": "GnosisToken"
+    "assertion": "GnosisToken"
   },
   {
     "type": "transaction",
-    "contract": "DISBURSEMENT_2",
+    "to": "DISBURSEMENT_2",
     "name": "setup",
     "params": ["GnosisToken"]
   },
   {
-    "type": "assertion",
-    "contract": "DISBURSEMENT_2",
+    "type": "call",
+    "to": "DISBURSEMENT_2",
     "name": "token",
-    "return": "GnosisToken"
+    "assertion": "GnosisToken"
   },
   {
     "type": "transaction",
-    "contract": "DISBURSEMENT_3",
+    "to": "DISBURSEMENT_3",
     "name": "setup",
     "params": ["GnosisToken"]
   },
   {
-    "type": "assertion",
-    "contract": "DISBURSEMENT_3",
+    "type": "call",
+    "to": "DISBURSEMENT_3",
     "name": "token",
-    "return": "GnosisToken"
+    "assertion": "GnosisToken"
   },
   {
     "type": "transaction",
-    "contract": "DISBURSEMENT_4",
+    "to": "DISBURSEMENT_4",
     "name": "setup",
     "params": ["GnosisToken"]
   },
   {
-    "type": "assertion",
-    "contract": "DISBURSEMENT_4",
+    "type": "call",
+    "to": "DISBURSEMENT_4",
     "name": "token",
-    "return": "GnosisToken"
+    "assertion": "GnosisToken"
   },
   {
     "type": "deployment",
-    "file": "DO/ClaimProxy.sol",
+    "file": "DutchAuction/ClaimProxy.sol",
     "params": ["DutchAuction"]
   }
 ]

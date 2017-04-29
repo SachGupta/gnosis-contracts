@@ -1,13 +1,19 @@
 pragma solidity 0.4.10;
-import "Wallets/MultiSigWallet.sol";
+import "MultiSigWallet.sol";
 
 
 /// @title Multisignature wallet with daily limit - Allows an owner to withdraw a daily limit without multisig.
 /// @author Stefan George - <stefan.george@consensys.net>
 contract MultiSigWalletWithDailyLimit is MultiSigWallet {
 
+    /*
+     *  Events
+     */
     event DailyLimitChange(uint dailyLimit);
 
+    /*
+     *  Storage
+     */
     uint public dailyLimit;
     uint public lastDay;
     uint public spentToday;
@@ -40,6 +46,8 @@ contract MultiSigWalletWithDailyLimit is MultiSigWallet {
     /// @param transactionId Transaction ID.
     function executeTransaction(uint transactionId)
         public
+        ownerExists(msg.sender)
+        transactionExists(transactionId)
         notExecuted(transactionId)
     {
         Transaction tx = transactions[transactionId];

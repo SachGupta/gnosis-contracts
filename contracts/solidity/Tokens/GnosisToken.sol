@@ -1,5 +1,5 @@
 pragma solidity 0.4.10;
-import "Tokens/StandardToken.sol";
+import "StandardToken.sol";
 
 
 /// @title Gnosis token contract
@@ -7,7 +7,7 @@ import "Tokens/StandardToken.sol";
 contract GnosisToken is StandardToken {
 
     /*
-     *  Token meta data
+     *  Constants
      */
     string constant public name = "Gnosis Token";
     string constant public symbol = "GNO";
