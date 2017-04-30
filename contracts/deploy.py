@@ -82,7 +82,7 @@ class Deploy:
         logger.info(string)
 
     def format_reference(self, string):
-        self.add_0x(string) if self.is_address(string) else string
+        return self.add_0x(string) if self.is_address(string) else string
 
     def log_transaction_receipt(self, transaction_receipt):
         gas_used = self.hex2int(transaction_receipt['gasUsed'])
@@ -120,8 +120,9 @@ class Deploy:
 
     def compile_code(self, code=None, path=None):
         # create list of valid paths
-        deploy_path = '{}/{}'.format(os.path.dirname(os.path.realpath(__file__)), self.contract_dir)
-        sub_dirs = [x[0] for x in os.walk(deploy_path)]
+        absolute_path = self.contract_dir if self.contract_dir.startswith('/') else '{}/{}'.format(os.getcwd(),
+                                                                                                   self.contract_dir)
+        sub_dirs = [x[0] for x in os.walk(absolute_path)]
         extra_args = ' '.join(['{}={}'.format(d.split('/')[-1], d) for d in sub_dirs])
         # compile code
         combined = self.solidity.combined(code, path=path, optimize=self.optimize, extra_args=extra_args)
