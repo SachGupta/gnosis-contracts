@@ -10,6 +10,7 @@ contract ProxySender {
      *  Events
      */
     event BidSubmission(address indexed sender, uint256 amount);
+    event RefundReceived(address indexed sender, uint256 amount);
 
     /*
      *  Constants
@@ -29,9 +30,6 @@ contract ProxySender {
     mapping (address => bool) public tokensSent;
     Stages public stage;
 
-    /*
-     *  Enums
-     */
     enum Stages {
         ContributionsCollection,
         TokensClaimed
@@ -50,7 +48,9 @@ contract ProxySender {
     function()
         payable
     {
-        if (stage == Stages.ContributionsCollection)
+        if (msg.sender == address(dutchAuction))
+            RefundReceived(this, msg.value);
+        else if (stage == Stages.ContributionsCollection)
             contribute();
         else if (stage == Stages.TokensClaimed)
             transferTokens();

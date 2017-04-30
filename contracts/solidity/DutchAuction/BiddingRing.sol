@@ -31,9 +31,6 @@ contract BiddingRing {
     mapping (address => bool) public tokensSent;
     Stages public stage;
 
-    /*
-     *  Enums
-     */
     enum Stages {
         ContributionsCollection,
         ContributionsSent,
@@ -53,7 +50,9 @@ contract BiddingRing {
     function()
         payable
     {
-        if (stage == Stages.ContributionsCollection)
+        if (msg.sender == address(dutchAuction))
+            RefundReceived(this, msg.value);
+        else if (stage == Stages.ContributionsCollection)
             contribute();
         else if (stage == Stages.TokensClaimed)
             transferTokens();

@@ -32,9 +32,6 @@ contract DutchAuction {
     mapping (address => uint) public bids;
     Stages public stage;
 
-    /*
-     *  Enums
-     */
     enum Stages {
         AuctionDeployed,
         AuctionSetUp,
