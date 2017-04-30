@@ -3,19 +3,11 @@ from ..abstract_test import AbstractTestContract, accounts, keys, TransactionFai
 
 class TestContract(AbstractTestContract):
     """
-    run test with python -m unittest contracts.tests.do.test_bidding_ring
+    run test with python -m unittest contracts.tests.dutch_auction.test_bidding_ring
     """
 
-    BACKER_1 = 1
-    BACKER_2 = 2
-    BLOCKS_PER_DAY = 5760
-    TOTAL_TOKENS = 10000000 * 10**18
-    MAX_TOKENS_SOLD = 9000000
     PREASSIGNED_TOKENS = 1000000 * 10**18
     WAITING_PERIOD = 60*60*24*7
-    FUNDING_GOAL = 250000 * 10**18
-    START_PRICE_FACTOR = 4000
-    MAX_GAS = 150000  # Kraken gas limit
 
     def __init__(self, *args, **kwargs):
         super(TestContract, self).__init__(*args, **kwargs)
@@ -28,39 +20,22 @@ class TestContract(AbstractTestContract):
             [accounts[wa_1]],
             required_accounts
         )
-        self.multisig_wallet = self.s.abi_contract(
-            self.pp.process(self.WALLETS_DIR + 'MultiSigWalletWithDailyLimit.sol', add_dev_code=True,
-                            contract_dir=self.contract_dir),
-            language='solidity',
-            constructor_parameters=constructor_parameters
-        )
+        self.multisig_wallet = self.create_contract('Wallets/MultiSigWalletWithDailyLimit.sol',
+                                                    params=constructor_parameters)
         # Create dutch auction
-        self.dutch_auction = self.s.abi_contract(self.pp.process(self.dutch_auction_name,
-                                                                 add_dev_code=True,
-                                                                 contract_dir=self.contract_dir),
-                                                 constructor_parameters=(self.multisig_wallet.address,
-                                                                         250000 * 10 ** 18,
-                                                                         4000),
-                                                 language='solidity')
+        self.dutch_auction = self.create_contract('DutchAuction/DutchAuction.sol',
+                                                  params=(self.multisig_wallet.address, 250000 * 10 ** 18, 4000))
         # Create Gnosis token
-        self.gnosis_token = self.s.abi_contract(self.pp.process(self.gnosis_token_name,
-                                                                add_dev_code=True,
-                                                                contract_dir=self.contract_dir),
-                                                language='solidity',
-                                                constructor_parameters=(self.dutch_auction.address,
-                                                                        [self.multisig_wallet.address],
-                                                                        [self.PREASSIGNED_TOKENS]))
+        self.gnosis_token = self.create_contract('Tokens/GnosisToken.sol', params=(self.dutch_auction.address,
+                                                                                   [self.multisig_wallet.address],
+                                                                                   [self.PREASSIGNED_TOKENS]))
 
         # Setup dutch auction
         self.dutch_auction.setup(self.gnosis_token.address)
         # Create proxy sender
         max_price = 533262231702439675
-        self.bidding_ring = self.s.abi_contract(
-            self.pp.process(self.DO_DIR + 'BiddingRing.sol', add_dev_code=True,
-                            contract_dir=self.contract_dir),
-            language='solidity',
-            constructor_parameters=(self.dutch_auction.address, max_price)
-        )
+        self.bidding_ring = self.create_contract('DutchAuction/BiddingRing.sol',
+                                                 params=(self.dutch_auction.address, max_price))
         # Collect bids
         bidder_1 = 1
         value_1 = 100000 * 10 ** 18  # 100k Ether

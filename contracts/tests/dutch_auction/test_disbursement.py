@@ -3,20 +3,14 @@ from ..abstract_test import AbstractTestContract, accounts, keys
 
 class TestContract(AbstractTestContract):
     """
-    run test with python -m unittest contracts.tests.do.test_disbursement
+    run test with python -m unittest contracts.tests.dutch_auction.test_disbursement
     """
 
-    BACKER_1 = 1
-    BACKER_2 = 2
-    BLOCKS_PER_DAY = 5760
-    TOTAL_TOKENS = 10000000 * 10**18
-    MAX_TOKENS_SOLD = 9000000 * 10**18
     PREASSIGNED_TOKENS = 1000000 * 10**18
     WAITING_PERIOD = 60*60*24*7
-    MAX_GAS = 150000  # Kraken gas limit
     ONE_YEAR = 60*60*24*365
     FUNDING_GOAL = 250000 * 10**18
-    START_PRICE_FACTOR = 4000
+    PRICE_FACTOR = 4000
     FOUR_YEARS = 4 * ONE_YEAR
 
     def __init__(self, *args, **kwargs):
@@ -31,45 +25,22 @@ class TestContract(AbstractTestContract):
             [accounts[wa_1]],
             required_accounts
         )
-        self.multisig_wallet = self.s.abi_contract(
-            self.pp.process(self.WALLETS_DIR + 'MultiSigWalletWithDailyLimit.sol', add_dev_code=True,
-                            contract_dir=self.contract_dir),
-            language='solidity',
-            constructor_parameters=constructor_parameters
-        )
+        self.multisig_wallet = self.create_contract('Wallets/MultiSigWalletWithDailyLimit.sol',
+                                                    params=constructor_parameters)
         # Create disbursement contracts
-        self.disbursement_1 = self.s.abi_contract(self.pp.process(self.DO_DIR + 'Disbursement.sol',
-                                                             add_dev_code=True,
-                                                             contract_dir=self.contract_dir),
-                                             language='solidity',
-                                             constructor_parameters=[accounts[0],
-                                                                     self.multisig_wallet.address,
-                                                                     self.FOUR_YEARS])
-        self.disbursement_2 = self.s.abi_contract(self.pp.process(self.DO_DIR + 'Disbursement.sol',
-                                                             add_dev_code=True,
-                                                             contract_dir=self.contract_dir),
-                                             language='solidity',
-                                             constructor_parameters=[accounts[1],
-                                                                     self.multisig_wallet.address,
-                                                                     self.FOUR_YEARS])
+        self.disbursement_1 = self.create_contract('DutchAuction/Disbursement.sol',
+                                                   params=(accounts[0], self.multisig_wallet.address, self.FOUR_YEARS))
+        self.disbursement_2 = self.create_contract('DutchAuction/Disbursement.sol',
+                                                   params=(accounts[1], self.multisig_wallet.address, self.FOUR_YEARS))
         # Create dutch auction
-        self.dutch_auction = self.s.abi_contract(self.pp.process(self.dutch_auction_name,
-                                                                 add_dev_code=True,
-                                                                 contract_dir=self.contract_dir),
-                                                 constructor_parameters=(self.multisig_wallet.address,
-                                                                         250000 * 10 ** 18,
-                                                                         4000),
-                                                 language='solidity')
+        self.dutch_auction = self.create_contract('DutchAuction/DutchAuction.sol',
+                                                  params=(self.multisig_wallet.address, 250000 * 10 ** 18, 4000))
         # Create Gnosis token
-        self.gnosis_token = self.s.abi_contract(self.pp.process(self.gnosis_token_name,
-                                                                add_dev_code=True,
-                                                                contract_dir=self.contract_dir),
-                                                language='solidity',
-                                                constructor_parameters=(self.dutch_auction.address,
-                                                                        [self.disbursement_1.address,
-                                                                         self.disbursement_2.address],
-                                                                        [self.PREASSIGNED_TOKENS / 2,
-                                                                         self.PREASSIGNED_TOKENS / 2]))
+        self.gnosis_token = self.create_contract('Tokens/GnosisToken.sol', params=(self.dutch_auction.address,
+                                                                                   [self.disbursement_1.address,
+                                                                                    self.disbursement_2.address],
+                                                                                   [self.PREASSIGNED_TOKENS / 2,
+                                                                                    self.PREASSIGNED_TOKENS / 2]))
         # Setup dutch auction
         self.dutch_auction.setup(self.gnosis_token.address)
         # Setup disbursement contracts
@@ -77,7 +48,7 @@ class TestContract(AbstractTestContract):
         self.disbursement_2.setup(self.gnosis_token.address)
         # Set funding goal
         change_ceiling_data = self.dutch_auction.translator.encode('changeSettings',
-                                                                   [self.FUNDING_GOAL, self.START_PRICE_FACTOR])
+                                                                   [self.FUNDING_GOAL, self.PRICE_FACTOR])
         self.multisig_wallet.submitTransaction(self.dutch_auction.address, 0, change_ceiling_data, sender=keys[wa_1])
         # Start auction
         start_auction_data = self.dutch_auction.translator.encode('startAuction', [])

@@ -3,19 +3,17 @@ from ..abstract_test import AbstractTestContract, accounts, keys, TransactionFai
 
 class TestContract(AbstractTestContract):
     """
-    run test with python -m unittest contracts.tests.do.test_bid_trigger_stop_price
+    run test with python -m unittest contracts.tests.dutch_auction.test_bid_trigger_stop_price
 
     A bid triggers the stop price to be higher than the token price, thus ending the auction instantly.
     Based on test_dao_dutch_auction_stop_price
     """
 
-    BACKER_1 = 1
-    BACKER_2 = 2
     BLOCKS_PER_DAY = 5760
     TOTAL_TOKENS = 10000000 * 10**18
     PREASSIGNED_TOKENS = 1000000 * 10**18
     FUNDING_GOAL = 250000 * 10**18
-    START_PRICE_FACTOR = 4000
+    PRICE_FACTOR = 4000
     MAX_TOKENS_SOLD = 9000000
     WAITING_PERIOD = 60*60*24*7
 
@@ -30,40 +28,26 @@ class TestContract(AbstractTestContract):
             [accounts[wa_1]],
             required_accounts
         )
-        self.multisig_wallet = self.s.abi_contract(
-            self.pp.process('Wallets/MultiSigWalletWithDailyLimit.sol',
-                            add_dev_code=True,
-                            contract_dir=self.contract_dir),
-            language='solidity',
-            constructor_parameters=constructor_parameters
-        )
+        self.multisig_wallet = self.create_contract('Wallets/MultiSigWalletWithDailyLimit.sol',
+                                                    params=constructor_parameters)
         # Create dutch auction
-        self.dutch_auction = self.s.abi_contract(self.pp.process(self.dutch_auction_name,
-                                                                 add_dev_code=True,
-                                                                 contract_dir=self.contract_dir),
-                                                 constructor_parameters=(self.multisig_wallet.address,
-                                                                         250000 * 10 ** 18,
-                                                                         4000),
-                                                 language='solidity')
+        self.dutch_auction = self.create_contract('DutchAuction/DutchAuction.sol',
+                                                  params=(self.multisig_wallet.address, 250000 * 10 ** 18, 4000))
         # Create Gnosis token
-        self.gnosis_token = self.s.abi_contract(self.pp.process(self.gnosis_token_name,
-                                                                add_dev_code=True,
-                                                                contract_dir=self.contract_dir),
-                                                language='solidity',
-                                                constructor_parameters=(self.dutch_auction.address,
-                                                                        [self.multisig_wallet.address],
-                                                                        [self.PREASSIGNED_TOKENS]))
+        self.gnosis_token = self.create_contract('Tokens/GnosisToken.sol', params=(self.dutch_auction.address,
+                                                                                   [self.multisig_wallet.address],
+                                                                                   [self.PREASSIGNED_TOKENS]))
         # Setup dutch auction
         self.dutch_auction.setup(self.gnosis_token.address)
         # Set funding goal
         change_ceiling_data = self.dutch_auction.translator.encode('changeSettings',
-                                                                   [self.FUNDING_GOAL, self.START_PRICE_FACTOR])
+                                                                   [self.FUNDING_GOAL, self.PRICE_FACTOR])
         self.multisig_wallet.submitTransaction(self.dutch_auction.address, 0, change_ceiling_data, sender=keys[wa_1])
         # Start auction
         start_auction_data = self.dutch_auction.translator.encode('startAuction', [])
         self.multisig_wallet.submitTransaction(self.dutch_auction.address, 0, start_auction_data, sender=keys[wa_1])
         # Bidder 1 places a bid in the first block after auction starts
-        self.assertEqual(self.dutch_auction.calcTokenPrice(), self.START_PRICE_FACTOR * 10**18 / 7500 + 1)
+        self.assertEqual(self.dutch_auction.calcTokenPrice(), self.PRICE_FACTOR * 10 ** 18 / 7500 + 1)
         bidder_1 = 0
         value_1 = 100000 * 10**18  # 100k Ether
         self.s.block.set_balance(accounts[bidder_1], value_1*2)
@@ -73,7 +57,7 @@ class TestContract(AbstractTestContract):
         days_later = self.BLOCKS_PER_DAY*60
         self.s.block.number += days_later
         self.assertEqual(self.dutch_auction.calcTokenPrice(),
-                         self.START_PRICE_FACTOR * 10**18 / (days_later + 7500) + 1)
+                         self.PRICE_FACTOR * 10 ** 18 / (days_later + 7500) + 1)
         self.assertGreater(self.dutch_auction.calcTokenPrice(), self.dutch_auction.calcStopPrice())
         # Bidder 2 places a bid
         bidder_2 = 1
