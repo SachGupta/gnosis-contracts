@@ -257,7 +257,7 @@ class Deploy:
         for i in instructions:
             if i['type'] == 'abi':
                 for address in i['addresses']:
-                    self.abis[address] = i['abi']
+                    self.abis[self.strip_0x(address)] = i['abi']
             if i['type'] == 'deployment':
                 self.deploy(
                     i['from'] if 'from' in i else None,
