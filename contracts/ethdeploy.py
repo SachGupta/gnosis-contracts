@@ -229,8 +229,8 @@ class EthDeploy:
         translator = ContractTranslator(abi)
         data = translator.encode(name, self.replace_references(params)).encode('hex')
         response = self.json_rpc.eth_call(
+            self.add_0x(to),
             from_address=self.add_0x(_from if _from else self._from),
-            to_address=self.add_0x(to),
             value=value,
             data=self.add_0x(data),
             gas=self.gas,
