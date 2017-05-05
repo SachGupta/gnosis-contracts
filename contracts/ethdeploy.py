@@ -21,7 +21,7 @@ ch.setFormatter(formatter)
 logger.addHandler(ch)
 
 
-class Deploy:
+class EthDeploy:
 
     def __init__(self, protocol, host, port, gas, gas_price, contract_dir, optimize, account, private_key_path):
         # establish rpc connection
@@ -311,7 +311,7 @@ class Deploy:
 @click.option('--account', help='Default account used as from parameter')
 @click.option('--private-key-path', help='Path to private key')
 def setup(f, protocol, host, port, gas, gas_price, contract_dir, optimize, account, private_key_path):
-    deploy = Deploy(protocol, host, port, gas, gas_price, contract_dir, optimize, account, private_key_path)
+    deploy = EthDeploy(protocol, host, port, gas, gas_price, contract_dir, optimize, account, private_key_path)
     deploy.process(f)
 
 if __name__ == '__main__':
