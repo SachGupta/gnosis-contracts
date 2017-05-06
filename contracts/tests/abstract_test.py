@@ -22,7 +22,7 @@ class AbstractTestContract(TestCase):
         self.s.block.number = self.HOMESTEAD_BLOCK
         t.gas_limit = 4712388
 
-    def create_contract(self, path, params=()):
+    def create_contract(self, path, params=None, libraries=None):
         abs_contract_path = '{}/{}'.format(ROOT_DIR, self.CONTRACT_DIR)
         sub_dirs = [x[0] for x in walk(abs_contract_path)]
         extra_args = ' '.join(['{}={}'.format(d.split('/')[-1], d) for d in sub_dirs])
@@ -30,5 +30,6 @@ class AbstractTestContract(TestCase):
         return self.s.abi_contract(None,
                                    path=path,
                                    constructor_parameters=params,
+                                   libraries=libraries,
                                    language='solidity',
                                    extra_args=extra_args)
