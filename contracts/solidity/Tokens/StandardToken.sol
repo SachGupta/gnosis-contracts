@@ -1,5 +1,5 @@
 pragma solidity 0.4.11;
-import "AbstractToken.sol";
+import "Tokens/AbstractToken.sol";
 
 
 /// @title Standard token contract - Standard token interface implementation.
@@ -8,59 +8,59 @@ contract StandardToken is Token {
     /*
      *  Storage
      */
-    mapping (address => uint256) balances;
-    mapping (address => mapping (address => uint256)) allowed;
-    uint256 public totalSupply;
+    mapping (address => uint) balances;
+    mapping (address => mapping (address => uint)) allowed;
+    uint public totalSupply;
 
     /*
      *  Public functions
      */
     /// @dev Transfers sender's tokens to a given address. Returns success.
-    /// @param _to Address of token receiver.
-    /// @param _value Number of tokens to transfer.
+    /// @param to Address of token receiver.
+    /// @param value Number of tokens to transfer.
     /// @return Returns success of function call.
-    function transfer(address _to, uint256 _value)
+    function transfer(address to, uint value)
         public
         returns (bool)
     {
-        if (balances[msg.sender] < _value)
+        if (balances[msg.sender] < value)
             // Balance too low
             throw;
-        balances[msg.sender] -= _value;
-        balances[_to] += _value;
-        Transfer(msg.sender, _to, _value);
+        balances[msg.sender] -= value;
+        balances[to] += value;
+        Transfer(msg.sender, to, value);
         return true;
     }
 
     /// @dev Allows allowed third party to transfer tokens from one address to another. Returns success.
-    /// @param _from Address from where tokens are withdrawn.
-    /// @param _to Address to where tokens are sent.
-    /// @param _value Number of tokens to transfer.
+    /// @param from Address from where tokens are withdrawn.
+    /// @param to Address to where tokens are sent.
+    /// @param value Number of tokens to transfer.
     /// @return Returns success of function call.
-    function transferFrom(address _from, address _to, uint256 _value)
+    function transferFrom(address from, address to, uint value)
         public
         returns (bool)
     {
-        if (balances[_from] < _value || allowed[_from][msg.sender] < _value)
+        if (balances[from] < value || allowed[from][msg.sender] < value)
             // Balance or allowance too low
             throw;
-        balances[_to] += _value;
-        balances[_from] -= _value;
-        allowed[_from][msg.sender] -= _value;
-        Transfer(_from, _to, _value);
+        balances[to] += value;
+        balances[from] -= value;
+        allowed[from][msg.sender] -= value;
+        Transfer(from, to, value);
         return true;
     }
 
     /// @dev Sets approved amount of tokens for spender. Returns success.
     /// @param _spender Address of allowed account.
-    /// @param _value Number of approved tokens.
+    /// @param value Number of approved tokens.
     /// @return Returns success of function call.
-    function approve(address _spender, uint256 _value)
+    function approve(address _spender, uint value)
         public
         returns (bool)
     {
-        allowed[msg.sender][_spender] = _value;
-        Approval(msg.sender, _spender, _value);
+        allowed[msg.sender][_spender] = value;
+        Approval(msg.sender, _spender, value);
         return true;
     }
 
@@ -71,7 +71,7 @@ contract StandardToken is Token {
     function allowance(address _owner, address _spender)
         constant
         public
-        returns (uint256)
+        returns (uint)
     {
         return allowed[_owner][_spender];
     }
@@ -82,7 +82,7 @@ contract StandardToken is Token {
     function balanceOf(address _owner)
         constant
         public
-        returns (uint256)
+        returns (uint)
     {
         return balances[_owner];
     }

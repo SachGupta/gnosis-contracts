@@ -4,14 +4,14 @@ pragma solidity 0.4.11;
 
 /// @title Abstract token contract - Functions to be implemented by token contracts.
 contract Token {
-    function transfer(address to, uint256 value) returns (bool success);
-    function transferFrom(address from, address to, uint256 value) returns (bool success);
-    function approve(address spender, uint256 value) returns (bool success);
 
-    uint256 public totalSupply;
-    function balanceOf(address owner) constant returns (uint256 balance);
-    function allowance(address owner, address spender) constant returns (uint256 remaining);
+    event Transfer(address indexed from, address indexed to, uint value);
+    event Approval(address indexed owner, address indexed spender, uint value);
 
-    event Transfer(address indexed from, address indexed to, uint256 value);
-    event Approval(address indexed owner, address indexed spender, uint256 value);
+    function transfer(address to, uint value) returns (bool);
+    function transferFrom(address from, address to, uint value) returns (bool);
+    function approve(address spender, uint value) returns (bool);
+    function balanceOf(address owner) constant returns (uint);
+    function allowance(address owner, address spender) constant returns (uint);
+    uint public totalSupply;
 }
