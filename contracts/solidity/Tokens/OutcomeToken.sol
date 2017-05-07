@@ -1,10 +1,10 @@
 pragma solidity 0.4.11;
-import "Tokens/StandardToken.sol";
+import "Tokens/StandardTokenWithOverflowProtection.sol";
 
 
 /// @title Outcome token contract - Issuing and revoking outcome tokens.
 /// @author Stefan George - <stefan.george@consensys.net>
-contract OutcomeToken is StandardToken {
+contract OutcomeToken is StandardTokenWithOverflowProtection {
 
     /*
      *  Storage
