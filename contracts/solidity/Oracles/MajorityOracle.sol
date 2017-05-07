@@ -38,7 +38,6 @@ contract MajorityOracle is Oracle {
             oracles: oracles,
             eventIdentifiers: eventIdentifiers
         });
-        EventRegistration(msg.sender, eventIdentifier);
     }
 
     /// @dev Allows to registers oracles for a majority vote.

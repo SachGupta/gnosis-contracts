@@ -26,7 +26,6 @@ contract DifficultyOracle is Oracle {
         difficultyResults[blockNumber] = block.difficulty;
         bytes32 eventIdentifier = bytes32(blockNumber);
         int outcome = int(block.difficulty);
-        EventResolution(eventIdentifier, outcome);
     }
 
     /// @dev Validates and registers event. Returns event identifier.
@@ -40,7 +39,6 @@ contract DifficultyOracle is Oracle {
             // Block number was already reached
             throw;
         eventIdentifier = bytes32(blockNumber);
-        EventRegistration(msg.sender, eventIdentifier);
     }
 
     /// @dev Returns if winning outcome is set for given event.

@@ -50,7 +50,6 @@ contract OffChainOracle is Oracle {
             throw;
         results[eventIdentifier].isSet = true;
         results[eventIdentifier].outcome = outcome;
-        EventResolution(eventIdentifier, outcome);
     }
 
     /// @dev Returns final event identifier after all recursive replacements are done.
