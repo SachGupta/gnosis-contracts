@@ -26,10 +26,8 @@ contract StandardTokenWithOverflowProtection is Token, SafeMath {
     {
         if (   !safeToSubtract(balances[msg.sender], value)
             || !safeToAdd(balances[to], value))
-        {
             // Overflow operation
             throw;
-        }
         balances[msg.sender] -= value;
         balances[to] += value;
         Transfer(msg.sender, to, value);
@@ -48,10 +46,8 @@ contract StandardTokenWithOverflowProtection is Token, SafeMath {
         if (   !safeToSubtract(balances[from], value)
             || !safeToSubtract(allowances[from][msg.sender], value)
             || !safeToAdd(balances[to], value))
-        {
             // Overflow operation
             throw;
-        }
         balances[from] -= value;
         allowances[from][msg.sender] -= value;
         balances[to] += value;
