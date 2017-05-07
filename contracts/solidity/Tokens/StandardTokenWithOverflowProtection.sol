@@ -73,8 +73,8 @@ contract StandardTokenWithOverflowProtection is Token, SafeMath {
     /// @param _spender Address of token spender.
     /// @return Returns remaining allowance for spender.
     function allowance(address _owner, address _spender)
-        constant
         public
+        constant
         returns (uint)
     {
         return allowances[_owner][_spender];
@@ -84,8 +84,8 @@ contract StandardTokenWithOverflowProtection is Token, SafeMath {
     /// @param _owner Address of token owner.
     /// @return Returns balance of owner.
     function balanceOf(address _owner)
-        constant
         public
+        constant
         returns (uint)
     {
         return balances[_owner];

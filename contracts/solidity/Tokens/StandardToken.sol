@@ -80,8 +80,8 @@ contract StandardToken is Token {
     /// @param _owner Address of token owner.
     /// @return Returns balance of owner.
     function balanceOf(address _owner)
-        constant
         public
+        constant
         returns (uint)
     {
         return balances[_owner];
