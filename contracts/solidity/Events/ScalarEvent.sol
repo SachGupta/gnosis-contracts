@@ -7,9 +7,9 @@ contract ScalarEvent is Event {
     /*
      *  Constants
      */
-    uint8 constant public SHORT = 0;
-    uint8 constant public LONG = 1;
-    uint16 constant public OUTCOME_RANGE = 10000;
+    uint8 public constant SHORT = 0;
+    uint8 public constant LONG = 1;
+    uint16 public constant OUTCOME_RANGE = 10000;
 
     /*
      *  Storage

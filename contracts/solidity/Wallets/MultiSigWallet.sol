@@ -21,7 +21,7 @@ contract MultiSigWallet {
     /*
      *  Constants
      */
-    uint constant public MAX_OWNER_COUNT = 50;
+    uint public constant MAX_OWNER_COUNT = 50;
 
     /*
      *  Storage

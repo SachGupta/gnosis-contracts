@@ -9,9 +9,9 @@ contract GnosisToken is StandardToken {
     /*
      *  Constants
      */
-    string constant public name = "Gnosis Token";
-    string constant public symbol = "GNO";
-    uint8 constant public decimals = 18;
+    string public constant name = "Gnosis Token";
+    string public constant symbol = "GNO";
+    uint8 public constant decimals = 18;
 
     /*
      *  Public functions
