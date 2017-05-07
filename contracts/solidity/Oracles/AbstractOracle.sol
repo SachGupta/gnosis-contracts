@@ -7,6 +7,6 @@ contract Oracle {
     event EventRegistration(address indexed creator, bytes32 indexed eventIdentifier);
     event EventResolution(bytes32 indexed eventIdentifier, int outcome);
 
-    function isOutcomeSet(bytes32 eventIdentifier) constant returns (bool isSet);
-    function getOutcome(bytes32 eventIdentifier) constant returns (int outcome);
+    function isOutcomeSet(bytes32 eventIdentifier) constant returns (bool);
+    function getOutcome(bytes32 eventIdentifier) constant returns (int);
 }

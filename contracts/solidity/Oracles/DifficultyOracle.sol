@@ -31,6 +31,7 @@ contract DifficultyOracle is Oracle {
 
     /// @dev Validates and registers event. Returns event identifier.
     /// @param blockNumber Block number, which has to be passed to set difficulty for block.
+    /// @return Returns event identifier.
     function registerEvent(uint blockNumber)
         public
         returns (bytes32 eventIdentifier)
@@ -44,6 +45,7 @@ contract DifficultyOracle is Oracle {
 
     /// @dev Returns if winning outcome is set for given event.
     /// @param eventIdentifier Event identifier.
+    /// @return Returns if outcome is set.
     function isOutcomeSet(bytes32 eventIdentifier)
         public
         constant
