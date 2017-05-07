@@ -9,7 +9,7 @@ contract StandardToken is Token {
      *  Storage
      */
     mapping (address => uint) balances;
-    mapping (address => mapping (address => uint)) allowed;
+    mapping (address => mapping (address => uint)) allowances;
     uint public totalSupply;
 
     /*
@@ -41,12 +41,12 @@ contract StandardToken is Token {
         public
         returns (bool)
     {
-        if (balances[from] < value || allowed[from][msg.sender] < value)
+        if (balances[from] < value || allowances[from][msg.sender] < value)
             // Balance or allowance too low
             throw;
         balances[to] += value;
         balances[from] -= value;
-        allowed[from][msg.sender] -= value;
+        allowances[from][msg.sender] -= value;
         Transfer(from, to, value);
         return true;
     }
@@ -59,7 +59,7 @@ contract StandardToken is Token {
         public
         returns (bool)
     {
-        allowed[msg.sender][_spender] = value;
+        allowances[msg.sender][_spender] = value;
         Approval(msg.sender, _spender, value);
         return true;
     }
@@ -69,11 +69,11 @@ contract StandardToken is Token {
     /// @param _spender Address of token spender.
     /// @return Returns remaining allowance for spender.
     function allowance(address _owner, address _spender)
-        constant
         public
+        constant
         returns (uint)
     {
-        return allowed[_owner][_spender];
+        return allowances[_owner][_spender];
     }
 
     /// @dev Returns number of tokens owned by given address.
