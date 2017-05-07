@@ -14,12 +14,27 @@ contract OffChainOracle is Oracle {
     struct Result {
         bool isSet;
         int outcome;
+        bytes32 replacement;
     }
 
     /*
      *  Public functions
      */
-    /// @dev Sets difficulty as winning outcome for a specific block.
+    /// @dev Replaces oracle/signing private key for an oracle.
+    /// @param descriptionHash Hash identifying off chain event description.
+    /// @param oracle New oracle.
+    function replaceOracle(bytes32 descriptionHash, address oracle)
+        public
+    {
+        bytes32 _eventIdentifier = keccak256(msg.sender, descriptionHash);
+        if (results[_eventIdentifier].isSet)
+            // Result was set already
+            throw;
+        bytes32 newEventIdentifier = keccak256(oracle, descriptionHash);
+        results[_eventIdentifier].replacement = newEventIdentifier;
+    }
+
+    /// @dev Sets outcome based on signed message.
     /// @param descriptionHash Hash identifying off chain event description.
     /// @param outcome Signed event outcome.
     /// @param v Signature parameter.
@@ -33,20 +48,33 @@ contract OffChainOracle is Oracle {
         if (results[eventIdentifier].isSet)
             // Result was set already
             throw;
-        results[eventIdentifier] = Result({
-            isSet: true,
-            outcome: outcome
-        });
+        results[eventIdentifier].isSet = true;
+        results[eventIdentifier].outcome = outcome;
         EventResolution(eventIdentifier, outcome);
+    }
+
+    /// @dev Returns final event identifier after all recursive replacements are done.
+    /// @param eventIdentifier Event identifier.
+    /// @return Returns final event identifier.
+    function getEventIdentifier(bytes32 eventIdentifier)
+        public
+        constant
+        returns (bytes32)
+    {
+        if (results[eventIdentifier].replacement != 0)
+            return getEventIdentifier(eventIdentifier);
+        return eventIdentifier;
     }
 
     /// @dev Returns if winning outcome is set for given event.
     /// @param eventIdentifier Event identifier.
+    /// @return Returns if outcome is set.
     function isOutcomeSet(bytes32 eventIdentifier)
         public
         constant
         returns (bool)
     {
+        eventIdentifier = getEventIdentifier(eventIdentifier);
         return results[eventIdentifier].isSet;
     }
 
@@ -58,6 +86,7 @@ contract OffChainOracle is Oracle {
         constant
         returns (int)
     {
+        eventIdentifier = getEventIdentifier(eventIdentifier);
         return results[eventIdentifier].outcome;
     }
 }
