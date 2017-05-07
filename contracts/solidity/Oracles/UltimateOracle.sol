@@ -53,7 +53,6 @@ contract UltimateOracle is Oracle {
         public
     {
         if (   _oracle == 0
-            || _eventIdentifier == 0
             || _collateralToken == 0
             || _challengePeriod == 0
             || _challengeAmount == 0
