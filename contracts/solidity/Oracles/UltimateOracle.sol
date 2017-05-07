@@ -4,7 +4,7 @@ import "Tokens/AbstractToken.sol";
 
 
 /// @title Ultimate oracle contract - Allows to swap oracle result for ultimate oracle result.
-/// @author Stefan George - <stefan.george@consensys.net>
+/// @author Stefan George - <stefan@gnosis.pm>
 contract UltimateOracle is Oracle {
 
     /*

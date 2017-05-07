@@ -2,6 +2,8 @@ pragma solidity 0.4.11;
 import "Events/Event.sol";
 
 
+/// @title Scalar event contract - Scalar events resolve to a number within a range.
+/// @author Stefan George - <stefan@gnosis.pm>
 contract ScalarEvent is Event {
 
     /*

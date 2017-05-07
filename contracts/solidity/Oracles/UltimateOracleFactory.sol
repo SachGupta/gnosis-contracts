@@ -2,6 +2,8 @@ pragma solidity 0.4.11;
 import "Oracles/UltimateOracle.sol";
 
 
+/// @title Ultimate oracle factory contract - Allows to create ultimate oracle contracts.
+/// @author Stefan George - <stefan@gnosis.pm>
 contract UltimateOracleFactory {
 
     /*

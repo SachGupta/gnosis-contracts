@@ -4,6 +4,7 @@ import "AbstractDutchAuction.sol";
 
 
 /// @title Bidding ring contract - allows participants to coordinate around one price and bid together.
+/// @author Stefan George - <stefan@gnosis.pm>
 contract BiddingRing {
 
     /*

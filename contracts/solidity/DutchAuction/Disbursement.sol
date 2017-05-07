@@ -3,6 +3,7 @@ import "Tokens/AbstractToken.sol";
 
 
 /// @title Disbursement contract - allows to distribute tokens over time.
+/// @author Stefan George - <stefan@gnosis.pm>
 contract Disbursement {
 
     /*

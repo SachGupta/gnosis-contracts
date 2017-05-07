@@ -3,6 +3,7 @@ import "AbstractDutchAuction.sol";
 
 
 /// @title Claim proxy contract - allows to claim GNO tokens for multiple receivers at once.
+/// @author Stefan George - <stefan@gnosis.pm>
 contract ClaimProxy {
 
     /*

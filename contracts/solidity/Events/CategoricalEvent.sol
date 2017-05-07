@@ -2,6 +2,8 @@ pragma solidity 0.4.11;
 import "Events/Event.sol";
 
 
+/// @title Categorical event contract - Categorical events resolve to an outcome from a list of outcomes.
+/// @author Stefan George - <stefan@gnosis.pm>
 contract CategoricalEvent is Event {
 
     /*

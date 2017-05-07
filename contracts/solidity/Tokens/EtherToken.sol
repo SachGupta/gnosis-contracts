@@ -3,7 +3,7 @@ import "Tokens/StandardTokenWithOverflowProtection.sol";
 
 
 /// @title Token contract - Token exchanging Ether 1:1.
-/// @author Stefan George - <stefan.george@consensys.net>
+/// @author Stefan George - <stefan@gnosis.pm>
 contract EtherToken is StandardTokenWithOverflowProtection {
 
     /*

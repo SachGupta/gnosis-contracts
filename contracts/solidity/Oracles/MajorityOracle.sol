@@ -3,7 +3,7 @@ import "Oracles/AbstractOracle.sol";
 
 
 /// @title Majority oracle contract - Allows to resolve an event based on multiple oracles with majority vote.
-/// @author Stefan George - <stefan.george@consensys.net>
+/// @author Stefan George - <stefan@gnosis.pm>
 contract MajorityOracle is Oracle {
 
     /*

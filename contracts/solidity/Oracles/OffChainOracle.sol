@@ -3,7 +3,7 @@ import "Oracles/AbstractOracle.sol";
 
 
 /// @title Off-chain oracle contract - Allows to set an outcome with a signed message.
-/// @author Stefan George - <stefan.george@consensys.net>
+/// @author Stefan George - <stefan@gnosis.pm>
 contract OffChainOracle is Oracle {
 
     /*

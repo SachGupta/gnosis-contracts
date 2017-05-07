@@ -3,7 +3,7 @@ import "Tokens/StandardTokenWithOverflowProtection.sol";
 
 
 /// @title Outcome token contract - Issuing and revoking outcome tokens.
-/// @author Stefan George - <stefan.george@consensys.net>
+/// @author Stefan George - <stefan@gnosis.pm>
 contract OutcomeToken is StandardTokenWithOverflowProtection {
 
     /*

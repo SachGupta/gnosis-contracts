@@ -3,8 +3,7 @@ import "Oracles/AbstractOracle.sol";
 
 
 /// @title Difficulty oracle contract - On chain oracle to resolve difficulty events at given block.
-/// @author Stefan George - <stefan.george@consensys.net>
-/// @author Martin Koeppelmann - <martin.koeppelmann@consensys.net>
+/// @author Stefan George - <stefan@gnosis.pm>
 contract DifficultyOracle is Oracle {
 
     /*

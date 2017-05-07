@@ -4,6 +4,7 @@ import "AbstractDutchAuction.sol";
 
 
 /// @title Proxy sender contract - allows to participate in the auction by sending ETH to the contract.
+/// @author Stefan George - <stefan@gnosis.pm>
 contract ProxySender {
 
     /*

@@ -3,6 +3,8 @@ import "Events/CategoricalEvent.sol";
 import "Events/ScalarEvent.sol";
 
 
+/// @title Event factory contract - Allows create categorical and scalar events.
+/// @author Stefan George - <stefan@gnosis.pm>
 contract EventFactory {
 
     /*

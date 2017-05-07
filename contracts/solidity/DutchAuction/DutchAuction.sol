@@ -3,7 +3,7 @@ import "Tokens/AbstractToken.sol";
 
 
 /// @title Dutch auction contract - distribution of Gnosis tokens using an auction.
-/// @author Stefan George - <stefan.george@consensys.net>
+/// @author Stefan George - <stefan@gnosis.pm>
 contract DutchAuction {
 
     /*
