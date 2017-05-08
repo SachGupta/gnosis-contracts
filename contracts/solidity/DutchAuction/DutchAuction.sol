@@ -185,14 +185,10 @@ contract DutchAuction {
         if (amount > maxWei) {
             amount = maxWei;
             // Send change back to receiver address. In case of a ShapeShift bid the user receives the change back directly.
-            if (!receiver.send(msg.value - amount))
-                // Sending failed
-                throw;
+            receiver.transfer(msg.value - amount);
         }
         // Forward funding to ether wallet
-        if (amount == 0 || !wallet.send(amount))
-            // No amount sent or sending failed
-            throw;
+        wallet.transfer(amount);
         bids[receiver] += amount;
         totalReceived += amount;
         if (maxWei == amount)

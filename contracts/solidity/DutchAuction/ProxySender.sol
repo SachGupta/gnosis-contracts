@@ -131,7 +131,6 @@ contract ProxySender {
         contributions[msg.sender] = 0;
         // Calc. percentage of tokens for sender
         amount = totalBalance * contribution / totalContributions;
-        if (amount > 0 && !msg.sender.send(amount))
-            throw;
+        msg.sender.transfer(amount);
     }
 }

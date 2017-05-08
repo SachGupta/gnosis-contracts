@@ -100,8 +100,7 @@ contract BiddingRing {
         contributions[msg.sender] = 0;
         totalContributions -= contribution;
         RefundReceived(msg.sender, contribution);
-        if (!msg.sender.send(contribution))
-            throw;
+        msg.sender.transfer(contribution);
     }
 
     /// @dev Allows to send the collected ether to the auction contract when max price is reached.
@@ -159,7 +158,6 @@ contract BiddingRing {
         contributions[msg.sender] = 0;
         // Calc. percentage of tokens for sender
         amount = totalBalance * contribution / totalContributions;
-        if (amount > 0 && !msg.sender.send(amount))
-            throw;
+        msg.sender.transfer(amount);
     }
 }

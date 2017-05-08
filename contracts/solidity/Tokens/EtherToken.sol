@@ -40,8 +40,6 @@ contract EtherToken is StandardTokenWithOverflowProtection {
             throw;
         balances[msg.sender] -= amount;
         totalSupply -= amount;
-        if (!msg.sender.send(amount))
-            // Sending failed
-            throw;
+        msg.sender.transfer(amount);
     }
 }
