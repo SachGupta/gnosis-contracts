@@ -23,8 +23,6 @@ contract DifficultyOracle is Oracle {
             // Block number was not reached yet or it was set already
             throw;
         difficultyResults[blockNumber] = block.difficulty;
-        bytes32 eventIdentifier = bytes32(blockNumber);
-        int outcome = int(block.difficulty);
     }
 
     /// @dev Validates and registers event. Returns event identifier.
