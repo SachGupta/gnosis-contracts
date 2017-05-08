@@ -27,6 +27,7 @@ contract EventFactory {
     /// @param oracle Oracle contract used to resolve the event.
     /// @param oracleEventIdentifier Optional identifier to identify a specific oracle event.
     /// @param outcomeCount Number of event outcomes.
+    /// @return Returns event contract.
     function createCategoricalEvent(
         address collateralToken,
         address oracle,
@@ -38,7 +39,7 @@ contract EventFactory {
     {
         bytes32 eventHash = keccak256(collateralToken, oracle, oracleEventIdentifier, outcomeCount);
         if (address(categoricalEvents[eventHash]) != 0)
-            // Event does not exist
+            // Event does exist
             throw;
         eventContract = new CategoricalEvent(
             collateralToken,
@@ -58,6 +59,7 @@ contract EventFactory {
     /// @param outcomeCount Number of event outcomes.
     /// @param lowerBound Lower bound for event outcome.
     /// @param upperBound Lower bound for event outcome.
+    /// @return Returns event contract.
     function createScalarEvent(
         address collateralToken,
         address oracle,
@@ -71,7 +73,7 @@ contract EventFactory {
     {
         bytes32 eventHash = keccak256(collateralToken, oracle, oracleEventIdentifier, outcomeCount, lowerBound, upperBound);
         if (address(scalarEvents[eventHash]) != 0)
-            // Event does not exist
+            // Event does exist already
             throw;
         eventContract = new ScalarEvent(
             collateralToken,

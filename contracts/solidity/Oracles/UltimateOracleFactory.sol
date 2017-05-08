@@ -21,6 +21,7 @@ contract UltimateOracleFactory {
     /// @param challengePeriod Time to challenge oracle outcome.
     /// @param challengeAmount Amount to challenge the outcome.
     /// @param frontRunnerPeriod Time to overbid the front-runner.
+    /// @return Returns oracle contract.
     function createUltimateOracle(
         address oracle,
         bytes32 eventIdentifier,
@@ -34,7 +35,7 @@ contract UltimateOracleFactory {
     {
         bytes32 ultimateOracleHash = keccak256(oracle, eventIdentifier, collateralToken, challengePeriod, challengeAmount, frontRunnerPeriod);
         if (address(ultimateOracles[ultimateOracleHash]) != 0)
-            // Event does not exist
+            // Ultimate oracle exists already
             throw;
         ultimateOracle = new UltimateOracle(
             oracle,
