@@ -90,8 +90,6 @@ class TestContract(AbstractTestContract):
         self.assertEqual(self.dutch_auction.calcTokenPrice(),
                          self.PRICE_FACTOR * 10 ** 18 / (self.BLOCKS_PER_DAY * 5 + 7500) + 1)
         self.assertEqual(self.dutch_auction.calcStopPrice(), (value_1 + value_2) / self.MAX_TOKENS_SOLD + 1)
-        # Bidder 2 tries to send 0 bid
-        self.assertRaises(TransactionFailed, self.dutch_auction.bid, sender=keys[bidder_2], value=0)
         # Bidder 3 places a bid
         bidder_3 = 2
         value_3 = 100000 * 10 ** 18  # 100k Ether
