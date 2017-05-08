@@ -10,8 +10,8 @@ contract EventFactory {
     /*
      *  Events
      */
-    event CategoricalEventCreation(address indexed creator, bytes32 indexed eventHash, address indexed eventAddress);
-    event ScalarEventCreation(address indexed creator, bytes32 indexed eventHash, address indexed eventAddress);
+    event CategoricalEventCreation(address indexed creator, bytes32 indexed eventHash, address indexed eventContract);
+    event ScalarEventCreation(address indexed creator, bytes32 indexed eventHash, address indexed eventContract);
 
     /*
      *  Storage
@@ -34,21 +34,21 @@ contract EventFactory {
         uint outcomeCount
     )
         public
-        returns (CategoricalEvent _event)
+        returns (CategoricalEvent eventContract)
     {
         bytes32 eventHash = keccak256(collateralToken, oracle, oracleEventIdentifier, outcomeCount);
         if (address(categoricalEvents[eventHash]) != 0)
             // Event does not exist
             throw;
-        _event = new CategoricalEvent(
+        eventContract = new CategoricalEvent(
             collateralToken,
             oracle,
             oracleEventIdentifier,
             outcomeCount
         );
-        categoricalEvents[eventHash] = _event;
-        CategoricalEventCreation(msg.sender, eventHash, _event);
-        return _event;
+        categoricalEvents[eventHash] = eventContract;
+        CategoricalEventCreation(msg.sender, eventHash, eventContract);
+        return eventContract;
     }
 
     /// @dev Creates a new scalar event and adds it to the event mapping.
@@ -67,13 +67,13 @@ contract EventFactory {
         int upperBound
     )
         public
-        returns (ScalarEvent _event)
+        returns (ScalarEvent eventContract)
     {
         bytes32 eventHash = keccak256(collateralToken, oracle, oracleEventIdentifier, outcomeCount, lowerBound, upperBound);
         if (address(scalarEvents[eventHash]) != 0)
             // Event does not exist
             throw;
-        _event = new ScalarEvent(
+        eventContract = new ScalarEvent(
             collateralToken,
             oracle,
             oracleEventIdentifier,
@@ -81,8 +81,8 @@ contract EventFactory {
             lowerBound,
             upperBound
         );
-        scalarEvents[eventHash] = _event;
-        ScalarEventCreation(msg.sender, eventHash, _event);
-        return _event;
+        scalarEvents[eventHash] = eventContract;
+        ScalarEventCreation(msg.sender, eventHash, eventContract);
+        return eventContract;
     }
 }
