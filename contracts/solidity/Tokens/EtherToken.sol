@@ -24,7 +24,7 @@ contract EtherToken is StandardTokenWithOverflowProtection {
         if (   !safeToAdd(balances[msg.sender], msg.value)
             || !safeToAdd(totalSupply, msg.value))
             // Overflow operation
-            throw;
+            revert();
         balances[msg.sender] += msg.value;
         totalSupply += msg.value;
     }
@@ -37,7 +37,7 @@ contract EtherToken is StandardTokenWithOverflowProtection {
         if (   !safeToSubtract(balances[msg.sender], amount)
             || !safeToSubtract(totalSupply, amount))
             // Overflow operation
-            throw;
+            revert();
         balances[msg.sender] -= amount;
         totalSupply -= amount;
         msg.sender.transfer(amount);

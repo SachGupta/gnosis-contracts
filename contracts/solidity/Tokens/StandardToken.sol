@@ -25,7 +25,7 @@ contract StandardToken is Token {
     {
         if (balances[msg.sender] < value)
             // Balance too low
-            throw;
+            revert();
         balances[msg.sender] -= value;
         balances[to] += value;
         Transfer(msg.sender, to, value);
@@ -43,7 +43,7 @@ contract StandardToken is Token {
     {
         if (balances[from] < value || allowances[from][msg.sender] < value)
             // Balance or allowance too low
-            throw;
+            revert();
         balances[to] += value;
         balances[from] -= value;
         allowances[from][msg.sender] -= value;

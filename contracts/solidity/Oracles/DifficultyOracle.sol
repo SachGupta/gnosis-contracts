@@ -21,7 +21,7 @@ contract DifficultyOracle is Oracle {
     {
         if (block.number < blockNumber || difficultyResults[blockNumber] != 0)
             // Block number was not reached yet or it was set already
-            throw;
+            revert();
         difficultyResults[blockNumber] = block.difficulty;
     }
 
@@ -34,7 +34,7 @@ contract DifficultyOracle is Oracle {
     {
         if (blockNumber <= block.number)
             // Block number was already reached
-            throw;
+            revert();
         eventIdentifier = bytes32(blockNumber);
     }
 

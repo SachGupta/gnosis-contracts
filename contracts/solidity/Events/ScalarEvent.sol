@@ -42,7 +42,7 @@ contract ScalarEvent is Event {
     {
         if (outcomeCount > 2 || upperBound <= lowerBound)
             // Outcome count is too high or bounds are invalid
-            throw;
+            revert();
         lowerBound = _lowerBound;
         upperBound = _upperBound;
     }
@@ -54,7 +54,7 @@ contract ScalarEvent is Event {
     {
         if (!isWinningOutcomeSet)
             // Winning outcome is not set yet
-            throw;
+            revert();
         // Calculate winnings
         uint16 convertedWinningOutcome;
         // Outcome is lower than defined lower bound
@@ -77,6 +77,6 @@ contract ScalarEvent is Event {
         // Payout winnings
         if (!collateralToken.transfer(msg.sender, winnings))
             // Transfer failed
-            throw;
+            revert();
     }
 }

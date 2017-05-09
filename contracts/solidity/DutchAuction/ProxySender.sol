@@ -41,7 +41,7 @@ contract ProxySender {
      */
     modifier atStage(Stages _stage) {
         if (stage != _stage)
-            throw;
+            revert();
         _;
     }
 
@@ -56,7 +56,7 @@ contract ProxySender {
         else if (stage == Stages.TokensClaimed)
             transferTokens();
         else
-            throw;
+            revert();
     }
 
     /*
@@ -68,7 +68,7 @@ contract ProxySender {
         public
     {
         if (_dutchAuction == 0)
-            throw;
+            revert();
         dutchAuction = DutchAuction(_dutchAuction);
         gnosisToken = dutchAuction.gnosisToken();
         stage = Stages.ContributionsCollection;
@@ -82,7 +82,7 @@ contract ProxySender {
     {
         // Check auction has started
         if (dutchAuction.stage() != AUCTION_STARTED)
-            throw;
+            revert();
         contributions[msg.sender] += msg.value;
         totalContributions += msg.value;
         dutchAuction.bid.value(this.balance)(0);
@@ -96,7 +96,7 @@ contract ProxySender {
     {
         // Auction is over
         if (dutchAuction.stage() != TRADING_STARTED)
-            throw;
+            revert();
         dutchAuction.claimTokens(0);
         totalTokens = gnosisToken.balanceOf(this);
         totalBalance = this.balance;
@@ -111,7 +111,7 @@ contract ProxySender {
         returns (uint amount)
     {
         if (tokensSent[msg.sender])
-            throw;
+            revert();
         tokensSent[msg.sender] = true;
         // Calc. percentage of tokens for sender
         amount = totalTokens * contributions[msg.sender] / totalContributions;
@@ -126,7 +126,7 @@ contract ProxySender {
         returns (uint amount)
     {
         if (!tokensSent[msg.sender])
-            throw;
+            revert();
         uint contribution = contributions[msg.sender];
         contributions[msg.sender] = 0;
         // Calc. percentage of tokens for sender

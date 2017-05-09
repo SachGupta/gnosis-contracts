@@ -36,7 +36,7 @@ contract UltimateOracleFactory {
         bytes32 ultimateOracleHash = keccak256(oracle, eventIdentifier, collateralToken, challengePeriod, challengeAmount, frontRunnerPeriod);
         if (address(ultimateOracles[ultimateOracleHash]) != 0)
             // Ultimate oracle exists already
-            throw;
+            revert();
         ultimateOracle = new UltimateOracle(
             oracle,
             eventIdentifier,

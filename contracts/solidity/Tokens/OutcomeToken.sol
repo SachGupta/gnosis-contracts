@@ -17,7 +17,7 @@ contract OutcomeToken is StandardTokenWithOverflowProtection {
     modifier isEventContract () {
         if (msg.sender != eventContract)
             // Only event contract is allowed to proceed.
-            throw;
+            revert();
         _;
     }
 
@@ -52,7 +52,7 @@ contract OutcomeToken is StandardTokenWithOverflowProtection {
     {
         if (outcomeTokenCount > balances[_for])
             // Balance is too low
-            throw;
+            revert();
         balances[_for] -= outcomeTokenCount;
         totalSupply -= outcomeTokenCount;
         Transfer(_for, 0, outcomeTokenCount);

@@ -33,7 +33,7 @@ contract CategoricalEvent is Event {
     {
         if (!isWinningOutcomeSet)
             // Winning outcome is not set yet
-            throw;
+            revert();
         // Calculate winnings
         winnings = outcomeTokens[uint(winningOutcome)].balanceOf(msg.sender);
         // Revoke tokens from winning outcome
@@ -41,6 +41,6 @@ contract CategoricalEvent is Event {
         // Payout winnings
         if (!collateralToken.transfer(msg.sender, winnings))
             // Transfer failed
-            throw;
+            revert();
     }
 }

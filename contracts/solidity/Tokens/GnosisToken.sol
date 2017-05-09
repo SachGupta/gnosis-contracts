@@ -25,7 +25,7 @@ contract GnosisToken is StandardToken {
     {
         if (dutchAuction == 0)
             // Address should not be null.
-            throw;
+            revert();
         totalSupply = 10000000 * 10**18;
         balances[dutchAuction] = 9000000 * 10**18;
         Transfer(0, dutchAuction, balances[dutchAuction]);
@@ -33,12 +33,12 @@ contract GnosisToken is StandardToken {
         for (uint i=0; i<owners.length; i++) {
             if (owners[i] == 0)
                 // Address should not be null.
-                throw;
+                revert();
             balances[owners[i]] += tokens[i];
             Transfer(0, owners[i], tokens[i]);
             assignedTokens += tokens[i];
         }
         if (assignedTokens != totalSupply)
-            throw;
+            revert();
     }
 }

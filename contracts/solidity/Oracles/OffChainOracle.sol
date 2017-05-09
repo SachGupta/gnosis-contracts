@@ -29,7 +29,7 @@ contract OffChainOracle is Oracle {
         bytes32 _eventIdentifier = keccak256(msg.sender, descriptionHash);
         if (results[_eventIdentifier].isSet)
             // Result was set already
-            throw;
+            revert();
         bytes32 newEventIdentifier = keccak256(oracle, descriptionHash);
         results[_eventIdentifier].replacement = newEventIdentifier;
     }
@@ -47,7 +47,7 @@ contract OffChainOracle is Oracle {
         bytes32 eventIdentifier = keccak256(oracle, descriptionHash);
         if (results[eventIdentifier].isSet)
             // Result was set already
-            throw;
+            revert();
         results[eventIdentifier].isSet = true;
         results[eventIdentifier].outcome = outcome;
     }

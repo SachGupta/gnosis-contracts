@@ -46,21 +46,21 @@ contract DutchAuction {
     modifier atStage(Stages _stage) {
         if (stage != _stage)
             // Contract not in expected state
-            throw;
+            revert();
         _;
     }
 
     modifier isOwner() {
         if (msg.sender != owner)
             // Only owner is allowed to proceed
-            throw;
+            revert();
         _;
     }
 
     modifier isWallet() {
         if (msg.sender != wallet)
             // Only wallet is allowed to proceed
-            throw;
+            revert();
         _;
     }
 
@@ -69,7 +69,7 @@ contract DutchAuction {
             || receiver == address(this)
             || receiver == address(gnosisToken))
             // Payload length has to have correct length and receiver should not be dutch auction or gnosis token contract
-            throw;
+            revert();
         _;
     }
 
@@ -93,7 +93,7 @@ contract DutchAuction {
     {
         if (_wallet == 0 || _ceiling == 0 || _priceFactor == 0)
             // Arguments are null.
-            throw;
+            revert();
         owner = msg.sender;
         wallet = _wallet;
         ceiling = _ceiling;
@@ -110,11 +110,11 @@ contract DutchAuction {
     {
         if (_gnosisToken == 0)
             // Argument is null.
-            throw;
+            revert();
         gnosisToken = Token(_gnosisToken);
         // Validate token balance
         if (gnosisToken.balanceOf(this) != MAX_TOKENS_SOLD)
-            throw;
+            revert();
         stage = Stages.AuctionSetUp;
     }
 

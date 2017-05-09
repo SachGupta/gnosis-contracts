@@ -23,28 +23,28 @@ contract Disbursement {
     modifier isOwner() {
         if (msg.sender != owner)
             // Only owner is allowed to proceed
-            throw;
+            revert();
         _;
     }
 
     modifier isReceiver() {
         if (msg.sender != receiver)
             // Only receiver is allowed to proceed
-            throw;
+            revert();
         _;
     }
 
     modifier isWallet() {
         if (msg.sender != wallet)
             // Only wallet is allowed to proceed
-            throw;
+            revert();
         _;
     }
 
     modifier isSetUp() {
         if (address(token) == 0)
             // Contract is not set up
-            throw;
+            revert();
         _;
     }
 
@@ -61,7 +61,7 @@ contract Disbursement {
     {
         if (_receiver == 0 || _wallet == 0 || _disbursementPeriod == 0)
             // Arguments are null.
-            throw;
+            revert();
         owner = msg.sender;
         receiver = _receiver;
         wallet = _wallet;
@@ -79,7 +79,7 @@ contract Disbursement {
     {
         if (address(token) != 0 || _token == 0)
             // Setup was executed already or address is null.
-            throw;
+            revert();
         token = Token(_token);
     }
 
@@ -93,7 +93,7 @@ contract Disbursement {
     {
         uint maxTokens = calcMaxWithdraw();
         if (_value > maxTokens)
-            throw;
+            revert();
         withdrawnTokens += _value;
         token.transfer(_to, _value);
     }

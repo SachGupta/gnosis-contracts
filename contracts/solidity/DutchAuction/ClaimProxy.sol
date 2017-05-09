@@ -21,7 +21,7 @@ contract ClaimProxy {
     {
         if (_dutchAuction == 0)
             // Address should not be null.
-            throw;
+            revert();
         dutchAuction = DutchAuction(_dutchAuction);
     }
 

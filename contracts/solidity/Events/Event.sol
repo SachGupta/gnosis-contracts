@@ -31,7 +31,7 @@ contract Event {
     {
         if (_collateralToken == 0 || _oracle == 0 || outcomeCount < 2)
             // Values are null or outcome count is too low
-            throw;
+            revert();
         collateralToken = Token(_collateralToken);
         oracle = Oracle(_oracle);
         oracleEventIdentifier = _oracleEventIdentifier;
@@ -48,7 +48,7 @@ contract Event {
         // Transfer tokens to events contract
         if (!collateralToken.transferFrom(msg.sender, this, collateralTokenCount))
             // Transfer failed
-            throw;
+            revert();
         // Issue new event tokens to owner.
         for (uint8 i=0; i<outcomeTokens.length; i++)
             outcomeTokens[i].issueTokens(msg.sender, collateralTokenCount);
@@ -65,7 +65,7 @@ contract Event {
         // Transfer redeemed tokens
         if (!collateralToken.transfer(msg.sender, outcomeTokenCount))
             // Transfer failed
-            throw;
+            revert();
     }
 
     /// @dev Sets winning event outcome if resolved by oracle.
@@ -74,10 +74,10 @@ contract Event {
     {
         if (isWinningOutcomeSet)
             // Winning outcome is set already
-            throw;
+            revert();
         if (!oracle.isOutcomeSet(oracleEventIdentifier))
             // Winning outcome is not set
-            throw;
+            revert();
         // Set winning outcome
         winningOutcome = oracle.getOutcome(oracleEventIdentifier);
         isWinningOutcomeSet = true;

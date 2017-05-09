@@ -29,10 +29,10 @@ contract MajorityOracle is Oracle {
     {
         if (oracles.length != eventIdentifiers.length)
             // Data is invalid
-            throw;
+            revert();
         for (uint i=0; i<oracles.length; i++)
             if (oracles[i] == 0)
-                throw;
+                revert();
         eventIdentifier = keccak256(oracles, eventIdentifiers);
         oracleIdentifiers[eventIdentifier] = OracleIdentifier({
             oracles: oracles,

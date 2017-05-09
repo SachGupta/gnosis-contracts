@@ -58,7 +58,7 @@ contract UltimateOracle is Oracle {
             || _challengeAmount == 0
             || _frontRunnerPeriod == 0)
             // Values are null
-            throw;
+            revert();
         oracle = Oracle(_oracle);
         eventIdentifier = _eventIdentifier;
         collateralToken = Token(_collateralToken);
@@ -74,7 +74,7 @@ contract UltimateOracle is Oracle {
             || outcomeSetTimestamp != 0
             || !oracle.isOutcomeSet(eventIdentifier))
             // Outcome was set already or cannot be set yet
-            throw;
+            revert();
         outcome = oracle.getOutcome(eventIdentifier);
         outcomeSetTimestamp = now;
     }
@@ -89,7 +89,7 @@ contract UltimateOracle is Oracle {
             || outcomeSetTimestamp != 0 && now - outcomeSetTimestamp > challengePeriod
             || !collateralToken.transferFrom(msg.sender, this, challengeAmount))
             // Outcome challenged already or challenge period is over or deposit cannot be paid
-            throw;
+            revert();
         outcomeAmounts[msg.sender][_outcome] = challengeAmount;
         totalOutcomeAmounts[_outcome] = challengeAmount;
         totalAmount = challengeAmount;
@@ -109,7 +109,7 @@ contract UltimateOracle is Oracle {
             || now - frontRunnerSetTimestamp <= frontRunnerPeriod
             || !collateralToken.transferFrom(msg.sender, this, amount))
             // Outcome is not challenged or leading period is over or deposit cannot be paid
-            throw;
+            revert();
         outcomeAmounts[msg.sender][_outcome] = amount;
         totalOutcomeAmounts[_outcome] = amount;
         if (   _outcome != frontRunner

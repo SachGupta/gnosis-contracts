@@ -40,7 +40,7 @@ contract EventFactory {
         bytes32 eventHash = keccak256(collateralToken, oracle, oracleEventIdentifier, outcomeCount);
         if (address(categoricalEvents[eventHash]) != 0)
             // Event does exist
-            throw;
+            revert();
         eventContract = new CategoricalEvent(
             collateralToken,
             oracle,
@@ -74,7 +74,7 @@ contract EventFactory {
         bytes32 eventHash = keccak256(collateralToken, oracle, oracleEventIdentifier, outcomeCount, lowerBound, upperBound);
         if (address(scalarEvents[eventHash]) != 0)
             // Event does exist already
-            throw;
+            revert();
         eventContract = new ScalarEvent(
             collateralToken,
             oracle,

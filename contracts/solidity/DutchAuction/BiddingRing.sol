@@ -43,7 +43,7 @@ contract BiddingRing {
      */
     modifier atStage(Stages _stage) {
         if (stage != _stage)
-            throw;
+            revert();
         _;
     }
 
@@ -58,7 +58,7 @@ contract BiddingRing {
         else if (stage == Stages.TokensClaimed)
             transferTokens();
         else
-            throw;
+            revert();
     }
 
     /*
@@ -71,11 +71,11 @@ contract BiddingRing {
         public
     {
         if (_dutchAuction == 0 || _maxPrice == 0)
-            throw;
+            revert();
         dutchAuction = DutchAuction(_dutchAuction);
         gnosisToken = dutchAuction.gnosisToken();
         if (address(gnosisToken) == 0)
-            throw;
+            revert();
         maxPrice = _maxPrice;
         stage = Stages.ContributionsCollection;
     }
@@ -110,7 +110,7 @@ contract BiddingRing {
     {
         // Check auction has started and price is below max price
         if (dutchAuction.stage() != AUCTION_STARTED || dutchAuction.calcTokenPrice() > maxPrice)
-            throw;
+            revert();
         // Send all money to auction contract
         stage = Stages.ContributionsSent;
         dutchAuction.bid.value(this.balance)(0);
@@ -123,7 +123,7 @@ contract BiddingRing {
     {
         // Auction is over
         if (dutchAuction.stage() != TRADING_STARTED)
-            throw;
+            revert();
         dutchAuction.claimTokens(0);
         totalTokens = gnosisToken.balanceOf(this);
         totalBalance = this.balance;
@@ -138,7 +138,7 @@ contract BiddingRing {
         returns (uint amount)
     {
         if (tokensSent[msg.sender])
-            throw;
+            revert();
         tokensSent[msg.sender] = true;
         // Calc. percentage of tokens for sender
         amount = totalTokens * contributions[msg.sender] / totalContributions;
@@ -153,7 +153,7 @@ contract BiddingRing {
         returns (uint amount)
     {
         if (!tokensSent[msg.sender])
-            throw;
+            revert();
         uint contribution = contributions[msg.sender];
         contributions[msg.sender] = 0;
         // Calc. percentage of tokens for sender
