@@ -33,7 +33,7 @@ contract EtherToken is StandardTokenWithOverflowProtection {
             revert();
         balances[msg.sender] += msg.value;
         totalSupply += msg.value;
-        Deposit(msg.sender, amount);
+        Deposit(msg.sender, msg.value);
     }
 
     /// @dev Sells tokens in exchange for Ether, exchanging them 1:1.
