@@ -7,6 +7,12 @@ import "Tokens/StandardTokenWithOverflowProtection.sol";
 contract OutcomeToken is StandardTokenWithOverflowProtection {
 
     /*
+     *  Events
+     */
+    event Issue(address indexed owner, uint amount);
+    event Revoke(address indexed owner, uint amount);
+
+    /*
      *  Storage
      */
     address eventContract;
@@ -44,7 +50,7 @@ contract OutcomeToken is StandardTokenWithOverflowProtection {
             revert();
         balances[_for] += outcomeTokenCount;
         totalSupply += outcomeTokenCount;
-        Transfer(0, _for, outcomeTokenCount);
+        Issue(_for, outcomeTokenCount);
     }
 
     /// @dev Events contract revokes tokens for address. Returns success.
@@ -60,6 +66,6 @@ contract OutcomeToken is StandardTokenWithOverflowProtection {
             revert();
         balances[_for] -= outcomeTokenCount;
         totalSupply -= outcomeTokenCount;
-        Transfer(_for, 0, outcomeTokenCount);
+        Revoke(_for, outcomeTokenCount);
     }
 }
