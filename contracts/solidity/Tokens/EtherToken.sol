@@ -7,6 +7,12 @@ import "Tokens/StandardTokenWithOverflowProtection.sol";
 contract EtherToken is StandardTokenWithOverflowProtection {
 
     /*
+     *  Events
+     */
+    event Deposit(address indexed sender, uint amount);
+    event Withdrawal(address indexed receiver, uint amount);
+
+    /*
      *  Constants
      */
     string public constant name = "Ether Token";
@@ -27,6 +33,7 @@ contract EtherToken is StandardTokenWithOverflowProtection {
             revert();
         balances[msg.sender] += msg.value;
         totalSupply += msg.value;
+        Deposit(msg.sender, amount);
     }
 
     /// @dev Sells tokens in exchange for Ether, exchanging them 1:1.
@@ -41,5 +48,6 @@ contract EtherToken is StandardTokenWithOverflowProtection {
         balances[msg.sender] -= amount;
         totalSupply -= amount;
         msg.sender.transfer(amount);
+        Withdrawal(msg.sender, amount);
     }
 }
