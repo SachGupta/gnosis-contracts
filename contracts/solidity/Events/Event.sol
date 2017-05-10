@@ -51,7 +51,7 @@ contract Event {
             revert();
         // Issue new event tokens to owner.
         for (uint8 i=0; i<outcomeTokens.length; i++)
-            outcomeTokens[i].issueTokens(msg.sender, collateralTokenCount);
+            outcomeTokens[i].issue(msg.sender, collateralTokenCount);
     }
 
     /// @dev Sells equal number of tokens of all outcomes, exchanging collateral tokens and all outcome tokens 1:1.
@@ -61,7 +61,7 @@ contract Event {
     {
         // Revoke tokens of all outcomes
         for (uint8 i=0; i<outcomeTokens.length; i++)
-            outcomeTokens[i].revokeTokens(msg.sender, outcomeTokenCount);
+            outcomeTokens[i].revoke(msg.sender, outcomeTokenCount);
         // Transfer redeemed tokens
         if (!collateralToken.transfer(msg.sender, outcomeTokenCount))
             // Transfer failed

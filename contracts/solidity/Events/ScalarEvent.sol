@@ -72,8 +72,8 @@ contract ScalarEvent is Event {
         uint longOutcomeTokenCount = outcomeTokens[LONG].balanceOf(msg.sender);
         winnings = (shortOutcomeTokenCount * factorShort + longOutcomeTokenCount * factorLong) / OUTCOME_RANGE;
         // Revoke all tokens of all outcomes
-        outcomeTokens[SHORT].revokeTokens(msg.sender, shortOutcomeTokenCount);
-        outcomeTokens[LONG].revokeTokens(msg.sender, longOutcomeTokenCount);
+        outcomeTokens[SHORT].revoke(msg.sender, shortOutcomeTokenCount);
+        outcomeTokens[LONG].revoke(msg.sender, longOutcomeTokenCount);
         // Payout winnings
         if (!collateralToken.transfer(msg.sender, winnings))
             // Transfer failed

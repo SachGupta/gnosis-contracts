@@ -37,7 +37,7 @@ contract CategoricalEvent is Event {
         // Calculate winnings
         winnings = outcomeTokens[uint(winningOutcome)].balanceOf(msg.sender);
         // Revoke tokens from winning outcome
-        outcomeTokens[uint(winningOutcome)].revokeTokens(msg.sender, winnings);
+        outcomeTokens[uint(winningOutcome)].revoke(msg.sender, winnings);
         // Payout winnings
         if (!collateralToken.transfer(msg.sender, winnings))
             // Transfer failed

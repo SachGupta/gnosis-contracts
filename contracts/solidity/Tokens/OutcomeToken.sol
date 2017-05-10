@@ -34,10 +34,14 @@ contract OutcomeToken is StandardTokenWithOverflowProtection {
     /// @dev Events contract issues new tokens for address. Returns success.
     /// @param _for Address of receiver.
     /// @param outcomeTokenCount Number of tokens to issue.
-    function issueTokens(address _for, uint outcomeTokenCount)
+    function issue(address _for, uint outcomeTokenCount)
         public
         isEventContract
     {
+        if (   !safeToAdd(balances[_for], outcomeTokenCount)
+            || !safeToAdd(totalSupply, outcomeTokenCount))
+            // Overflow operation
+            revert();
         balances[_for] += outcomeTokenCount;
         totalSupply += outcomeTokenCount;
         Transfer(0, _for, outcomeTokenCount);
@@ -46,12 +50,13 @@ contract OutcomeToken is StandardTokenWithOverflowProtection {
     /// @dev Events contract revokes tokens for address. Returns success.
     /// @param _for Address of token holder.
     /// @param outcomeTokenCount Number of tokens to revoke.
-    function revokeTokens(address _for, uint outcomeTokenCount)
+    function revoke(address _for, uint outcomeTokenCount)
         public
         isEventContract
     {
-        if (outcomeTokenCount > balances[_for])
-            // Balance is too low
+        if (   !safeToSubtract(balances[_for], outcomeTokenCount)
+            || !safeToSubtract(totalSupply, outcomeTokenCount))
+            // Overflow operation
             revert();
         balances[_for] -= outcomeTokenCount;
         totalSupply -= outcomeTokenCount;
