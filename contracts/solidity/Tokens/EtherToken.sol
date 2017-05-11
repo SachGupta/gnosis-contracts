@@ -27,10 +27,6 @@ contract EtherToken is StandardTokenWithOverflowProtection {
         public
         payable
     {
-        if (   !safeToAdd(balances[msg.sender], msg.value)
-            || !safeToAdd(totalSupply, msg.value))
-            // Overflow operation
-            revert();
         balances[msg.sender] += msg.value;
         totalSupply += msg.value;
         Deposit(msg.sender, msg.value);
@@ -41,8 +37,7 @@ contract EtherToken is StandardTokenWithOverflowProtection {
     function withdraw(uint amount)
         public
     {
-        if (   !safeToSubtract(balances[msg.sender], amount)
-            || !safeToSubtract(totalSupply, amount))
+        if (!safeToSubtract(balances[msg.sender], amount))
             // Overflow operation
             revert();
         balances[msg.sender] -= amount;
