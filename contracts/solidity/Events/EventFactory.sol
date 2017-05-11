@@ -56,7 +56,6 @@ contract EventFactory {
     /// @param collateralToken Tokens used as collateral in exchange for outcome tokens.
     /// @param oracle Oracle contract used to resolve the event.
     /// @param oracleEventIdentifier Optional identifier to identify a specific oracle event.
-    /// @param outcomeCount Number of event outcomes.
     /// @param lowerBound Lower bound for event outcome.
     /// @param upperBound Lower bound for event outcome.
     /// @return Returns event contract.
@@ -64,14 +63,13 @@ contract EventFactory {
         address collateralToken,
         address oracle,
         bytes32 oracleEventIdentifier,
-        uint outcomeCount,
         int lowerBound,
         int upperBound
     )
         public
         returns (ScalarEvent eventContract)
     {
-        bytes32 eventHash = keccak256(collateralToken, oracle, oracleEventIdentifier, outcomeCount, lowerBound, upperBound);
+        bytes32 eventHash = keccak256(collateralToken, oracle, oracleEventIdentifier, lowerBound, upperBound);
         if (address(scalarEvents[eventHash]) != 0)
             // Event does exist already
             revert();
@@ -79,7 +77,6 @@ contract EventFactory {
             collateralToken,
             oracle,
             oracleEventIdentifier,
-            outcomeCount,
             lowerBound,
             upperBound
         );
