@@ -53,15 +53,15 @@ contract MultiSigWalletWithDailyLimit is MultiSigWallet {
     {
         Transaction tx = transactions[transactionId];
         tx.executed = true;
-        bool _confirmed = isConfirmedByRequiredOwners(transactionId);
-        if (!_confirmed)
+        bool confirmedByOwners = isConfirmedByOwners(transactionId);
+        if (!confirmedByOwners)
             spentToday += tx.value;
         if (tx.destination.call.value(tx.value)(tx.data))
             Execution(transactionId);
         else {
             ExecutionFailure(transactionId);
             tx.executed = false;
-            if (!_confirmed)
+            if (!confirmedByOwners)
                 spentToday -= tx.value;
         }
     }
@@ -75,14 +75,14 @@ contract MultiSigWalletWithDailyLimit is MultiSigWallet {
         returns (bool)
     {
         Transaction tx = transactions[transactionId];
-        if (isConfirmedByRequiredOwners(transactionId) || tx.data.length == 0 && isUnderLimit(tx.value))
+        if (isConfirmedByOwners(transactionId) || tx.data.length == 0 && isUnderLimit(tx.value))
             return true;
     }
 
     /// @dev Returns the confirmation status of a transaction.
     /// @param transactionId Transaction ID.
     /// @return Confirmation status.
-    function isConfirmedByRequiredOwners(uint transactionId)
+    function isConfirmedByOwners(uint transactionId)
         public
         constant
         returns (bool)
