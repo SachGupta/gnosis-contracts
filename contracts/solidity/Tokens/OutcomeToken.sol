@@ -44,8 +44,8 @@ contract OutcomeToken is StandardTokenWithOverflowProtection {
         public
         isEventContract
     {
-        if (   !safeToAdd(balances[_for], outcomeTokenCount)
-            || !safeToAdd(totalSupply, outcomeTokenCount))
+        if (   !Math.safeToAdd(balances[_for], outcomeTokenCount)
+            || !Math.safeToAdd(totalSupply, outcomeTokenCount))
             // Overflow operation
             revert();
         balances[_for] += outcomeTokenCount;
@@ -60,8 +60,8 @@ contract OutcomeToken is StandardTokenWithOverflowProtection {
         public
         isEventContract
     {
-        if (   !safeToSubtract(balances[_for], outcomeTokenCount)
-            || !safeToSubtract(totalSupply, outcomeTokenCount))
+        if (   !Math.safeToSubtract(balances[_for], outcomeTokenCount)
+            || !Math.safeToSubtract(totalSupply, outcomeTokenCount))
             // Overflow operation
             revert();
         balances[_for] -= outcomeTokenCount;

@@ -1,10 +1,10 @@
 pragma solidity 0.4.11;
 import "Tokens/AbstractToken.sol";
-import "Utils/SafeMath.sol";
+import "Utils/Math.sol";
 
 
 /// @title Standard token contract with overflow protection - Used for tokens with dynamic supply.
-contract StandardTokenWithOverflowProtection is Token, SafeMath {
+contract StandardTokenWithOverflowProtection is Token {
 
     /*
      *  Storage
@@ -24,8 +24,8 @@ contract StandardTokenWithOverflowProtection is Token, SafeMath {
         public
         returns (bool)
     {
-        if (   !safeToSubtract(balances[msg.sender], value)
-            || !safeToAdd(balances[to], value))
+        if (   !Math.safeToSubtract(balances[msg.sender], value)
+            || !Math.safeToAdd(balances[to], value))
             // Overflow operation
             revert();
         balances[msg.sender] -= value;
@@ -43,9 +43,9 @@ contract StandardTokenWithOverflowProtection is Token, SafeMath {
         public
         returns (bool)
     {
-        if (   !safeToSubtract(balances[from], value)
-            || !safeToSubtract(allowances[from][msg.sender], value)
-            || !safeToAdd(balances[to], value))
+        if (   !Math.safeToSubtract(balances[from], value)
+            || !Math.safeToSubtract(allowances[from][msg.sender], value)
+            || !Math.safeToAdd(balances[to], value))
             // Overflow operation
             revert();
         balances[from] -= value;

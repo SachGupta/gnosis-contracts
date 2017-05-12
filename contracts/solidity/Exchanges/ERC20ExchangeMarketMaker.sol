@@ -1,6 +1,6 @@
 pragma solidity 0.4.11;
 import "Tokens/AbstractToken.sol";
-import "Utils/Arithmetic.sol";
+import "Utils/Math.sol";
 
 
 /// @title Currency exchange backed by holdings
@@ -120,8 +120,8 @@ contract ERC20ExchangeMarketMaker {
                 param = PRICE_RAMP_DURATION;
         }
         return [
-            Arithmetic.overflowResistantFraction((ex.supplies[0] - ex.lastPricePoint[0]), param, PRICE_RAMP_DURATION) + ex.lastPricePoint[0],
-            Arithmetic.overflowResistantFraction((ex.supplies[1] - ex.lastPricePoint[1]), param, PRICE_RAMP_DURATION) + ex.lastPricePoint[1]
+            Math.overflowResistantFraction((ex.supplies[0] - ex.lastPricePoint[0]), param, PRICE_RAMP_DURATION) + ex.lastPricePoint[0],
+            Math.overflowResistantFraction((ex.supplies[1] - ex.lastPricePoint[1]), param, PRICE_RAMP_DURATION) + ex.lastPricePoint[1]
         ];
     }
 
