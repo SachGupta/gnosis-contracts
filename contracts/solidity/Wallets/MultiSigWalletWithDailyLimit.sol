@@ -49,22 +49,44 @@ contract MultiSigWalletWithDailyLimit is MultiSigWallet {
         ownerExists(msg.sender)
         confirmed(transactionId, msg.sender)
         notExecuted(transactionId)
+        executable(transactionId)
     {
         Transaction tx = transactions[transactionId];
-        bool _confirmed = isConfirmed(transactionId);
-        if (_confirmed || tx.data.length == 0 && isUnderLimit(tx.value)) {
-            tx.executed = true;
+        tx.executed = true;
+        bool _confirmed = isConfirmedByRequiredOwners(transactionId);
+        if (!_confirmed)
+            spentToday += tx.value;
+        if (tx.destination.call.value(tx.value)(tx.data))
+            Execution(transactionId);
+        else {
+            ExecutionFailure(transactionId);
+            tx.executed = false;
             if (!_confirmed)
-                spentToday += tx.value;
-            if (tx.destination.call.value(tx.value)(tx.data))
-                Execution(transactionId);
-            else {
-                ExecutionFailure(transactionId);
-                tx.executed = false;
-                if (!_confirmed)
-                    spentToday -= tx.value;
-            }
+                spentToday -= tx.value;
         }
+    }
+
+    /// @dev Returns the confirmation status of a transaction.
+    /// @param transactionId Transaction ID.
+    /// @return Confirmation status.
+    function isConfirmed(uint transactionId)
+        public
+        constant
+        returns (bool)
+    {
+        if (isConfirmedByRequiredOwners(transactionId) || tx.data.length == 0 && isUnderLimit(tx.value))
+            return true;
+    }
+
+    /// @dev Returns the confirmation status of a transaction.
+    /// @param transactionId Transaction ID.
+    /// @return Confirmation status.
+    function isConfirmedByRequiredOwners(uint transactionId)
+        public
+        constant
+        returns (bool)
+    {
+        return super.isConfirmed(transactionId);
     }
 
     /*

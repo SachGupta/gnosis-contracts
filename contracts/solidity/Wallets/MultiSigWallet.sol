@@ -79,6 +79,12 @@ contract MultiSigWallet {
         _;
     }
 
+    modifier executable(uint transactionId) {
+        if (!isConfirmed(transactionId))
+            revert();
+        _;
+    }
+
     modifier notExecuted(uint transactionId) {
         if (transactions[transactionId].executed)
             revert();
@@ -214,7 +220,8 @@ contract MultiSigWallet {
     {
         confirmations[transactionId][msg.sender] = true;
         Confirmation(msg.sender, transactionId);
-        executeTransaction(transactionId);
+        if (isConfirmed(transactionId))
+            executeTransaction(transactionId);
     }
 
     /// @dev Allows an owner to revoke a confirmation for a transaction.
@@ -236,16 +243,15 @@ contract MultiSigWallet {
         ownerExists(msg.sender)
         confirmed(transactionId, msg.sender)
         notExecuted(transactionId)
+        executable(transactionId)
     {
-        if (isConfirmed(transactionId)) {
-            Transaction tx = transactions[transactionId];
-            tx.executed = true;
-            if (tx.destination.call.value(tx.value)(tx.data))
-                Execution(transactionId);
-            else {
-                ExecutionFailure(transactionId);
-                tx.executed = false;
-            }
+        Transaction tx = transactions[transactionId];
+        tx.executed = true;
+        if (tx.destination.call.value(tx.value)(tx.data))
+            Execution(transactionId);
+        else {
+            ExecutionFailure(transactionId);
+            tx.executed = false;
         }
     }
 
