@@ -27,6 +27,7 @@ contract CategoricalEvent is Event {
     }
 
     /// @dev Exchanges user's winning outcome tokens for collateral tokens.
+    /// @return Returns user's winnings.
     function redeemWinnings()
         public
         returns (uint winnings)
@@ -45,7 +46,7 @@ contract CategoricalEvent is Event {
     }
 
     /// @dev Calculates and returns event hash.
-    /// @return Event hash
+    /// @return Returns event hash.
     function getEventHash()
         public
         constant

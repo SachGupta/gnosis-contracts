@@ -93,6 +93,6 @@ contract Event {
     }
 
     /// @dev Calculates and returns event hash.
-    /// @return Event hash
+    /// @return Returns event hash.
     function getEventHash() public constant returns (bytes32);
 }
