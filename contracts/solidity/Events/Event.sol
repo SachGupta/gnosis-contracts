@@ -29,7 +29,7 @@ contract Event {
     function Event(address _collateralToken, address _oracle, bytes32 _oracleEventIdentifier, uint outcomeCount)
         public
     {
-        if (_collateralToken == 0 || _oracle == 0 || outcomeCount < 2)
+        if (_collateralToken == 0 || _oracle == 0 || outcomeCount < 2 || outcomeCount > 256)
             // Values are null or outcome count is too low
             revert();
         collateralToken = Token(_collateralToken);
@@ -82,4 +82,17 @@ contract Event {
         winningOutcome = oracle.getOutcome(oracleEventIdentifier);
         isWinningOutcomeSet = true;
     }
+
+    /// @dev Returns outcome count
+    /// @return Outcome count
+    function getOutcomeCount()
+        public
+        returns (uint8)
+    {
+        return uint8(outcomeTokens.length);
+    }
+
+    /// @dev Calculates and returns event hash.
+    /// @return Event hash
+    function getEventHash() public constant returns (bytes32);
 }
