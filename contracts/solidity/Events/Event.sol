@@ -72,11 +72,8 @@ contract Event {
     function setWinningOutcome()
         public
     {
-        if (isWinningOutcomeSet)
-            // Winning outcome is set already
-            revert();
-        if (!oracle.isOutcomeSet(oracleEventIdentifier))
-            // Winning outcome is not set
+        if (isWinningOutcomeSet || !oracle.isOutcomeSet(oracleEventIdentifier))
+            // Winning outcome is set already or outcome is not set yet
             revert();
         // Set winning outcome
         winningOutcome = oracle.getOutcome(oracleEventIdentifier);
