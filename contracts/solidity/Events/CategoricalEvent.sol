@@ -43,4 +43,14 @@ contract CategoricalEvent is Event {
             // Transfer failed
             revert();
     }
+
+    /// @dev Calculates and returns event hash.
+    /// @return Event hash
+    function getEventHash()
+        public
+        constant
+        returns (bytes32)
+    {
+        return keccak256(collateralToken, oracle, oracleEventIdentifier, outcomeTokens.length);
+    }
 }
