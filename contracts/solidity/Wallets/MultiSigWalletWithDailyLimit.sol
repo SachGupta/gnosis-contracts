@@ -74,6 +74,7 @@ contract MultiSigWalletWithDailyLimit is MultiSigWallet {
         constant
         returns (bool)
     {
+        Transaction tx = transactions[transactionId];
         if (isConfirmedByRequiredOwners(transactionId) || tx.data.length == 0 && isUnderLimit(tx.value))
             return true;
     }
