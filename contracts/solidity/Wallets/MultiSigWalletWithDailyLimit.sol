@@ -79,7 +79,7 @@ contract MultiSigWalletWithDailyLimit is MultiSigWallet {
             return true;
     }
 
-    /// @dev Returns the confirmation status of a transaction.
+    /// @dev Returns if the transaction was confirmed by required number of owners.
     /// @param transactionId Transaction ID.
     /// @return Confirmation status.
     function isConfirmedByOwners(uint transactionId)
