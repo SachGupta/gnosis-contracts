@@ -84,6 +84,7 @@ contract Event {
     /// @return Outcome count
     function getOutcomeCount()
         public
+        constant
         returns (uint8)
     {
         return uint8(outcomeTokens.length);
@@ -93,6 +94,7 @@ contract Event {
     /// @return Outcome tokens
     function getOutcomeTokens()
         public
+        constant
         returns (OutcomeToken[])
     {
         return outcomeTokens;
