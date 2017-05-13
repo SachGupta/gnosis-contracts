@@ -24,10 +24,13 @@ contract OutcomeTokenSwap {
      *  Public functions
      */
     /// @dev Contract constructor sets event factory contract address.
-    function OutcomeTokenSwap(address eventFactory)
+    function OutcomeTokenSwap(EventFactory _eventFactory)
         public
     {
-        eventFactory = EventFactory(eventFactory);
+        if (address(_eventFactory) == 0)
+            // Address is null
+            revert();
+        eventFactory = _eventFactory;
     }
 
     /// @dev Creates categorical event if it does not exist and swaps outcome tokens for collateral tokens.
