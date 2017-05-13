@@ -43,25 +43,25 @@ contract UltimateOracle is Oracle {
     /// @param _challengeAmount Amount to challenge the outcome.
     /// @param _frontRunnerPeriod Time to overbid the front-runner.
     function UltimateOracle(
-        address _oracle,
+        Oracle _oracle,
         bytes32 _eventIdentifier,
-        address _collateralToken,
+        Token _collateralToken,
         uint _challengePeriod,
         uint _challengeAmount,
         uint _frontRunnerPeriod
     )
         public
     {
-        if (   _oracle == 0
-            || _collateralToken == 0
+        if (   address(_oracle) == 0
+            || address(_collateralToken) == 0
             || _challengePeriod == 0
             || _challengeAmount == 0
             || _frontRunnerPeriod == 0)
             // Values are null
             revert();
-        oracle = Oracle(_oracle);
+        oracle = _oracle;
         eventIdentifier = _eventIdentifier;
-        collateralToken = Token(_collateralToken);
+        collateralToken = _collateralToken;
         challengeAmount = _challengeAmount;
         frontRunnerPeriod = _frontRunnerPeriod;
     }

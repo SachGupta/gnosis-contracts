@@ -24,10 +24,10 @@ contract OutcomeTokenSwap {
      *  Public functions
      */
     /// @dev Contract constructor sets event factory contract address.
-    function OutcomeTokenSwap(address _eventFactory)
+    function OutcomeTokenSwap(address eventFactory)
         public
     {
-        eventFactory = EventFactory(_eventFactory);
+        eventFactory = EventFactory(eventFactory);
     }
 
     /// @dev Creates categorical event if it does not exist and swaps outcome tokens for collateral tokens.
@@ -41,8 +41,8 @@ contract OutcomeTokenSwap {
     /// @param r Encoded signature parameters of traders.
     /// @param s Encoded signature parameters of traders.
     function swap(
-        address collateralToken,
-        address oracle,
+        Token collateralToken,
+        Oracle oracle,
         bytes32 oracleEventIdentifier,
         uint8 outcomeCount,
         uint[4] trade,
@@ -54,11 +54,11 @@ contract OutcomeTokenSwap {
         public
     {
         bytes32 eventHash = keccak256(collateralToken, oracle, oracleEventIdentifier, outcomeCount);
-        CategoricalEvent _event = eventFactory.categoricalEvents(eventHash);
+        CategoricalEvent eventContract = eventFactory.categoricalEvents(eventHash);
         // Create event if it doesn't exist
-        if (address(_event) == 0)
-            _event = eventFactory.createCategoricalEvent(collateralToken, oracle, oracleEventIdentifier, outcomeCount);
-        settle(_event, trade, traders, v, r, s);
+        if (address(eventContract) == 0)
+            eventContract = eventFactory.createCategoricalEvent(collateralToken, oracle, oracleEventIdentifier, outcomeCount);
+        settle(eventContract, trade, traders, v, r, s);
     }
 
     /// @dev Creates scalar event if it does not exist and swaps outcome tokens for collateral tokens.
@@ -73,8 +73,8 @@ contract OutcomeTokenSwap {
     /// @param r Encoded signature parameters of traders.
     /// @param s Encoded signature parameters of traders.
     function swap(
-        address collateralToken,
-        address oracle,
+        Token collateralToken,
+        Oracle oracle,
         bytes32 oracleEventIdentifier,
         int lowerBound,
         int upperBound,
@@ -87,11 +87,11 @@ contract OutcomeTokenSwap {
         public
     {
         bytes32 eventHash = keccak256(collateralToken, oracle, oracleEventIdentifier, lowerBound, upperBound);
-        ScalarEvent _event = eventFactory.scalarEvents(eventHash);
+        ScalarEvent eventContract = eventFactory.scalarEvents(eventHash);
         // Create event if it doesn't exist
-        if (address(_event) == 0)
-            _event = eventFactory.createScalarEvent(collateralToken, oracle, oracleEventIdentifier, lowerBound, upperBound);
-        settle(_event, trade, traders, v, r, s);
+        if (address(eventContract) == 0)
+            eventContract = eventFactory.createScalarEvent(collateralToken, oracle, oracleEventIdentifier, lowerBound, upperBound);
+        settle(eventContract, trade, traders, v, r, s);
     }
 
     /// @dev Swaps two tokens in one transaction.
@@ -130,14 +130,14 @@ contract OutcomeTokenSwap {
      *  Internal functions
      */
     /// @dev Settles token swap.
-    /// @param _event Event object.
+    /// @param eventContract Event object.
     /// @param trade Encoded trade parameters (nonce, token counts and outcome tokens index).
     /// @param traders Encoded trader addresses.
     /// @param v Encoded signature parameters of traders.
     /// @param r Encoded signature parameters of traders.
     /// @param s Encoded signature parameters of traders.
     function settle(
-        Event _event,
+        Event eventContract,
         uint[4] trade,
         address[2] traders,
         uint8[2] v,
@@ -149,12 +149,12 @@ contract OutcomeTokenSwap {
         // Validate nonces
         validateNonce(traders, trade[NONCE]);
         // Validate signatures
-        bytes32 tradeHash = keccak256(trade, _event.getEventHash());
+        bytes32 tradeHash = keccak256(trade, eventContract.getEventHash());
         validateSignatures(tradeHash, traders, v, r, s);
         // Buy outcome tokens
-        buyAllOutcomes(_event, trade, traders);
+        buyAllOutcomes(eventContract, trade, traders);
         // Distribute outcome tokens
-        distributeOutcomeTokens(_event, trade, traders);
+        distributeOutcomeTokens(eventContract, trade, traders);
     }
 
     /// @dev Validates that trade was signed by both parties.
@@ -186,33 +186,33 @@ contract OutcomeTokenSwap {
     }
 
     /// @dev Transfers collateral tokens from maker and taker and buys all outcomes.
-    /// @param _event Event object.
+    /// @param eventContract Event object.
     /// @param traders Encoded trader addresses.
     /// @param trade Encoded trade parameters (nonce, token counts and outcome tokens index).
-    function buyAllOutcomes(Event _event, uint[4] trade, address[2] traders)
+    function buyAllOutcomes(Event eventContract, uint[4] trade, address[2] traders)
         internal
     {
         // Buy outcome tokens
-        if (   !_event.collateralToken().transferFrom(traders[TAKER], this, trade[COLLATERAL_TOKEN_COUNT])
-            || !_event.collateralToken().transferFrom(traders[MAKER], this, trade[OUTCOME_TOKEN_COUNT] - trade[COLLATERAL_TOKEN_COUNT])
-            || !_event.collateralToken().approve(_event, trade[OUTCOME_TOKEN_COUNT]))
+        if (   !eventContract.collateralToken().transferFrom(traders[TAKER], this, trade[COLLATERAL_TOKEN_COUNT])
+            || !eventContract.collateralToken().transferFrom(traders[MAKER], this, trade[OUTCOME_TOKEN_COUNT] - trade[COLLATERAL_TOKEN_COUNT])
+            || !eventContract.collateralToken().approve(eventContract, trade[OUTCOME_TOKEN_COUNT]))
             revert();
-        _event.buyAllOutcomes(trade[OUTCOME_TOKEN_COUNT]);
+        eventContract.buyAllOutcomes(trade[OUTCOME_TOKEN_COUNT]);
     }
 
     /// @dev Distribute outcome tokens between maker and taker.
-    /// @param _event Event object.
+    /// @param eventContract Event object.
     /// @param traders Encoded trader addresses.
     /// @param trade Encoded trade parameters (nonce, token counts and outcome tokens index).
-    function distributeOutcomeTokens(Event _event, uint[4] trade, address[2] traders)
+    function distributeOutcomeTokens(Event eventContract, uint[4] trade, address[2] traders)
         internal
     {
         // Distribute tokens between maker and taker
-        uint8 outcomeCount = _event.getOutcomeCount();
+        uint8 outcomeCount = eventContract.getOutcomeCount();
         for (uint8 i=0; i<outcomeCount; i++)
             if (i == trade[OUTCOME_TOKEN_INDEX])
-                _event.outcomeTokens(i).transfer(traders[TAKER], trade[OUTCOME_TOKEN_COUNT]);
+                eventContract.outcomeTokens(i).transfer(traders[TAKER], trade[OUTCOME_TOKEN_COUNT]);
             else
-                _event.outcomeTokens(i).transfer(traders[MAKER], trade[OUTCOME_TOKEN_COUNT]);
+                eventContract.outcomeTokens(i).transfer(traders[MAKER], trade[OUTCOME_TOKEN_COUNT]);
     }
 }

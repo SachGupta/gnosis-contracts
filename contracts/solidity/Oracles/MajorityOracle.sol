@@ -12,7 +12,7 @@ contract MajorityOracle is Oracle {
     mapping (bytes32 => OracleIdentifier) oracleIdentifiers;
 
     struct OracleIdentifier {
-        address[] oracles;
+        Oracle[] oracles;
         bytes32[] eventIdentifiers;
     }
 
@@ -23,7 +23,7 @@ contract MajorityOracle is Oracle {
     /// @param oracles List of oracles taking part in the majority vote.
     /// @param eventIdentifiers List of event identifiers for each oracle.
     /// @return Returns event identifier.
-    function registerEvent(address[] oracles, bytes32[] eventIdentifiers)
+    function registerEvent(Oracle[] oracles, bytes32[] eventIdentifiers)
         public
         returns (bytes32 eventIdentifier)
     {
@@ -31,7 +31,7 @@ contract MajorityOracle is Oracle {
             // Data is invalid
             revert();
         for (uint i=0; i<oracles.length; i++)
-            if (oracles[i] == 0)
+            if (address(oracles[i]) == 0)
                 revert();
         eventIdentifier = keccak256(oracles, eventIdentifiers);
         oracleIdentifiers[eventIdentifier] = OracleIdentifier({
@@ -49,15 +49,14 @@ contract MajorityOracle is Oracle {
         returns (bool outcomeSet, int outcome)
     {
         OracleIdentifier memory oracleIdentifier = oracleIdentifiers[eventIdentifier];
-        address[] memory oracles = oracleIdentifier.oracles;
+        Oracle[] memory oracles = oracleIdentifier.oracles;
         bytes32[] memory eventIdentifiers = oracleIdentifier.eventIdentifiers;
         uint i;
         int[] memory outcomes = new int[](oracles.length);
         uint[] memory validations = new uint[](oracles.length);
-        for (i=0; i<oracles.length; i++) {
-            Oracle oracle = Oracle(oracles[i]);
-            if (oracle.isOutcomeSet(eventIdentifiers[i])) {
-                int _outcome = oracle.getOutcome(eventIdentifiers[i]);
+        for (i=0; i<oracles.length; i++)
+            if (oracles[i].isOutcomeSet(eventIdentifiers[i])) {
+                int _outcome = oracles[i].getOutcome(eventIdentifiers[i]);
                 for (uint j=0; j<=i; j++)
                     if (_outcome == outcomes[j]) {
                         validations[j] += 1;
@@ -69,7 +68,6 @@ contract MajorityOracle is Oracle {
                         break;
                     }
             }
-        }
         uint outcomeValidations = 0;
         uint outcomeIndex = 0;
         for (i=0; i<oracles.length; i++)

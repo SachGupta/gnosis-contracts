@@ -23,9 +23,9 @@ contract UltimateOracleFactory {
     /// @param frontRunnerPeriod Time to overbid the front-runner.
     /// @return Returns oracle contract.
     function createUltimateOracle(
-        address oracle,
+        Oracle oracle,
         bytes32 eventIdentifier,
-        address collateralToken,
+        Token collateralToken,
         uint challengePeriod,
         uint challengeAmount,
         uint frontRunnerPeriod
