@@ -11,4 +11,5 @@ contract Market {
     function sell(uint8 outcomeTokenIndex, uint outcomeTokenCount, uint minProfits) public returns (uint);
     function shortSell(uint8 outcomeTokenIndex, uint outcomeTokenCount, uint minProfits) public returns (uint);
     function calcMarketFee(uint outcomeTokenCosts) public constant returns (uint);
+    function getOutcomeTokenCounts() public constant returns (uint[]);
 }
