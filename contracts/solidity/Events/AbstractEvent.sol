@@ -26,14 +26,14 @@ contract Event {
     /// @param _oracle Oracle contract used to resolve the event.
     /// @param _oracleEventIdentifier Optional identifier to identify a specific oracle event.
     /// @param outcomeCount Number of event outcomes.
-    function Event(address _collateralToken, address _oracle, bytes32 _oracleEventIdentifier, uint outcomeCount)
+    function Event(Token _collateralToken, Oracle _oracle, bytes32 _oracleEventIdentifier, uint outcomeCount)
         public
     {
-        if (_collateralToken == 0 || _oracle == 0 || outcomeCount < 2 || outcomeCount > 256)
+        if (address(_collateralToken) == 0 || address(_oracle) == 0 || outcomeCount < 2 || outcomeCount > 256)
             // Values are null or outcome count is too low
             revert();
-        collateralToken = Token(_collateralToken);
-        oracle = Oracle(_oracle);
+        collateralToken = _collateralToken;
+        oracle = _oracle;
         oracleEventIdentifier = _oracleEventIdentifier;
         // Create outcome tokens for each outcome
         for (uint8 i=0; i<outcomeCount; i++)

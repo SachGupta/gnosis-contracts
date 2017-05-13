@@ -15,8 +15,8 @@ contract CategoricalEvent is Event {
     /// @param _oracleEventIdentifier Optional identifier to identify a specific oracle event.
     /// @param outcomeCount Number of event outcomes.
     function CategoricalEvent(
-        address _collateralToken,
-        address _oracle,
+        Token _collateralToken,
+        Oracle _oracle,
         bytes32 _oracleEventIdentifier,
         uint outcomeCount
     )

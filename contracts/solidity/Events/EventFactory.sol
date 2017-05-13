@@ -29,8 +29,8 @@ contract EventFactory {
     /// @param outcomeCount Number of event outcomes.
     /// @return Returns event contract.
     function createCategoricalEvent(
-        address collateralToken,
-        address oracle,
+        Token collateralToken,
+        Oracle oracle,
         bytes32 oracleEventIdentifier,
         uint outcomeCount
     )
@@ -60,8 +60,8 @@ contract EventFactory {
     /// @param upperBound Lower bound for event outcome.
     /// @return Returns event contract.
     function createScalarEvent(
-        address collateralToken,
-        address oracle,
+        Token collateralToken,
+        Oracle oracle,
         bytes32 oracleEventIdentifier,
         int lowerBound,
         int upperBound
