@@ -89,6 +89,15 @@ contract Event {
         return uint8(outcomeTokens.length);
     }
 
+    /// @dev Returns outcome tokens array
+    /// @return Outcome tokens
+    function getOutcomeTokens()
+        public
+        returns (OutcomeToken[])
+    {
+        return outcomeTokens;
+    }
+
     /// @dev Calculates and returns event hash.
     /// @return Returns event hash.
     function getEventHash() public constant returns (bytes32);
