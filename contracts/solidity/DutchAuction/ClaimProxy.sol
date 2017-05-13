@@ -16,13 +16,13 @@ contract ClaimProxy {
      */
     /// @dev Contract constructor function dutch auction contract address.
     /// @param _dutchAuction Dutch auction address.
-    function ClaimProxy(address _dutchAuction)
+    function ClaimProxy(DutchAuction _dutchAuction)
         public
     {
-        if (_dutchAuction == 0)
+        if (address(_dutchAuction) == 0)
             // Address should not be null.
             revert();
-        dutchAuction = DutchAuction(_dutchAuction);
+        dutchAuction = _dutchAuction;
     }
 
     /// @dev Allows to claim GNO on behalf of bidders.

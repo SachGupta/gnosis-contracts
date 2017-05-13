@@ -64,12 +64,12 @@ contract ProxySender {
      */
     /// @dev Constructor sets dutch auction and gnosis token address.
     /// @param _dutchAuction Address of dutch auction contract.
-    function ProxySender(address _dutchAuction)
+    function ProxySender(DutchAuction _dutchAuction)
         public
     {
-        if (_dutchAuction == 0)
+        if (address(_dutchAuction) == 0)
             revert();
-        dutchAuction = DutchAuction(_dutchAuction);
+        dutchAuction = _dutchAuction;
         gnosisToken = dutchAuction.gnosisToken();
         stage = Stages.ContributionsCollection;
     }

@@ -73,14 +73,14 @@ contract Disbursement {
 
     /// @dev Setup function sets external contracts' addresses.
     /// @param _token Token address.
-    function setup(address _token)
+    function setup(Token _token)
         public
         isOwner
     {
-        if (address(token) != 0 || _token == 0)
+        if (address(token) != 0 || address(_token) == 0)
             // Setup was executed already or address is null.
             revert();
-        token = Token(_token);
+        token = _token;
     }
 
     /// @dev Transfers tokens to a given address.

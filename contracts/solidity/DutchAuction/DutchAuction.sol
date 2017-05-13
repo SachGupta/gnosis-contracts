@@ -103,15 +103,15 @@ contract DutchAuction {
 
     /// @dev Setup function sets external contracts' addresses.
     /// @param _gnosisToken Gnosis token address.
-    function setup(address _gnosisToken)
+    function setup(Token _gnosisToken)
         public
         isOwner
         atStage(Stages.AuctionDeployed)
     {
-        if (_gnosisToken == 0)
+        if (address(_gnosisToken) == 0)
             // Argument is null.
             revert();
-        gnosisToken = Token(_gnosisToken);
+        gnosisToken = _gnosisToken;
         // Validate token balance
         if (gnosisToken.balanceOf(this) != MAX_TOKENS_SOLD)
             revert();

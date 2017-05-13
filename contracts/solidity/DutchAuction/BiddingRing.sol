@@ -67,12 +67,12 @@ contract BiddingRing {
     /// @dev Constructor sets dutch auction and gnosis token address and max price paid by the bidding ring.
     /// @param _dutchAuction Address of dutch auction contract.
     /// @param _maxPrice Maximum price paid by participants.
-    function BiddingRing(address _dutchAuction, uint _maxPrice)
+    function BiddingRing(DutchAuction _dutchAuction, uint _maxPrice)
         public
     {
-        if (_dutchAuction == 0 || _maxPrice == 0)
+        if (address(_dutchAuction) == 0 || _maxPrice == 0)
             revert();
-        dutchAuction = DutchAuction(_dutchAuction);
+        dutchAuction = _dutchAuction;
         gnosisToken = dutchAuction.gnosisToken();
         if (address(gnosisToken) == 0)
             revert();
