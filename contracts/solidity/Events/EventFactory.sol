@@ -25,26 +25,23 @@ contract EventFactory {
     /// @dev Creates a new categorical event and adds it to the event mapping.
     /// @param collateralToken Tokens used as collateral in exchange for outcome tokens.
     /// @param oracle Oracle contract used to resolve the event.
-    /// @param oracleEventIdentifier Optional identifier to identify a specific oracle event.
     /// @param outcomeCount Number of event outcomes.
     /// @return Returns event contract.
     function createCategoricalEvent(
         Token collateralToken,
         Oracle oracle,
-        bytes32 oracleEventIdentifier,
         uint outcomeCount
     )
         public
         returns (CategoricalEvent eventContract)
     {
-        bytes32 eventHash = keccak256(collateralToken, oracle, oracleEventIdentifier, outcomeCount);
+        bytes32 eventHash = keccak256(collateralToken, oracle, outcomeCount);
         if (address(categoricalEvents[eventHash]) != 0)
             // Event does exist
             revert();
         eventContract = new CategoricalEvent(
             collateralToken,
             oracle,
-            oracleEventIdentifier,
             outcomeCount
         );
         categoricalEvents[eventHash] = eventContract;
@@ -54,28 +51,25 @@ contract EventFactory {
     /// @dev Creates a new scalar event and adds it to the event mapping.
     /// @param collateralToken Tokens used as collateral in exchange for outcome tokens.
     /// @param oracle Oracle contract used to resolve the event.
-    /// @param oracleEventIdentifier Optional identifier to identify a specific oracle event.
     /// @param lowerBound Lower bound for event outcome.
     /// @param upperBound Lower bound for event outcome.
     /// @return Returns event contract.
     function createScalarEvent(
         Token collateralToken,
         Oracle oracle,
-        bytes32 oracleEventIdentifier,
         int lowerBound,
         int upperBound
     )
         public
         returns (ScalarEvent eventContract)
     {
-        bytes32 eventHash = keccak256(collateralToken, oracle, oracleEventIdentifier, lowerBound, upperBound);
+        bytes32 eventHash = keccak256(collateralToken, oracle, lowerBound, upperBound);
         if (address(scalarEvents[eventHash]) != 0)
             // Event does exist already
             revert();
         eventContract = new ScalarEvent(
             collateralToken,
             oracle,
-            oracleEventIdentifier,
             lowerBound,
             upperBound
         );

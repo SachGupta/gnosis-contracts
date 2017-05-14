@@ -25,18 +25,16 @@ contract ScalarEvent is Event {
     /// @dev Contract constructor validates and sets basic event properties.
     /// @param _collateralToken Tokens used as collateral in exchange for outcome tokens.
     /// @param _oracle Oracle contract used to resolve the event.
-    /// @param _oracleEventIdentifier Optional identifier to identify a specific oracle event.
     /// @param _lowerBound Lower bound for event outcome.
     /// @param _upperBound Lower bound for event outcome.
     function ScalarEvent(
         Token _collateralToken,
         Oracle _oracle,
-        bytes32 _oracleEventIdentifier,
         int _lowerBound,
         int _upperBound
     )
         public
-        Event(_collateralToken, _oracle, _oracleEventIdentifier, 2)
+        Event(_collateralToken, _oracle, 2)
     {
         if (upperBound <= lowerBound)
             // Bounds are invalid
@@ -86,6 +84,6 @@ contract ScalarEvent is Event {
         constant
         returns (bytes32)
     {
-        return keccak256(collateralToken, oracle, oracleEventIdentifier, lowerBound, upperBound);
+        return keccak256(collateralToken, oracle, lowerBound, upperBound);
     }
 }

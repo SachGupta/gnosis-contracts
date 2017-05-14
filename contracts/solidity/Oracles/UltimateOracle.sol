@@ -16,8 +16,6 @@ contract UltimateOracle is Oracle {
      *  Storage
      */
     Oracle public oracle;
-    bytes32 public eventIdentifier;
-
     Token public collateralToken;
     uint public challengePeriod;
     uint public challengeAmount;
@@ -37,14 +35,12 @@ contract UltimateOracle is Oracle {
      */
     /// @dev Constructor sets Ultimate Oracle properties.
     /// @param _oracle Oracle address.
-    /// @param _eventIdentifier Event identifier.
     /// @param _collateralToken Collateral token address.
     /// @param _challengePeriod Time to challenge oracle outcome.
     /// @param _challengeAmount Amount to challenge the outcome.
     /// @param _frontRunnerPeriod Time to overbid the front-runner.
     function UltimateOracle(
         Oracle _oracle,
-        bytes32 _eventIdentifier,
         Token _collateralToken,
         uint _challengePeriod,
         uint _challengeAmount,
@@ -60,7 +56,6 @@ contract UltimateOracle is Oracle {
             // Values are null
             revert();
         oracle = _oracle;
-        eventIdentifier = _eventIdentifier;
         collateralToken = _collateralToken;
         challengeAmount = _challengeAmount;
         frontRunnerPeriod = _frontRunnerPeriod;
@@ -72,10 +67,10 @@ contract UltimateOracle is Oracle {
     {
         if (   frontRunnerSetTimestamp != 0
             || outcomeSetTimestamp != 0
-            || !oracle.isOutcomeSet(eventIdentifier))
+            || !oracle.isOutcomeSet())
             // Outcome was set already or cannot be set yet
             revert();
-        outcome = oracle.getOutcome(eventIdentifier);
+        outcome = oracle.getOutcome();
         outcomeSetTimestamp = now;
     }
 
@@ -123,9 +118,8 @@ contract UltimateOracle is Oracle {
     }
 
     /// @dev Returns if winning outcome is set for given event.
-    /// @param _ Not used.
     /// @return Returns if outcome is set.
-    function isOutcomeSet(bytes32 _)
+    function isOutcomeSet()
         public
         constant
         returns (bool)
@@ -135,9 +129,8 @@ contract UltimateOracle is Oracle {
     }
 
     /// @dev Returns winning outcome for given event.
-    /// @param _ Not used.
     /// @return Returns outcome.
-    function getOutcome(bytes32 _)
+    function getOutcome()
         public
         constant
         returns (int)

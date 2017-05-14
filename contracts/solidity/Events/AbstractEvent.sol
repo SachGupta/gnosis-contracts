@@ -13,7 +13,6 @@ contract Event {
      */
     Token public collateralToken;
     Oracle public oracle;
-    bytes32 public oracleEventIdentifier;
     bool public isWinningOutcomeSet;
     int public winningOutcome;
     OutcomeToken[] public outcomeTokens;
@@ -24,9 +23,8 @@ contract Event {
     /// @dev Contract constructor validates and sets basic event properties.
     /// @param _collateralToken Tokens used as collateral in exchange for outcome tokens.
     /// @param _oracle Oracle contract used to resolve the event.
-    /// @param _oracleEventIdentifier Optional identifier to identify a specific oracle event.
     /// @param outcomeCount Number of event outcomes.
-    function Event(Token _collateralToken, Oracle _oracle, bytes32 _oracleEventIdentifier, uint outcomeCount)
+    function Event(Token _collateralToken, Oracle _oracle, uint outcomeCount)
         public
     {
         if (address(_collateralToken) == 0 || address(_oracle) == 0 || outcomeCount < 2 || outcomeCount > 256)
@@ -34,7 +32,6 @@ contract Event {
             revert();
         collateralToken = _collateralToken;
         oracle = _oracle;
-        oracleEventIdentifier = _oracleEventIdentifier;
         // Create outcome tokens for each outcome
         for (uint8 i=0; i<outcomeCount; i++)
             outcomeTokens.push(new OutcomeToken());
@@ -72,11 +69,11 @@ contract Event {
     function setWinningOutcome()
         public
     {
-        if (isWinningOutcomeSet || !oracle.isOutcomeSet(oracleEventIdentifier))
+        if (isWinningOutcomeSet || !oracle.isOutcomeSet())
             // Winning outcome is set already or outcome is not set yet
             revert();
         // Set winning outcome
-        winningOutcome = oracle.getOutcome(oracleEventIdentifier);
+        winningOutcome = oracle.getOutcome();
         isWinningOutcomeSet = true;
     }
 

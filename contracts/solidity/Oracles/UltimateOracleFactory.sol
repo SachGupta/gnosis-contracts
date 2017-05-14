@@ -16,7 +16,6 @@ contract UltimateOracleFactory {
      */
     /// @dev Creates a new Ultimate Oracle contract.
     /// @param oracle Oracle address.
-    /// @param eventIdentifier Event identifier.
     /// @param collateralToken Collateral token address.
     /// @param challengePeriod Time to challenge oracle outcome.
     /// @param challengeAmount Amount to challenge the outcome.
@@ -24,7 +23,6 @@ contract UltimateOracleFactory {
     /// @return Returns oracle contract.
     function createUltimateOracle(
         Oracle oracle,
-        bytes32 eventIdentifier,
         Token collateralToken,
         uint challengePeriod,
         uint challengeAmount,
@@ -33,13 +31,12 @@ contract UltimateOracleFactory {
         public
         returns (UltimateOracle ultimateOracle)
     {
-        bytes32 ultimateOracleHash = keccak256(oracle, eventIdentifier, collateralToken, challengePeriod, challengeAmount, frontRunnerPeriod);
+        bytes32 ultimateOracleHash = keccak256(oracle, collateralToken, challengePeriod, challengeAmount, frontRunnerPeriod);
         if (address(ultimateOracles[ultimateOracleHash]) != 0)
             // Ultimate oracle exists already
             revert();
         ultimateOracle = new UltimateOracle(
             oracle,
-            eventIdentifier,
             collateralToken,
             challengePeriod,
             challengeAmount,

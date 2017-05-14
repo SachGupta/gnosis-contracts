@@ -36,7 +36,6 @@ contract OutcomeTokenSwap {
     /// @dev Creates categorical event if it does not exist and swaps outcome tokens for collateral tokens.
     /// @param collateralToken Tokens used as collateral in exchange for outcome tokens.
     /// @param oracle Oracle contract used to resolve the event.
-    /// @param oracleEventIdentifier Optional identifier to identify a specific oracle event.
     /// @param outcomeCount Number of event outcomes.
     /// @param trade Encoded trade parameters (nonce, token counts and outcome tokens index).
     /// @param traders Encoded trader addresses.
@@ -46,7 +45,6 @@ contract OutcomeTokenSwap {
     function swap(
         Token collateralToken,
         Oracle oracle,
-        bytes32 oracleEventIdentifier,
         uint8 outcomeCount,
         uint[4] trade,
         address[2] traders,
@@ -56,18 +54,17 @@ contract OutcomeTokenSwap {
     )
         public
     {
-        bytes32 eventHash = keccak256(collateralToken, oracle, oracleEventIdentifier, outcomeCount);
+        bytes32 eventHash = keccak256(collateralToken, oracle, outcomeCount);
         CategoricalEvent eventContract = eventFactory.categoricalEvents(eventHash);
         // Create event if it doesn't exist
         if (address(eventContract) == 0)
-            eventContract = eventFactory.createCategoricalEvent(collateralToken, oracle, oracleEventIdentifier, outcomeCount);
+            eventContract = eventFactory.createCategoricalEvent(collateralToken, oracle, outcomeCount);
         settle(eventContract, trade, traders, v, r, s);
     }
 
     /// @dev Creates scalar event if it does not exist and swaps outcome tokens for collateral tokens.
     /// @param collateralToken Tokens used as collateral in exchange for outcome tokens.
     /// @param oracle Oracle contract used to resolve the event.
-    /// @param oracleEventIdentifier Optional identifier to identify a specific oracle event.
     /// @param lowerBound Lower bound for event outcome.
     /// @param upperBound Lower bound for event outcome.
     /// @param trade Encoded trade parameters (nonce, token counts and outcome tokens index).
@@ -78,7 +75,6 @@ contract OutcomeTokenSwap {
     function swap(
         Token collateralToken,
         Oracle oracle,
-        bytes32 oracleEventIdentifier,
         int lowerBound,
         int upperBound,
         uint[4] trade,
@@ -89,11 +85,11 @@ contract OutcomeTokenSwap {
     )
         public
     {
-        bytes32 eventHash = keccak256(collateralToken, oracle, oracleEventIdentifier, lowerBound, upperBound);
+        bytes32 eventHash = keccak256(collateralToken, oracle, lowerBound, upperBound);
         ScalarEvent eventContract = eventFactory.scalarEvents(eventHash);
         // Create event if it doesn't exist
         if (address(eventContract) == 0)
-            eventContract = eventFactory.createScalarEvent(collateralToken, oracle, oracleEventIdentifier, lowerBound, upperBound);
+            eventContract = eventFactory.createScalarEvent(collateralToken, oracle, lowerBound, upperBound);
         settle(eventContract, trade, traders, v, r, s);
     }
 

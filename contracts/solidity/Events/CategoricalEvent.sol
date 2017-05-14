@@ -12,16 +12,14 @@ contract CategoricalEvent is Event {
     /// @dev Contract constructor validates and sets basic event properties.
     /// @param _collateralToken Tokens used as collateral in exchange for outcome tokens.
     /// @param _oracle Oracle contract used to resolve the event.
-    /// @param _oracleEventIdentifier Optional identifier to identify a specific oracle event.
     /// @param outcomeCount Number of event outcomes.
     function CategoricalEvent(
         Token _collateralToken,
         Oracle _oracle,
-        bytes32 _oracleEventIdentifier,
         uint outcomeCount
     )
         public
-        Event(_collateralToken, _oracle, _oracleEventIdentifier, outcomeCount)
+        Event(_collateralToken, _oracle, outcomeCount)
     {
 
     }
@@ -52,6 +50,6 @@ contract CategoricalEvent is Event {
         constant
         returns (bytes32)
     {
-        return keccak256(collateralToken, oracle, oracleEventIdentifier, outcomeTokens.length);
+        return keccak256(collateralToken, oracle, outcomeTokens.length);
     }
 }
