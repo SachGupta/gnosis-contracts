@@ -9,54 +9,38 @@ contract MajorityOracle is Oracle {
     /*
      *  Storage
      */
-    mapping (bytes32 => OracleIdentifier) public oracleIdentifiers;
-
-    struct OracleIdentifier {
-        Oracle[] oracles;
-        bytes32[] eventIdentifiers;
-    }
+    Oracle[] oracles;
 
     /*
      *  Public functions
      */
-    /// @dev Allows to registers oracles for a majority vote.
-    /// @param oracles List of oracles taking part in the majority vote.
-    /// @param eventIdentifiers List of event identifiers for each oracle.
-    /// @return Returns event identifier.
-    function registerEvent(Oracle[] oracles, bytes32[] eventIdentifiers)
+    /// @dev Allows to create an oracle for a majority vote based on other oracles.
+    /// @param _oracles List of oracles taking part in the majority vote.
+    function MajorityOracle(Oracle[] _oracles)
         public
-        returns (bytes32 eventIdentifier)
     {
-        if (oracles.length != eventIdentifiers.length)
-            // Data is invalid
+        if (_oracles.length < 2)
+            // At least 2 oracles should be defined
             revert();
-        for (uint i=0; i<oracles.length; i++)
-            if (address(oracles[i]) == 0)
+        for (uint i=0; i<_oracles.length; i++)
+            if (address(_oracles[i]) == 0)
                 revert();
-        eventIdentifier = keccak256(oracles, eventIdentifiers);
-        oracleIdentifiers[eventIdentifier] = OracleIdentifier({
-            oracles: oracles,
-            eventIdentifiers: eventIdentifiers
-        });
+        oracles = _oracles;
     }
 
     /// @dev Allows to registers oracles for a majority vote.
-    /// @param eventIdentifier Event identifier.
     /// @return Returns if outcome is set.
     /// @return Returns outcome.
-    function getStatusAndOutcome(bytes32 eventIdentifier)
+    function getStatusAndOutcome()
         public
         returns (bool outcomeSet, int outcome)
     {
-        OracleIdentifier memory oracleIdentifier = oracleIdentifiers[eventIdentifier];
-        Oracle[] memory oracles = oracleIdentifier.oracles;
-        bytes32[] memory eventIdentifiers = oracleIdentifier.eventIdentifiers;
         uint i;
         int[] memory outcomes = new int[](oracles.length);
         uint[] memory validations = new uint[](oracles.length);
         for (i=0; i<oracles.length; i++)
-            if (oracles[i].isOutcomeSet(eventIdentifiers[i])) {
-                int _outcome = oracles[i].getOutcome(eventIdentifiers[i]);
+            if (oracles[i].isOutcomeSet()) {
+                int _outcome = oracles[i].getOutcome();
                 for (uint j=0; j<=i; j++)
                     if (_outcome == outcomes[j]) {
                         validations[j] += 1;
@@ -83,26 +67,24 @@ contract MajorityOracle is Oracle {
     }
 
     /// @dev Returns if winning outcome is set for given event.
-    /// @param eventIdentifier Event identifier.
     /// @return Returns if outcome is set.
-    function isOutcomeSet(bytes32 eventIdentifier)
+    function isOutcomeSet()
         public
         constant
         returns (bool)
     {
-        var (outcomeSet, ) = getStatusAndOutcome(eventIdentifier);
+        var (outcomeSet, ) = getStatusAndOutcome();
         return outcomeSet;
     }
 
     /// @dev Returns winning outcome for given event.
-    /// @param eventIdentifier Event identifier.
     /// @return Returns outcome.
-    function getOutcome(bytes32 eventIdentifier)
+    function getOutcome()
         public
         constant
         returns (int)
     {
-        var (, winningOutcome) = getStatusAndOutcome(eventIdentifier);
+        var (, winningOutcome) = getStatusAndOutcome();
         return winningOutcome;
     }
 }

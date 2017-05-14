@@ -23,7 +23,7 @@ contract DifficultyOracleFactory {
     {
         bytes32 difficultyOracleHash = keccak256(blockNumber);
         if (address(difficultyOracles[difficultyOracleHash]) != 0)
-            // Ultimate oracle exists already
+            // Difficulty oracle exists already
             revert();
         difficultyOracle = new DifficultyOracle(blockNumber);
         difficultyOracles[difficultyOracleHash] = difficultyOracle;
