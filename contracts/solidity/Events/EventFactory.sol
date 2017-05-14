@@ -49,7 +49,6 @@ contract EventFactory {
         );
         categoricalEvents[eventHash] = eventContract;
         CategoricalEventCreation(msg.sender, eventHash, eventContract);
-        return eventContract;
     }
 
     /// @dev Creates a new scalar event and adds it to the event mapping.
@@ -82,6 +81,5 @@ contract EventFactory {
         );
         scalarEvents[eventHash] = eventContract;
         ScalarEventCreation(msg.sender, eventHash, eventContract);
-        return eventContract;
     }
 }

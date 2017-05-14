@@ -30,6 +30,5 @@ contract MarketFactory {
             revert();
         market = new DefaultMarket(eventContract, marketMaker, fee, funding);
         markets[marketHash] = market;
-        return market;
     }
 }

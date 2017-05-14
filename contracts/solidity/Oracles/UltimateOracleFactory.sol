@@ -46,6 +46,5 @@ contract UltimateOracleFactory {
             frontRunnerPeriod
         );
         ultimateOracles[ultimateOracleHash] = ultimateOracle;
-        return ultimateOracle;
     }
 }
