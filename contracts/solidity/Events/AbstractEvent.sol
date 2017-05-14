@@ -100,6 +100,18 @@ contract Event {
         return outcomeTokens;
     }
 
+    /// @dev Returns the amount of outcome tokens held by owner.
+    /// @return Outcome token distribution.
+    function getOutcomeTokenDistribution(address owner)
+        public
+        constant
+        returns (uint[] outcomeTokenDistribution)
+    {
+        outcomeTokenDistribution = new uint[](outcomeTokens.length);
+        for (uint8 i=0; i<outcomeTokenDistribution.length; i++)
+            outcomeTokenDistribution[i] = outcomeTokens[i].balanceOf(owner);
+    }
+
     /// @dev Calculates and returns event hash.
     /// @return Returns event hash.
     function getEventHash() public constant returns (bytes32);

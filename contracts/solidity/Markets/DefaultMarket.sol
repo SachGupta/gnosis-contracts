@@ -187,16 +187,4 @@ contract DefaultMarket is Market {
     {
         return outcomeTokenCosts * fee / FEE_RANGE;
     }
-
-    /// @dev Returns the amount of outcome tokens held by market maker.
-    /// @return Outcome token counts.
-    function getOutcomeTokenCounts()
-        public
-        constant
-        returns (uint[] outcomeTokenCounts)
-    {
-        outcomeTokenCounts = new uint[](eventContract.getOutcomeCount());
-        for (uint8 i=0; i<outcomeTokenCounts.length; i++)
-            outcomeTokenCounts[i] = eventContract.outcomeTokens(i).balanceOf(this);
-    }
 }

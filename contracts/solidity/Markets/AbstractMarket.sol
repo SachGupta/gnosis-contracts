@@ -1,9 +1,17 @@
 pragma solidity 0.4.11;
+import "Events/AbstractEvent.sol";
+import "MarketMakers/AbstractMarketMaker.sol";
 
 
 /// @title Abstract market contract - Functions to be implemented by market contracts.
 contract Market {
 
+    address public creator;
+    uint public createdAtBlock;
+    Event public eventContract;
+    MarketMaker public marketMaker;
+    uint public fee;
+    uint public funding;
     function fund(uint _funding) public;
     function close() public;
     function withdrawFees() public returns (uint);
