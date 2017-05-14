@@ -93,6 +93,8 @@ contract UltimateOracle is Oracle {
         outcomeAmounts[msg.sender][_outcome] = challengeAmount;
         totalOutcomeAmounts[_outcome] = challengeAmount;
         totalAmount = challengeAmount;
+        frontRunner = _outcome;
+        frontRunnerSetTimestamp = now;
     }
 
     /// @dev Allows to challenge the oracle outcome.
