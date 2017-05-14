@@ -1,10 +1,11 @@
 pragma solidity 0.4.11;
+import "Markets/AbstractMarketFactory.sol";
 import "Markets/DefaultMarket.sol";
 
 
 /// @title Market factory contract - Allows to create market contracts.
 /// @author Stefan George - <stefan@gnosis.pm>
-contract MarketFactory {
+contract DefaultMarketFactory is MarketFactory {
 
     /*
      *  Storage
