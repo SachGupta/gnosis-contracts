@@ -32,6 +32,8 @@ class AbstractTestContract(TestCase):
         sub_dirs = [x[0] for x in walk(abs_contract_path)]
         extra_args = ' '.join(['{}={}'.format(d.split('/')[-1], d) for d in sub_dirs])
         path = '{}/{}'.format(abs_contract_path, path)
+        if params:
+            params = [x.address if isinstance(x, t.ABIContract) else x for x in params]
         if libraries:
             for name, address in libraries.iteritems():
                 if type(address) == str:
