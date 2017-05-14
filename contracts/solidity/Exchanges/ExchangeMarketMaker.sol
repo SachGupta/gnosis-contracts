@@ -6,7 +6,7 @@ import "Utils/Math.sol";
 /// @title Currency exchange backed by holdings
 /// @author Alan Lu <alan.lu@gnosis.pm>
 /// @author Stefan George <stefan@gnosis.pm>
-contract ERC20ExchangeMarketMaker {
+contract ExchangeMarketMaker {
 
     /*
      *  Constants
