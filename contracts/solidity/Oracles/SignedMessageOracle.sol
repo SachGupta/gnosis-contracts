@@ -2,9 +2,9 @@ pragma solidity 0.4.11;
 import "Oracles/AbstractOracle.sol";
 
 
-/// @title Off-chain oracle contract - Allows to set an outcome with a signed message.
+/// @title Signed message oracle contract - Allows to set an outcome with a signed message.
 /// @author Stefan George - <stefan@gnosis.pm>
-contract OffChainOracle is Oracle {
+contract SignedMessageOracle is Oracle {
 
     /*
      *  Storage
