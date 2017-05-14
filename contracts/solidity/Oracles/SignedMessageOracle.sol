@@ -9,29 +9,34 @@ contract SignedMessageOracle is Oracle {
     /*
      *  Storage
      */
-    mapping (bytes32 => Result) public results;
-
-    struct Result {
-        bool isSet;
-        int outcome;
-        bytes32 replacement;
-    }
+    address oracle;
+    address replacement;
+    bool isSet;
+    int outcome;
 
     /*
      *  Public functions
      */
-    /// @dev Replaces oracle/signing private key for an oracle.
+    /// @dev Constructor sets oracle address based on signature.
     /// @param descriptionHash Hash identifying off chain event description.
-    /// @param oracle New oracle.
-    function replaceOracle(bytes32 descriptionHash, address oracle)
+    /// @param v Signature parameter.
+    /// @param r Signature parameter.
+    /// @param s Signature parameter.
+    function SignedMessageOracle(bytes32 descriptionHash, uint8 v, bytes32 r, bytes32 s)
         public
     {
-        bytes32 _eventIdentifier = keccak256(msg.sender, descriptionHash);
-        if (results[_eventIdentifier].isSet)
-            // Result was set already
+        oracle = ecrecover(descriptionHash, v, r, s);
+    }
+
+    /// @dev Replaces oracle/signing private key for an oracle.
+    /// @param _oracle New oracle.
+    function replaceOracle(address _oracle)
+        public
+    {
+        if (isSet || msg.sender != oracle)
+            // Result was set already or sender is not registered oracle
             revert();
-        bytes32 newEventIdentifier = keccak256(oracle, descriptionHash);
-        results[_eventIdentifier].replacement = newEventIdentifier;
+        replacement = _oracle;
     }
 
     /// @dev Sets outcome based on signed message.
@@ -43,49 +48,33 @@ contract SignedMessageOracle is Oracle {
     function setOutcome(bytes32 descriptionHash, int outcome, uint8 v, bytes32 r, bytes32 s)
         public
     {
-        address oracle = ecrecover(keccak256(descriptionHash, outcome), v, r, s);
-        bytes32 eventIdentifier = keccak256(oracle, descriptionHash);
-        if (results[eventIdentifier].isSet)
-            // Result was set already
+        address _oracle = ecrecover(keccak256(descriptionHash, outcome), v, r, s);
+        if (isSet || _oracle != oracle)
+            // Result was set already or result was not signed by registered oracle
             revert();
-        results[eventIdentifier].isSet = true;
-        results[eventIdentifier].outcome = outcome;
-    }
-
-    /// @dev Returns final event identifier after all recursive replacements are done.
-    /// @param eventIdentifier Event identifier.
-    /// @return Returns final event identifier.
-    function getEventIdentifier(bytes32 eventIdentifier)
-        public
-        constant
-        returns (bytes32)
-    {
-        if (results[eventIdentifier].replacement != 0)
-            return getEventIdentifier(eventIdentifier);
-        return eventIdentifier;
+        isSet = true;
+        outcome = outcome;
     }
 
     /// @dev Returns if winning outcome is set for given event.
-    /// @param eventIdentifier Event identifier.
     /// @return Returns if outcome is set.
-    function isOutcomeSet(bytes32 eventIdentifier)
+    function isOutcomeSet()
         public
         constant
         returns (bool)
     {
-        eventIdentifier = getEventIdentifier(eventIdentifier);
-        return results[eventIdentifier].isSet;
+        if (replacement == 0)
+            return isSet;
+        return Oracle(replacement).isOutcomeSet();
     }
 
     /// @dev Returns winning outcome for given event.
-    /// @param eventIdentifier Event identifier.
     /// @return Returns outcome.
-    function getOutcome(bytes32 eventIdentifier)
+    function getOutcome()
         public
         constant
         returns (int)
     {
-        eventIdentifier = getEventIdentifier(eventIdentifier);
-        return results[eventIdentifier].outcome;
+        return outcome;
     }
 }
