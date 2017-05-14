@@ -3,24 +3,26 @@ import "Events/AbstractEvent.sol";
 import "Markets/DefaultMarketFactory.sol";
 
 
+/// @title Campaign contract - Allows to crowdfund a market.
+/// @author Stefan George - <stefan@gnosis.pm>
 contract Campaign {
 
     /*
      *  Constants
      */
-    uint constant FEE_RANGE = 1000000; // 100%
+    uint public constant FEE_RANGE = 1000000; // 100%
 
     /*
      *  Storage
      */
-    Event eventContract;
-    MarketFactory marketFactory;
-    MarketMaker marketMaker;
-    Market market;
-    uint fee;
-    uint funding;
-    uint deadline;
-    mapping (address => uint) contributions;
+    Event public eventContract;
+    MarketFactory public marketFactory;
+    MarketMaker public marketMaker;
+    Market public market;
+    uint public fee;
+    uint public funding;
+    uint public deadline;
+    mapping (address => uint) public contributions;
     Stages public stage;
 
     enum Stages {

@@ -15,7 +15,7 @@ contract OutcomeToken is StandardTokenWithOverflowProtection {
     /*
      *  Storage
      */
-    address eventContract;
+    address public eventContract;
 
     /*
      *  Modifiers

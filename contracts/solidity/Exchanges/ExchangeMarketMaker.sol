@@ -12,15 +12,15 @@ contract ExchangeMarketMaker {
      *  Constants
      */
     // Duration of price ramp
-    uint constant PRICE_RAMP_DURATION = 24 * 60 * 60;
+    uint public constant PRICE_RAMP_DURATION = 24 * 60 * 60;
     // Duration of price lock (See: http://ethereum.stackexchange.com/a/6796)
-    uint constant PRICE_LOCK_DURATION = 15 * 60;
+    uint public constant PRICE_LOCK_DURATION = 15 * 60;
 
     /*
      *  Storage
      */
     // A mapping from exchange identifiers to their corresponding Exchange struct instances
-    mapping (bytes32 => Exchange) exchanges;
+    mapping (bytes32 => Exchange) public exchanges;
 
     // Exchange structure
     struct Exchange {

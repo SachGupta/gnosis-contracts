@@ -73,7 +73,7 @@ contract LMSRMarketMaker is MarketMaker {
     /// @param funding Initial funding for market.
     /// @return Returns costs.
     function calcCurrentCosts(uint invB, uint[2] outcomeTokenRange, uint[] outcomeTokenDistribution, uint funding)
-        private
+        public
         returns(uint costs)
     {
         uint innerSum = 0;
@@ -87,7 +87,7 @@ contract LMSRMarketMaker is MarketMaker {
     /// @param market Market contract.
     /// @return Returns Outcome tokens owned by market.
     function getOutcomeTokenDistribution(Market market)
-        private
+        public
         returns (uint[] outcomeTokenDistribution)
     {
         outcomeTokenDistribution = new uint[](market.eventContract().getOutcomeCount());
@@ -98,7 +98,7 @@ contract LMSRMarketMaker is MarketMaker {
     /// @dev Returns lowest and highest number of outcome tokens owned by market.
     /// @return Returns lowest and highest number of outcome tokens.
     function getOutcomeTokenRange(uint[] outcomeTokenDistribution)
-        private
+        public
         returns (uint[2] outcomeTokenRange)
     {
         // Lowest shares

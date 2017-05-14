@@ -9,7 +9,7 @@ contract MajorityOracle is Oracle {
     /*
      *  Storage
      */
-    mapping (bytes32 => OracleIdentifier) oracleIdentifiers;
+    mapping (bytes32 => OracleIdentifier) public oracleIdentifiers;
 
     struct OracleIdentifier {
         Oracle[] oracles;
