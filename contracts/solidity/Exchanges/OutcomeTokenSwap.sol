@@ -122,7 +122,7 @@ contract OutcomeTokenSwap {
             || !tokens[MAKER].transferFrom(traders[MAKER], this, amounts[MAKER])
             || !tokens[TAKER].transfer(traders[MAKER], amounts[TAKER])
             || !tokens[MAKER].transfer(traders[TAKER], amounts[MAKER]))
-            throw;
+            revert();
     }
 
     /*

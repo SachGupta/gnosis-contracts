@@ -78,7 +78,7 @@ contract Campaign {
             || _funding == 0
             || deadline < now)
             // Invalid arguments
-            throw;
+            revert();
         eventContract = _eventContract;
         marketFactory = _marketFactory;
         marketMaker = _marketMaker;
@@ -99,7 +99,7 @@ contract Campaign {
         if (maxAmount < amount)
             amount = maxAmount;
         if (!eventContract.collateralToken().transferFrom(msg.sender, this, amount))
-            throw;
+            revert();
         contributions[msg.sender] += amount;
     }
 
@@ -115,7 +115,7 @@ contract Campaign {
         contributions[msg.sender] = 0;
         if (!eventContract.collateralToken().transfer(msg.sender, refundAmount))
             // Refund failed
-            throw;
+            revert();
     }
 
     /// @dev Allows to create market after successful funding.
@@ -152,6 +152,6 @@ contract Campaign {
         contributions[msg.sender] = 0;
         if (!eventContract.collateralToken().transfer(msg.sender, fees))
             // Transfer failed
-            throw;
+            revert();
     }
 }

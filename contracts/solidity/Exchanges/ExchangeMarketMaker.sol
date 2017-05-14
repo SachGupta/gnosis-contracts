@@ -43,10 +43,10 @@ contract ExchangeMarketMaker {
     {
         exchangeIdentifier = calcExchangeIdentifier(tokens);
         if (exchanges[exchangeIdentifier].tokens.length > 0)
-            throw;
+            revert();
         if (   !Token(tokens[0]).transferFrom(msg.sender, this, supplies[0])
             || !Token(tokens[1]).transferFrom(msg.sender, this, supplies[1]))
-            throw;
+            revert();
         exchanges[exchangeIdentifier] = Exchange({
             tokens: tokens,
             supplies: supplies,
@@ -65,7 +65,7 @@ contract ExchangeMarketMaker {
     {
         Exchange ex = exchanges[exchangeIdentifier];
         if (!Token(ex.tokens[tokenIndex]).transferFrom(msg.sender, this, amount))
-            throw;
+            revert();
         ex.lastPricePoint = getPricePoint(exchangeIdentifier);
         ex.lastUpdateTimestamp = now;
         ex.supplies[tokenIndex] += amount;
@@ -83,9 +83,9 @@ contract ExchangeMarketMaker {
         Exchange ex = exchanges[exchangeIdentifier];
         uint8 paymentTokenIndex = 1 - tokenIndex;
         if (!Token(ex.tokens[paymentTokenIndex]).transferFrom(msg.sender, this, amount))
-            throw;
+            revert();
         if (!Token(ex.tokens[tokenIndex]).transfer(msg.sender, amount))
-            throw;
+            revert();
         ex.lastPricePoint = getPricePoint(exchangeIdentifier);
         ex.lastUpdateTimestamp = now;
         ex.supplies[paymentTokenIndex] += costs;
@@ -138,13 +138,13 @@ contract ExchangeMarketMaker {
     {
         Exchange ex = exchanges[exchangeIdentifier];
         if (ex.supplies[tokenIndex] <= amount)
-            throw;
+            revert();
         uint invariant = ex.supplies[0] * ex.supplies[1];
         uint minuend = invariant / (ex.supplies[tokenIndex] - amount);
         uint8 paymentTokenIndex = 1 - tokenIndex;
         uint subtrahend = ex.supplies[paymentTokenIndex];
         if (subtrahend >= minuend)
-            throw;
+            revert();
         return minuend - subtrahend;
     }
 
