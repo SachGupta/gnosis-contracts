@@ -8,11 +8,6 @@ import "Markets/DefaultMarket.sol";
 contract DefaultMarketFactory is MarketFactory {
 
     /*
-     *  Storage
-     */
-    mapping (bytes32 => Market) public markets;
-
-    /*
      *  Public functions
      */
     /// @dev Creates a new market contract.
@@ -25,11 +20,7 @@ contract DefaultMarketFactory is MarketFactory {
         public
         returns (Market market)
     {
-        bytes32 marketHash = keccak256(eventContract, marketMaker, msg.sender);
-        if (address(markets[marketHash]) != 0)
-            // Market does exist already
-            revert();
         market = new DefaultMarket(eventContract, marketMaker, fee, funding);
-        markets[marketHash] = market;
+        MarketCreation(msg.sender, market, eventContract, marketMaker, fee, funding);
     }
 }

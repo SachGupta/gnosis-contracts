@@ -7,9 +7,9 @@ import "Oracles/DifficultyOracle.sol";
 contract DifficultyOracleFactory {
 
     /*
-     *  Storage
+     *  Events
      */
-    mapping (bytes32 => DifficultyOracle) public difficultyOracles;
+    event DifficultyOracleCreation(address indexed creator, DifficultyOracle difficultyOracle, uint blockNumber);
 
     /*
      *  Public functions
@@ -21,11 +21,7 @@ contract DifficultyOracleFactory {
         public
         returns (DifficultyOracle difficultyOracle)
     {
-        bytes32 difficultyOracleHash = keccak256(blockNumber);
-        if (address(difficultyOracles[difficultyOracleHash]) != 0)
-            // Difficulty oracle exists already
-            revert();
         difficultyOracle = new DifficultyOracle(blockNumber);
-        difficultyOracles[difficultyOracleHash] = difficultyOracle;
+        DifficultyOracleCreation(msg.sender, difficultyOracle, blockNumber);
     }
 }

@@ -7,9 +7,9 @@ import "Oracles/UltimateOracle.sol";
 contract UltimateOracleFactory {
 
     /*
-     *  Storage
+     *  Events
      */
-    mapping (bytes32 => UltimateOracle) public ultimateOracles;
+    event UltimateOracleCreation(address indexed creator, UltimateOracle ultimateOracle, Oracle oracle, Token collateralToken, uint challengePeriod, uint challengeAmount, uint frontRunnerPeriod);
 
     /*
      *  Public functions
@@ -31,10 +31,6 @@ contract UltimateOracleFactory {
         public
         returns (UltimateOracle ultimateOracle)
     {
-        bytes32 ultimateOracleHash = keccak256(oracle, collateralToken, challengePeriod, challengeAmount, frontRunnerPeriod);
-        if (address(ultimateOracles[ultimateOracleHash]) != 0)
-            // Ultimate oracle exists already
-            revert();
         ultimateOracle = new UltimateOracle(
             oracle,
             collateralToken,
@@ -42,6 +38,6 @@ contract UltimateOracleFactory {
             challengeAmount,
             frontRunnerPeriod
         );
-        ultimateOracles[ultimateOracleHash] = ultimateOracle;
+        UltimateOracleCreation(msg.sender, ultimateOracle, oracle, collateralToken, challengePeriod, challengeAmount, frontRunnerPeriod);
     }
 }

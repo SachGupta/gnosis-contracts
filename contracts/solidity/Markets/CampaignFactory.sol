@@ -7,9 +7,9 @@ import "Markets/Campaign.sol";
 contract CampaignFactory {
 
     /*
-     *  Storage
+     *  Events
      */
-    mapping (bytes32 => Campaign) public campaigns;
+    event CampaignCreation(address indexed creator, Campaign campaign, Event eventContract, MarketFactory marketFactory, MarketMaker marketMaker, uint fee, uint funding, uint deadline);
 
     /*
      *  Public functions
@@ -33,11 +33,7 @@ contract CampaignFactory {
         public
         returns (Campaign campaign)
     {
-        bytes32 campaignHash = keccak256(eventContract, marketFactory, marketMaker, fee, funding, deadline);
-        if (address(campaigns[campaignHash]) != 0)
-            // Campaign does exist already
-            revert();
         campaign = new Campaign(eventContract, marketFactory, marketMaker, fee, funding, deadline);
-        campaigns[campaignHash] = campaign;
+        CampaignCreation(msg.sender, campaign, eventContract, marketFactory, marketMaker, fee, funding, deadline);
     }
 }

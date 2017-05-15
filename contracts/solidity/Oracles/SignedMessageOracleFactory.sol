@@ -7,9 +7,9 @@ import "Oracles/SignedMessageOracle.sol";
 contract SignedMessageOracleFactory {
 
     /*
-     *  Storage
+     *  Events
      */
-    mapping (bytes32 => SignedMessageOracle) public signedMessageOracles;
+    event SignedMessageOracleCreation(address indexed creator, SignedMessageOracle signedMessageOracle, address oracle);
 
     /*
      *  Public functions
@@ -24,11 +24,8 @@ contract SignedMessageOracleFactory {
         public
         returns (SignedMessageOracle signedMessageOracle)
     {
-        bytes32 signedMessageOracleHash = keccak256(descriptionHash, v, r, s);
-        if (address(signedMessageOracles[signedMessageOracleHash]) != 0)
-            // Signed message oracle exists already
-            revert();
         signedMessageOracle = new SignedMessageOracle(descriptionHash, v, r, s);
-        signedMessageOracles[signedMessageOracleHash] = signedMessageOracle;
+        address oracle = ecrecover(descriptionHash, v, r, s);
+        SignedMessageOracleCreation(msg.sender, signedMessageOracle, oracle);
     }
 }

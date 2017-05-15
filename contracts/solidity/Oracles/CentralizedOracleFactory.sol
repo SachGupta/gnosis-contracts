@@ -7,9 +7,9 @@ import "Oracles/CentralizedOracle.sol";
 contract CentralizedOracleFactory {
 
     /*
-     *  Storage
+     *  Events
      */
-    mapping (bytes32 => CentralizedOracle) public centralizedOracles;
+    event CentralizedOracleCreation(address indexed creator, CentralizedOracle centralizedOracle, bytes32 descriptionHash);
 
     /*
      *  Public functions
@@ -21,11 +21,7 @@ contract CentralizedOracleFactory {
         public
         returns (CentralizedOracle centralizedOracle)
     {
-        bytes32 centralizedOracleHash = keccak256(descriptionHash, msg.sender);
-        if (address(centralizedOracles[centralizedOracleHash]) != 0)
-            // Centralized oracle exists already
-            revert();
         centralizedOracle = new CentralizedOracle(descriptionHash);
-        centralizedOracles[centralizedOracleHash] = centralizedOracle;
+        CentralizedOracleCreation(msg.sender, centralizedOracle, descriptionHash);
     }
 }

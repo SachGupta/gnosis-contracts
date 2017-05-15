@@ -7,10 +7,27 @@ import "Oracles/FutarchyOracle.sol";
 contract FutarchyOracleFactory {
 
     /*
+     *  Events
+     */
+    event FutarchyOracleCreation(
+        address indexed creator,
+        FutarchyOracle futarchyOracle,
+        Token collateralToken,
+        Oracle oracle,
+        uint8 outcomeCount,
+        int lowerBound,
+        int upperBound,
+        MarketFactory marketFactory,
+        MarketMaker marketMaker,
+        uint fee,
+        uint funding,
+        uint deadline
+    );
+
+    /*
      *  Storage
      */
     EventFactory eventFactory;
-    mapping (bytes32 => FutarchyOracle) public futarchyOracles;
 
     /*
      *  Public functions
@@ -38,7 +55,7 @@ contract FutarchyOracleFactory {
     /// @param funding Initial funding for market.
     /// @param deadline Decision deadline.
     /// @return Returns oracle contract.
-    function createUltimateOracle(
+    function createFutarchyOracle(
         Token collateralToken,
         Oracle oracle,
         uint8 outcomeCount,
@@ -53,10 +70,6 @@ contract FutarchyOracleFactory {
         public
         returns (FutarchyOracle futarchyOracle)
     {
-        bytes32 futarchyOracleHash = keccak256(collateralToken, oracle, outcomeCount, lowerBound, upperBound, marketFactory, marketMaker, fee, funding, deadline);
-        if (address(futarchyOracles[futarchyOracleHash]) != 0)
-            // Futarchy oracle exists already
-            revert();
         futarchyOracle = new FutarchyOracle(
             eventFactory,
             collateralToken,
@@ -70,6 +83,19 @@ contract FutarchyOracleFactory {
             funding,
             deadline
         );
-        futarchyOracles[futarchyOracleHash] = futarchyOracle;
+        FutarchyOracleCreation(
+            msg.sender,
+            futarchyOracle,
+            collateralToken,
+            oracle,
+            outcomeCount,
+            lowerBound,
+            upperBound,
+            marketFactory,
+            marketMaker,
+            fee,
+            funding,
+            deadline
+        );
     }
 }

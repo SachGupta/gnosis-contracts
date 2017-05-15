@@ -7,9 +7,9 @@ import "Oracles/MajorityOracle.sol";
 contract MajorityOracleFactory {
 
     /*
-     *  Storage
+     *  Events
      */
-    mapping (bytes32 => MajorityOracle) public majorityOracles;
+    event MajorityOracleCreation(address indexed creator, MajorityOracle majorityOracle, Oracle[] oracles);
 
     /*
      *  Public functions
@@ -21,11 +21,7 @@ contract MajorityOracleFactory {
         public
         returns (MajorityOracle majorityOracle)
     {
-        bytes32 majorityOracleHash = keccak256(oracles);
-        if (address(majorityOracles[majorityOracleHash]) != 0)
-            // Majority oracle exists already
-            revert();
         majorityOracle = new MajorityOracle(oracles);
-        majorityOracles[majorityOracleHash] = majorityOracle;
+        MajorityOracleCreation(msg.sender, majorityOracle, oracles);
     }
 }
