@@ -1,4 +1,4 @@
-from ..abstract_test import AbstractTestContract, accounts, keys
+from ..abstract_test import AbstractTestContract, accounts
 
 
 class TestContract(AbstractTestContract):
@@ -14,15 +14,6 @@ class TestContract(AbstractTestContract):
         self.ether_token = self.create_contract('Tokens/EtherToken.sol', libraries={'Math': self.math})
         self.event_abi = self.create_abi('Events/AbstractEvent.sol')
         self.token_abi = self.create_abi('Tokens/AbstractToken.sol')
-
-    def send(self, to, abi, func, params=None, value=0, sender=None):
-        result = abi.decode(
-            func,
-            self.s.send(
-                keys[sender if sender else 0], to, value, abi.encode(func, params)
-            )
-        )
-        return result[0] if len(result) == 1 else result
 
     def test(self):
         # Create event
