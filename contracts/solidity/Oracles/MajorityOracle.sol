@@ -9,7 +9,7 @@ contract MajorityOracle is Oracle {
     /*
      *  Storage
      */
-    Oracle[] oracles;
+    Oracle[] public oracles;
 
     /*
      *  Public functions

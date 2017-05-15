@@ -9,8 +9,8 @@ contract DifficultyOracle is Oracle {
     /*
      *  Storage
      */
-    uint blockNumber;
-    int outcome;
+    uint public blockNumber;
+    int public outcome;
 
     /*
      *  Public functions
