@@ -2,7 +2,7 @@
 from contracts import ROOT_DIR
 # ethereum pacakge
 from ethereum import tester as t
-from ethereum.tester import keys, accounts, TransactionFailed
+from ethereum.tester import keys, accounts, TransactionFailed, ABIContract
 from ethereum import _solidity
 from ethereum.abi import ContractTranslator
 # standard libraries
@@ -37,14 +37,8 @@ class AbstractTestContract(TestCase):
         path = '{}/{}'.format(abs_contract_path, path)
         return path, extra_args
 
-    def send(self, to, abi, func, params=None, value=0, sender=None):
-        result = abi.decode(
-            func,
-            self.s.send(
-                keys[sender if sender else 0], to, value, abi.encode(func, params)
-            )
-        )
-        return result[0] if len(result) == 1 else result
+    def contract_at(self, abi, address):
+        return ABIContract(self.s, abi, address)
 
     def create_abi(self, path, libraries=None):
         path, extra_args = self.get_dirs(path)

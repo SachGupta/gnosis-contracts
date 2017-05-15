@@ -19,25 +19,24 @@ class TestContract(AbstractTestContract):
         # Create event
         description_hash = "1"
         oracle = self.centralized_oracle_factory.createCentralizedOracle(description_hash)
-        event = self.event_factory.createCategoricalEvent(self.ether_token.address, oracle, 2)
+        event_address = self.event_factory.createCategoricalEvent(self.ether_token.address, oracle, 2)
+        event = self.contract_at(self.event_abi, event_address)
         # Buy all outcomes
         buyer = 0
         collateral_token_count = 10
         self.ether_token.deposit(value=collateral_token_count)
         self.assertEqual(self.ether_token.balanceOf(accounts[buyer]), collateral_token_count)
-        self.ether_token.approve(event, collateral_token_count)
-        self.send(event, self.event_abi, 'buyAllOutcomes', [collateral_token_count])
-        self.assertEqual(self.ether_token.balanceOf(event), collateral_token_count)
+        self.ether_token.approve(event_address, collateral_token_count)
+        event.buyAllOutcomes(collateral_token_count)
+        self.assertEqual(self.ether_token.balanceOf(event_address), collateral_token_count)
         self.assertEqual(self.ether_token.balanceOf(accounts[buyer]), 0)
-        outcome_token_1 = self.send(event, self.event_abi, 'outcomeTokens', [0])
-        outcome_token_2 = self.send(event, self.event_abi, 'outcomeTokens', [1])
-        self.assertEqual(self.send(outcome_token_1, self.token_abi, 'balanceOf', [accounts[buyer]]),
-                         collateral_token_count)
-        self.assertEqual(self.send(outcome_token_2, self.token_abi, 'balanceOf', [accounts[buyer]]),
-                         collateral_token_count)
+        outcome_token_1 = self.contract_at(self.token_abi, event.outcomeTokens(0))
+        outcome_token_2 = self.contract_at(self.token_abi, event.outcomeTokens(1))
+        self.assertEqual(outcome_token_1.balanceOf(accounts[buyer]), collateral_token_count)
+        self.assertEqual(outcome_token_2.balanceOf(accounts[buyer]), collateral_token_count)
         # Sell all outcomes
-        self.send(event, self.event_abi, 'sellAllOutcomes', [collateral_token_count])
+        event.sellAllOutcomes(collateral_token_count)
         self.assertEqual(self.ether_token.balanceOf(accounts[buyer]), collateral_token_count)
-        self.assertEqual(self.ether_token.balanceOf(event), 0)
-        self.assertEqual(self.send(outcome_token_1, self.token_abi, 'balanceOf', [accounts[buyer]]), 0)
-        self.assertEqual(self.send(outcome_token_2, self.token_abi, 'balanceOf', [accounts[buyer]]), 0)
+        self.assertEqual(self.ether_token.balanceOf(event_address), 0)
+        self.assertEqual(outcome_token_1.balanceOf(accounts[buyer]), 0)
+        self.assertEqual(outcome_token_2.balanceOf(accounts[buyer]), 0)
