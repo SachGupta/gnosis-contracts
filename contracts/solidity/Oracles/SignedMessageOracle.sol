@@ -52,20 +52,19 @@ contract SignedMessageOracle is Oracle {
     }
 
     /// @dev Sets outcome based on signed message.
-    /// @param descriptionHash Hash identifying off chain event description.
-    /// @param outcome Signed event outcome.
+    /// @param _outcome Signed event outcome.
     /// @param v Signature parameter.
     /// @param r Signature parameter.
     /// @param s Signature parameter.
-    function setOutcome(bytes32 descriptionHash, int outcome, uint8 v, bytes32 r, bytes32 s)
+    function setOutcome(int _outcome, uint8 v, bytes32 r, bytes32 s)
         public
     {
-        address _oracle = ecrecover(keccak256(descriptionHash, outcome), v, r, s);
+        address _oracle = ecrecover(keccak256(descriptionHash, _outcome), v, r, s);
         if (isSet || _oracle != oracle)
             // Result was set already or result was not signed by registered oracle
             revert();
         isSet = true;
-        outcome = outcome;
+        outcome = _outcome;
     }
 
     /// @dev Returns if winning outcome is set for given event.
