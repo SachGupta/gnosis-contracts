@@ -37,7 +37,7 @@ contract EtherToken is StandardTokenWithOverflowProtection {
     function withdraw(uint amount)
         public
     {
-        if (!safeToSubtract(balances[msg.sender], amount))
+        if (!Math.safeToSubtract(balances[msg.sender], amount))
             // Overflow operation
             revert();
         balances[msg.sender] -= amount;
