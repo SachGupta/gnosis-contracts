@@ -9,34 +9,46 @@ contract SignedMessageOracle is Oracle {
     /*
      *  Storage
      */
-    address oracle;
-    address replacement;
-    bool isSet;
-    int outcome;
+    address public oracle;
+    bytes32 public descriptionHash;
+    bool public isSet;
+    int public outcome;
+
+    /*
+     *  Modifiers
+     */
+    modifier isOracle () {
+        if (msg.sender != oracle)
+            // Only oracle contract is allowed to proceed.
+            revert();
+        _;
+    }
 
     /*
      *  Public functions
      */
     /// @dev Constructor sets oracle address based on signature.
-    /// @param descriptionHash Hash identifying off chain event description.
+    /// @param _descriptionHash Hash identifying off chain event description.
     /// @param v Signature parameter.
     /// @param r Signature parameter.
     /// @param s Signature parameter.
-    function SignedMessageOracle(bytes32 descriptionHash, uint8 v, bytes32 r, bytes32 s)
+    function SignedMessageOracle(bytes32 _descriptionHash, uint8 v, bytes32 r, bytes32 s)
         public
     {
-        oracle = ecrecover(descriptionHash, v, r, s);
+        oracle = ecrecover(_descriptionHash, v, r, s);
+        descriptionHash = _descriptionHash;
     }
 
     /// @dev Replaces oracle/signing private key for an oracle.
     /// @param _oracle New oracle.
     function replaceOracle(address _oracle)
         public
+        isOracle
     {
-        if (isSet || msg.sender != oracle)
+        if (isSet)
             // Result was set already or sender is not registered oracle
             revert();
-        replacement = _oracle;
+        oracle = _oracle;
     }
 
     /// @dev Sets outcome based on signed message.
@@ -63,9 +75,7 @@ contract SignedMessageOracle is Oracle {
         constant
         returns (bool)
     {
-        if (replacement == 0)
-            return isSet;
-        return Oracle(replacement).isOutcomeSet();
+        return isSet;
     }
 
     /// @dev Returns winning outcome for given event.
