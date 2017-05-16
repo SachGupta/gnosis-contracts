@@ -36,7 +36,7 @@ contract ScalarEvent is Event {
         public
         Event(_collateralToken, _oracle, 2)
     {
-        if (upperBound <= lowerBound)
+        if (_upperBound <= _lowerBound)
             // Bounds are invalid
             revert();
         lowerBound = _lowerBound;
