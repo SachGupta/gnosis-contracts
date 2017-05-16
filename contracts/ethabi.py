@@ -1,12 +1,7 @@
-from ethjsonrpc import EthJsonRpc
-from ethereum.abi import ContractTranslator
-from ethereum.transactions import Transaction
-from ethereum.utils import privtoaddr
 from ethereum import _solidity
+from subprocess import CalledProcessError
 import click
-import time
 import json
-import rlp
 import logging
 import os
 
@@ -33,19 +28,24 @@ class EthABI:
     def log(string):
         logger.info(string)
 
-    def compile_code(self, code=None, path=None):
+    @staticmethod
+    def get_file_name(file_path):
+        return file_path.split("/")[-1].split(".")[0]
+
+    def create_abi(self, file_path):
         # create list of valid paths
         absolute_path = self.contract_dir if self.contract_dir.startswith('/') else '{}/{}'.format(os.getcwd(),
                                                                                                    self.contract_dir)
         sub_dirs = [x[0] for x in os.walk(absolute_path)]
         extra_args = ' '.join(['{}={}'.format(d.split('/')[-1], d) for d in sub_dirs])
-        # compile code
-        combined = self.solidity.combined(code, path=path, extra_args=extra_args)
-        abi = combined[-1][1]['abi']
-        return abi
+        try:
+            return self.solidity.mk_full_signature(None, path=file_path, libraries=None, extra_args=extra_args)
+        except CalledProcessError:
+            file_name = self.get_file_name(file_path)
+            logger.error('Error: {} ABI not generated.'.format(file_name))
 
     def save_abi(self, file_path, abi):
-        file_name = file_path.split("/")[-1].split(".")[0]
+        file_name = self.get_file_name(file_path)
         with open('{}/{}.json'.format(self.abi_dir, file_name), 'w+') as abi_file:
             abi_file.write(json.dumps(abi))
             abi_file.close()
@@ -53,15 +53,15 @@ class EthABI:
 
     def process(self):
         if self.f:
-            abi = self.compile_code(None, path=self.f)
+            abi = self.create_abi(self.f)
             if abi:
                 self.save_abi(self.f, abi)
         else:
             for root, directories, files in os.walk(self.contract_dir):
-                for filename in files:
-                    if filename.endswith('.sol'):
-                        file_path = os.path.join(root, filename)
-                        abi = self.compile_code(None, path=file_path)
+                for file_name in files:
+                    if file_name.endswith('.sol'):
+                        file_path = os.path.join(root, file_name)
+                        abi = self.create_abi(file_path)
                         if abi:
                             self.save_abi(file_path, abi)
 
