@@ -38,7 +38,7 @@ class AbstractTestContract(TestCase):
         return path, extra_args
 
     def contract_at(self, abi, address):
-        return ABIContract(self.s, abi, address)
+        return ABIContract(self.s, address, abi)
 
     def create_abi(self, path, libraries=None):
         path, extra_args = self.get_dirs(path)

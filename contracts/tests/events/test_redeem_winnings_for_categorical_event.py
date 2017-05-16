@@ -21,8 +21,8 @@ class TestContract(AbstractTestContract):
         description_hash = "1"
         oracle_address = self.centralized_oracle_factory.createCentralizedOracle(description_hash)
         event_address = self.event_factory.createCategoricalEvent(self.ether_token.address, oracle_address, 2)
-        event = self.contract_at(self.event_abi, event_address)
-        oracle = self.contract_at(self.oracle_abi, oracle_address)
+        event = self.contract_at(event_address, self.event_abi)
+        oracle = self.contract_at(oracle_address, self.oracle_abi)
         # Get ether tokens
         buyer = 0
         collateral_token_count = 10
@@ -33,8 +33,8 @@ class TestContract(AbstractTestContract):
         event.buyAllOutcomes(collateral_token_count, sender=keys[buyer])
         self.assertEqual(self.ether_token.balanceOf(event_address), collateral_token_count)
         self.assertEqual(self.ether_token.balanceOf(accounts[buyer]), 0)
-        outcome_token_1 = self.contract_at(self.token_abi, event.outcomeTokens(0))
-        outcome_token_2 = self.contract_at(self.token_abi, event.outcomeTokens(1))
+        outcome_token_1 = self.contract_at(event.outcomeTokens(0), self.token_abi)
+        outcome_token_2 = self.contract_at(event.outcomeTokens(1), self.token_abi)
         self.assertEqual(outcome_token_1.balanceOf(accounts[buyer]), collateral_token_count)
         self.assertEqual(outcome_token_2.balanceOf(accounts[buyer]), collateral_token_count)
         # Set outcome in oracle contract

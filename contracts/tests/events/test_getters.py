@@ -19,7 +19,7 @@ class TestContract(AbstractTestContract):
         description_hash = "1"
         oracle = self.centralized_oracle_factory.createCentralizedOracle(description_hash)
         event_address = self.event_factory.createCategoricalEvent(self.ether_token.address, oracle, 2)
-        event = self.contract_at(self.event_abi, event_address)
+        event = self.contract_at(event_address, self.event_abi)
         # Buy all outcomes
         buyer = 0
         collateral_token_count = 10
