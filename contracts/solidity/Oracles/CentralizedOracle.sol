@@ -10,7 +10,7 @@ contract CentralizedOracle is Oracle {
      *  Storage
      */
     address public oracle;
-    bytes32 descriptionHash;
+    bytes32 public descriptionHash;
     bool public isSet;
     int public outcome;
 
@@ -29,13 +29,13 @@ contract CentralizedOracle is Oracle {
      */
     /// @dev Constructor sets oracle address and description hash.
     /// @param _descriptionHash Hash identifying off chain event description.
-    function CentralizedOracle(bytes32 _descriptionHash)
+    function CentralizedOracle(address _oracle, bytes32 _descriptionHash)
         public
     {
         if (_descriptionHash == 0)
             // Description hash is null
             revert();
-        oracle = msg.sender;
+        oracle = _oracle;
         descriptionHash = _descriptionHash;
     }
 
@@ -52,8 +52,8 @@ contract CentralizedOracle is Oracle {
     }
 
     /// @dev Sets event outcome.
-    /// @param outcome Event outcome.
-    function setOutcome(int outcome)
+    /// @param _outcome Event outcome.
+    function setOutcome(int _outcome)
         public
         isOracle
     {
@@ -61,7 +61,7 @@ contract CentralizedOracle is Oracle {
             // Result was set already
             revert();
         isSet = true;
-        outcome = outcome;
+        outcome = _outcome;
     }
 
     /// @dev Returns if winning outcome is set for given event.

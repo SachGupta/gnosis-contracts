@@ -3,7 +3,7 @@ from ..abstract_test import AbstractTestContract, accounts, keys
 
 class TestContract(AbstractTestContract):
     """
-    run test with python -m unittest contracts.tests.events.test_redeem_winnings
+    run test with python -m unittest contracts.tests.events.test_redeem_winnings_for_categorical_event
     """
 
     def __init__(self, *args, **kwargs):

@@ -21,7 +21,7 @@ contract CentralizedOracleFactory {
         public
         returns (CentralizedOracle centralizedOracle)
     {
-        centralizedOracle = new CentralizedOracle(descriptionHash);
+        centralizedOracle = new CentralizedOracle(msg.sender, descriptionHash);
         CentralizedOracleCreation(msg.sender, centralizedOracle, descriptionHash);
     }
 }
