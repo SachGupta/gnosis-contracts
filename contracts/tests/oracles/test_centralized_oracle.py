@@ -19,9 +19,9 @@ class TestContract(AbstractTestContract):
         oracle = self.contract_at(self.centralized_oracle_factory.createCentralizedOracle(description_hash, sender=keys[o_1]),
                                   self.oracle_abi)
         # Replace account resolving outcome
-        self.assertEqual(oracle.oracle(), accounts[o_1].encode('hex'))
-        oracle.replaceOracle(accounts[o_2], sender=keys[o_1])
-        self.assertEqual(oracle.oracle(), accounts[o_2].encode('hex'))
+        self.assertEqual(oracle.owner(), accounts[o_1].encode('hex'))
+        oracle.replaceOwner(accounts[o_2], sender=keys[o_1])
+        self.assertEqual(oracle.owner(), accounts[o_2].encode('hex'))
         # Set outcome
         self.assertRaises(TransactionFailed, oracle.setOutcome, 0, sender=keys[o_1])
         self.assertFalse(oracle.isOutcomeSet())

@@ -9,7 +9,7 @@ contract CentralizedOracle is Oracle {
     /*
      *  Storage
      */
-    address public oracle;
+    address public owner;
     bytes32 public descriptionHash;
     bool public isSet;
     int public outcome;
@@ -17,9 +17,9 @@ contract CentralizedOracle is Oracle {
     /*
      *  Modifiers
      */
-    modifier isOracle () {
-        if (msg.sender != oracle)
-            // Only oracle contract is allowed to proceed.
+    modifier isOwner () {
+        if (msg.sender != owner)
+            // Only owner is allowed to proceed.
             revert();
         _;
     }
@@ -27,35 +27,35 @@ contract CentralizedOracle is Oracle {
     /*
      *  Public functions
      */
-    /// @dev Constructor sets oracle address and description hash.
+    /// @dev Constructor sets owner address and description hash.
     /// @param _descriptionHash Hash identifying off chain event description.
-    function CentralizedOracle(address _oracle, bytes32 _descriptionHash)
+    function CentralizedOracle(address _owner, bytes32 _descriptionHash)
         public
     {
         if (_descriptionHash == 0)
             // Description hash is null
             revert();
-        oracle = _oracle;
+        owner = _owner;
         descriptionHash = _descriptionHash;
     }
 
-    /// @dev Replaces oracle.
-    /// @param _oracle New oracle.
-    function replaceOracle(address _oracle)
+    /// @dev Replaces owner.
+    /// @param _owner New owner.
+    function replaceOwner(address _owner)
         public
-        isOracle
+        isOwner
     {
         if (isSet)
             // Result was set already
             revert();
-        oracle = _oracle;
+        owner = _owner;
     }
 
     /// @dev Sets event outcome.
     /// @param _outcome Event outcome.
     function setOutcome(int _outcome)
         public
-        isOracle
+        isOwner
     {
         if (isSet)
             // Result was set already
