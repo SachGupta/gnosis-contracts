@@ -1,4 +1,4 @@
-from ..abstract_test import AbstractTestContract, keys
+from ..abstract_test import AbstractTestContract, keys, TransactionFailed
 
 
 class TestContract(AbstractTestContract):
@@ -46,8 +46,12 @@ class TestContract(AbstractTestContract):
         self.ether_token.approve(ultimate_oracle.address, 200, sender=keys[sender_2])
         ultimate_oracle.voteForOutcome(3, 200, sender=keys[sender_2])
         self.assertEqual(ultimate_oracle.frontRunner(), 3)
+        # Trying to withdraw before front runner period ends fails
+        self.assertRaises(TransactionFailed, ultimate_oracle.withdraw, sender=keys[sender_2])
         # Wait for front runner period to pass
         self.assertFalse(ultimate_oracle.isOutcomeSet())
         self.s.block.timestamp += front_runner_period + 1
         self.assertTrue(ultimate_oracle.isOutcomeSet())
         self.assertEqual(ultimate_oracle.getOutcome(), 3)
+        # Withdraw winnings
+        self.assertEqual(ultimate_oracle.withdraw(sender=keys[sender_2]), 300)

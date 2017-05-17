@@ -110,12 +110,28 @@ contract UltimateOracle is Oracle {
             revert();
         outcomeAmounts[msg.sender][_outcome] += amount;
         totalOutcomeAmounts[_outcome] += amount;
+        totalAmount += amount;
         if (   _outcome != frontRunner
             && totalOutcomeAmounts[_outcome] > totalOutcomeAmounts[frontRunner])
         {
             frontRunner = _outcome;
             frontRunnerSetTimestamp = now;
         }
+    }
+
+    /// @dev Withdraws winnings for user.
+    /// @return Returns winnings.
+    function withdraw()
+        public
+        returns (uint amount)
+    {
+        if (frontRunnerSetTimestamp == 0 || now - frontRunnerSetTimestamp <= frontRunnerPeriod)
+            revert();
+        amount = totalAmount * outcomeAmounts[msg.sender][frontRunner] / totalOutcomeAmounts[frontRunner];
+        outcomeAmounts[msg.sender][frontRunner] = 0;
+        if (!collateralToken.transfer(msg.sender, amount))
+            // Tokens could not be transferred
+            revert();
     }
 
     /// @dev Returns if winning outcome is set for given event.
