@@ -9,7 +9,7 @@ contract SignedMessageOracle is Oracle {
     /*
      *  Storage
      */
-    address public oracle;
+    address public signer;
     bytes32 public descriptionHash;
     bool public isSet;
     int public outcome;
@@ -17,9 +17,9 @@ contract SignedMessageOracle is Oracle {
     /*
      *  Modifiers
      */
-    modifier isOracle () {
-        if (msg.sender != oracle)
-            // Only oracle contract is allowed to proceed.
+    modifier isSigner () {
+        if (msg.sender != signer)
+            // Only signer is allowed to proceed.
             revert();
         _;
     }
@@ -27,7 +27,7 @@ contract SignedMessageOracle is Oracle {
     /*
      *  Public functions
      */
-    /// @dev Constructor sets oracle address based on signature.
+    /// @dev Constructor sets signer address based on signature.
     /// @param _descriptionHash Hash identifying off chain event description.
     /// @param v Signature parameter.
     /// @param r Signature parameter.
@@ -35,20 +35,20 @@ contract SignedMessageOracle is Oracle {
     function SignedMessageOracle(bytes32 _descriptionHash, uint8 v, bytes32 r, bytes32 s)
         public
     {
-        oracle = ecrecover(_descriptionHash, v, r, s);
+        signer = ecrecover(_descriptionHash, v, r, s);
         descriptionHash = _descriptionHash;
     }
 
-    /// @dev Replaces oracle/signing private key for an oracle.
-    /// @param _oracle New oracle.
-    function replaceOracle(address _oracle)
+    /// @dev Replaces signer.
+    /// @param _signer New signer.
+    function replaceSigner(address _signer)
         public
-        isOracle
+        isSigner
     {
         if (isSet)
-            // Result was set already or sender is not registered oracle
+            // Result was set already
             revert();
-        oracle = _oracle;
+        signer = _signer;
     }
 
     /// @dev Sets outcome based on signed message.
@@ -59,9 +59,9 @@ contract SignedMessageOracle is Oracle {
     function setOutcome(int _outcome, uint8 v, bytes32 r, bytes32 s)
         public
     {
-        address _oracle = ecrecover(keccak256(descriptionHash, _outcome), v, r, s);
-        if (isSet || _oracle != oracle)
-            // Result was set already or result was not signed by registered oracle
+        address _signer = ecrecover(keccak256(descriptionHash, _outcome), v, r, s);
+        if (isSet || _signer != signer)
+            // Result was set already or result was not signed by registered signer
             revert();
         isSet = true;
         outcome = _outcome;
