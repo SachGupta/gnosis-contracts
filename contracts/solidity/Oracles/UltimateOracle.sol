@@ -57,6 +57,7 @@ contract UltimateOracle is Oracle {
             revert();
         oracle = _oracle;
         collateralToken = _collateralToken;
+        challengePeriod = _challengePeriod;
         challengeAmount = _challengeAmount;
         frontRunnerPeriod = _frontRunnerPeriod;
     }

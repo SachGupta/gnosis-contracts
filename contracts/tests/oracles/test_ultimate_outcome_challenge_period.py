@@ -1,9 +1,9 @@
-from ..abstract_test import AbstractTestContract, keys
+from ..abstract_test import AbstractTestContract
 
 
 class TestContract(AbstractTestContract):
     """
-    run test with python -m unittest contracts.tests.oracles.test_ultimate_oracle
+    run test with python -m unittest contracts.tests.oracles.test_ultimate_outcome_challenge_period
     """
 
     def __init__(self, *args, **kwargs):
@@ -34,20 +34,7 @@ class TestContract(AbstractTestContract):
         ultimate_oracle.setOutcome()
         self.assertEqual(ultimate_oracle.outcome(), 1)
         self.assertFalse(ultimate_oracle.isOutcomeSet())
-        # Challenge outcome
-        sender_1 = 0
-        self.ether_token.deposit(value=100, sender=keys[sender_1])
-        self.ether_token.approve(ultimate_oracle.address, 100, sender=keys[sender_1])
-        ultimate_oracle.challengeOutcome(2)
-        self.assertEqual(ultimate_oracle.frontRunner(), 2)
-        # Sender 2 overbids sender 1
-        sender_2 = 1
-        self.ether_token.deposit(value=200, sender=keys[sender_2])
-        self.ether_token.approve(ultimate_oracle.address, 200, sender=keys[sender_2])
-        ultimate_oracle.voteForOutcome(3, 200, sender=keys[sender_2])
-        self.assertEqual(ultimate_oracle.frontRunner(), 3)
-        # Wait for front runner period to pass
-        self.assertFalse(ultimate_oracle.isOutcomeSet())
-        self.s.block.timestamp += front_runner_period + 1
+        # Wait for challenge period to pass
+        self.s.block.timestamp += challenge_period + 1
         self.assertTrue(ultimate_oracle.isOutcomeSet())
-        self.assertEqual(ultimate_oracle.getOutcome(), 3)
+        self.assertEqual(ultimate_oracle.getOutcome(), 1)
