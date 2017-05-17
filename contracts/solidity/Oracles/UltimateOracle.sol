@@ -8,15 +8,11 @@ import "Tokens/AbstractToken.sol";
 contract UltimateOracle is Oracle {
 
     /*
-     *  Constants
-     */
-    uint public constant SPREAD_MULTIPLIER = 3;
-
-    /*
      *  Storage
      */
     Oracle public oracle;
     Token public collateralToken;
+    uint8 public spreadMultiplier;
     uint public challengePeriod;
     uint public challengeAmount;
     uint public frontRunnerPeriod;
@@ -36,12 +32,14 @@ contract UltimateOracle is Oracle {
     /// @dev Constructor sets Ultimate Oracle properties.
     /// @param _oracle Oracle address.
     /// @param _collateralToken Collateral token address.
+    /// @param _spreadMultiplier Defines the spread as a multiple of the money bet on other outcomes.
     /// @param _challengePeriod Time to challenge oracle outcome.
     /// @param _challengeAmount Amount to challenge the outcome.
     /// @param _frontRunnerPeriod Time to overbid the front-runner.
     function UltimateOracle(
         Oracle _oracle,
         Token _collateralToken,
+        uint8 _spreadMultiplier,
         uint _challengePeriod,
         uint _challengeAmount,
         uint _frontRunnerPeriod
@@ -50,6 +48,7 @@ contract UltimateOracle is Oracle {
     {
         if (   address(_oracle) == 0
             || address(_collateralToken) == 0
+            || _spreadMultiplier == 0
             || _challengePeriod == 0
             || _challengeAmount == 0
             || _frontRunnerPeriod == 0)
@@ -57,6 +56,7 @@ contract UltimateOracle is Oracle {
             revert();
         oracle = _oracle;
         collateralToken = _collateralToken;
+        spreadMultiplier = _spreadMultiplier;
         challengePeriod = _challengePeriod;
         challengeAmount = _challengeAmount;
         frontRunnerPeriod = _frontRunnerPeriod;
@@ -99,7 +99,7 @@ contract UltimateOracle is Oracle {
     function voteForOutcome(int _outcome, uint amount)
         public
     {
-        uint maxAmount =   (totalAmount - totalOutcomeAmounts[_outcome]) * SPREAD_MULTIPLIER
+        uint maxAmount =   (totalAmount - totalOutcomeAmounts[_outcome]) * spreadMultiplier
                          - totalOutcomeAmounts[_outcome];
         if (amount > maxAmount)
             amount = maxAmount;

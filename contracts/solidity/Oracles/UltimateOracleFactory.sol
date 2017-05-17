@@ -9,7 +9,16 @@ contract UltimateOracleFactory {
     /*
      *  Events
      */
-    event UltimateOracleCreation(address indexed creator, UltimateOracle ultimateOracle, Oracle oracle, Token collateralToken, uint challengePeriod, uint challengeAmount, uint frontRunnerPeriod);
+    event UltimateOracleCreation(
+        address indexed creator,
+        UltimateOracle ultimateOracle,
+        Oracle oracle,
+        Token collateralToken,
+        uint8 spreadMultiplier,
+        uint challengePeriod,
+        uint challengeAmount,
+        uint frontRunnerPeriod
+    );
 
     /*
      *  Public functions
@@ -17,6 +26,7 @@ contract UltimateOracleFactory {
     /// @dev Creates a new Ultimate Oracle contract.
     /// @param oracle Oracle address.
     /// @param collateralToken Collateral token address.
+    /// @param spreadMultiplier Defines the spread as a multiple of the money bet on other outcomes.
     /// @param challengePeriod Time to challenge oracle outcome.
     /// @param challengeAmount Amount to challenge the outcome.
     /// @param frontRunnerPeriod Time to overbid the front-runner.
@@ -24,6 +34,7 @@ contract UltimateOracleFactory {
     function createUltimateOracle(
         Oracle oracle,
         Token collateralToken,
+        uint8 spreadMultiplier,
         uint challengePeriod,
         uint challengeAmount,
         uint frontRunnerPeriod
@@ -34,10 +45,20 @@ contract UltimateOracleFactory {
         ultimateOracle = new UltimateOracle(
             oracle,
             collateralToken,
+            spreadMultiplier,
             challengePeriod,
             challengeAmount,
             frontRunnerPeriod
         );
-        UltimateOracleCreation(msg.sender, ultimateOracle, oracle, collateralToken, challengePeriod, challengeAmount, frontRunnerPeriod);
+        UltimateOracleCreation(
+            msg.sender,
+            ultimateOracle,
+            oracle,
+            collateralToken,
+            spreadMultiplier,
+            challengePeriod,
+            challengeAmount,
+            frontRunnerPeriod
+        );
     }
 }
