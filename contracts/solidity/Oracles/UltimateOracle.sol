@@ -124,7 +124,7 @@ contract UltimateOracle is Oracle {
         constant
         returns (bool)
     {
-        return    outcomeSetTimestamp != 0 && now - outcomeSetTimestamp > challengePeriod
+        return    outcomeSetTimestamp != 0 && frontRunnerSetTimestamp == 0 && now - outcomeSetTimestamp > challengePeriod
                || frontRunnerSetTimestamp != 0 && now - frontRunnerSetTimestamp > frontRunnerPeriod;
     }
 

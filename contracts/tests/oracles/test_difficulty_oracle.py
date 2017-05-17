@@ -1,4 +1,4 @@
-from ..abstract_test import AbstractTestContract, keys, TransactionFailed
+from ..abstract_test import AbstractTestContract, TransactionFailed
 
 
 class TestContract(AbstractTestContract):
