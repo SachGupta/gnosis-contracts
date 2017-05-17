@@ -103,7 +103,7 @@ contract UltimateOracle is Oracle {
         if (amount > maxAmount)
             amount = maxAmount;
         if (   frontRunnerSetTimestamp == 0
-            || now - frontRunnerSetTimestamp <= frontRunnerPeriod
+            || now - frontRunnerSetTimestamp > frontRunnerPeriod
             || !collateralToken.transferFrom(msg.sender, this, amount))
             // Outcome is not challenged or leading period is over or deposit cannot be paid
             revert();
