@@ -107,8 +107,8 @@ contract UltimateOracle is Oracle {
             || !collateralToken.transferFrom(msg.sender, this, amount))
             // Outcome is not challenged or leading period is over or deposit cannot be paid
             revert();
-        outcomeAmounts[msg.sender][_outcome] = amount;
-        totalOutcomeAmounts[_outcome] = amount;
+        outcomeAmounts[msg.sender][_outcome] += amount;
+        totalOutcomeAmounts[_outcome] += amount;
         if (   _outcome != frontRunner
             && totalOutcomeAmounts[_outcome] > totalOutcomeAmounts[frontRunner])
         {
