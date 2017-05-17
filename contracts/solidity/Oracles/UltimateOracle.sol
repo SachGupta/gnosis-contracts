@@ -66,7 +66,7 @@ contract UltimateOracle is Oracle {
     function setOutcome()
         public
     {
-        if (   frontRunnerSetTimestamp != 0
+        if (   isChallenged()
             || outcomeSetTimestamp != 0
             || !oracle.isOutcomeSet())
             // Outcome was set already or cannot be set yet
@@ -81,8 +81,8 @@ contract UltimateOracle is Oracle {
         public
     {
         if (   _outcome == outcome
-            || frontRunnerSetTimestamp != 0
-            || outcomeSetTimestamp != 0 && now - outcomeSetTimestamp > challengePeriod
+            || isChallenged()
+            || isChallengePeriodOver()
             || !collateralToken.transferFrom(msg.sender, this, challengeAmount))
             // Outcome challenged already or challenge period is over or deposit cannot be paid
             revert();
@@ -103,16 +103,15 @@ contract UltimateOracle is Oracle {
                          - totalOutcomeAmounts[_outcome];
         if (amount > maxAmount)
             amount = maxAmount;
-        if (   frontRunnerSetTimestamp == 0
-            || now - frontRunnerSetTimestamp > frontRunnerPeriod
+        if (   !isChallenged()
+            || isFrontRunnerPeriodOver()
             || !collateralToken.transferFrom(msg.sender, this, amount))
-            // Outcome is not challenged or leading period is over or deposit cannot be paid
+            // Outcome is not challenged or front runner period is over or deposit cannot be paid
             revert();
         outcomeAmounts[msg.sender][_outcome] += amount;
         totalOutcomeAmounts[_outcome] += amount;
         totalAmount += amount;
-        if (   _outcome != frontRunner
-            && totalOutcomeAmounts[_outcome] > totalOutcomeAmounts[frontRunner])
+        if (_outcome != frontRunner && totalOutcomeAmounts[_outcome] > totalOutcomeAmounts[frontRunner])
         {
             frontRunner = _outcome;
             frontRunnerSetTimestamp = now;
@@ -125,13 +124,40 @@ contract UltimateOracle is Oracle {
         public
         returns (uint amount)
     {
-        if (frontRunnerSetTimestamp == 0 || now - frontRunnerSetTimestamp <= frontRunnerPeriod)
+        if (!isChallenged() || !isFrontRunnerPeriodOver())
             revert();
         amount = totalAmount * outcomeAmounts[msg.sender][frontRunner] / totalOutcomeAmounts[frontRunner];
         outcomeAmounts[msg.sender][frontRunner] = 0;
         if (!collateralToken.transfer(msg.sender, amount))
             // Tokens could not be transferred
             revert();
+    }
+
+    /// @dev Checks if time to challenge the outcome is over.
+    /// @return Returns if challenge period is over.
+    function isChallengePeriodOver()
+        public
+        returns (bool)
+    {
+        return outcomeSetTimestamp != 0 && now - outcomeSetTimestamp > challengePeriod;
+    }
+
+    /// @dev Checks if time to overbid the front runner is over.
+    /// @return Returns if front runner period is over.
+    function isFrontRunnerPeriodOver()
+        public
+        returns (bool)
+    {
+        return frontRunnerSetTimestamp != 0 && now - frontRunnerSetTimestamp > frontRunnerPeriod;
+    }
+
+    /// @dev Checks if outcome was challenged.
+    /// @return Returns if outcome was challenged.
+    function isChallenged()
+        public
+        returns (bool)
+    {
+        return frontRunnerSetTimestamp > 0;
     }
 
     /// @dev Returns if winning outcome is set for given event.
@@ -141,8 +167,8 @@ contract UltimateOracle is Oracle {
         constant
         returns (bool)
     {
-        return    outcomeSetTimestamp != 0 && frontRunnerSetTimestamp == 0 && now - outcomeSetTimestamp > challengePeriod
-               || frontRunnerSetTimestamp != 0 && now - frontRunnerSetTimestamp > frontRunnerPeriod;
+        return    isChallengePeriodOver() && !isChallenged()
+               || isFrontRunnerPeriodOver();
     }
 
     /// @dev Returns winning outcome for given event.
@@ -152,7 +178,7 @@ contract UltimateOracle is Oracle {
         constant
         returns (int)
     {
-        if (frontRunnerSetTimestamp != 0 && now - frontRunnerSetTimestamp > frontRunnerPeriod)
+        if (isFrontRunnerPeriodOver())
             return frontRunner;
         return outcome;
     }
