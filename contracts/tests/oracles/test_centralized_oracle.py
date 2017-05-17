@@ -13,7 +13,7 @@ class TestContract(AbstractTestContract):
 
     def test(self):
         # Create oracles
-        description_hash = "1"
+        description_hash = "d621d969951b20c5cf2008cbfc282a2d496ddfe75a76afe7b6b32f1470b8a449".decode('hex')
         owner_1 = 0
         owner_2 = 1
         oracle = self.contract_at(self.centralized_oracle_factory.createCentralizedOracle(description_hash, sender=keys[owner_1]),

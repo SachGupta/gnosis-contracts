@@ -48,7 +48,7 @@ contract MajorityOracle is Oracle {
                     }
                     else if (validations[j] == 0) {
                         outcomes[j] = _outcome;
-                        validations[j] += 1;
+                        validations[j] = 1;
                         break;
                     }
             }
