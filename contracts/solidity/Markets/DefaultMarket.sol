@@ -102,18 +102,18 @@ contract DefaultMarket is Market {
         // Calculate costs for bought outcome tokens
         uint outcomeTokenCosts = marketMaker.calcCosts(this, outcomeTokenIndex, outcomeTokenCount);
         // Calculate fee charged by market
-        uint feeCosts = calcMarketFee(outcomeTokenCosts);
-        costs = outcomeTokenCosts + feeCosts;
+        uint fee = calcMarketFee(outcomeTokenCosts);
+        costs = outcomeTokenCosts + fee;
         // Check costs don't exceed max spending
         if (costs == 0 || costs > maxCosts)
             // Amount of token is too small or tokens are more expensive
             revert();
         // Transfer tokens to markets contract and buy all outcomes
         if (   !eventContract.collateralToken().transferFrom(msg.sender, this, costs)
-            || !eventContract.collateralToken().approve(eventContract, costs))
+            || !eventContract.collateralToken().approve(eventContract, outcomeTokenCosts))
             revert();
         // Buy all outcomes
-        eventContract.buyAllOutcomes(costs);
+        eventContract.buyAllOutcomes(outcomeTokenCosts);
         // Transfer outcome tokens to buyer
         eventContract.outcomeTokens(outcomeTokenIndex).transfer(msg.sender, outcomeTokenCount);
     }
