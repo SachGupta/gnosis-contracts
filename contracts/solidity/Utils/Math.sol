@@ -108,8 +108,8 @@ library Math {
 
     /// @dev Returns natural exponential function value of given x.
     /// @param x X.
-    /// @return Returns exponential value.
-    function eExp(uint x)
+    /// @return Returns e**x.
+    function exp(uint x)
         public
         constant
         returns (uint)
@@ -138,7 +138,7 @@ library Math {
 
     /// @dev Returns natural logarithm value of given x.
     /// @param x X.
-    /// @return Returns logarithmic value.
+    /// @return Returns ln(x).
     function ln(uint x)
         public
         constant
