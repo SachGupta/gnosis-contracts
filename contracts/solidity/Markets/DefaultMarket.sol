@@ -105,8 +105,8 @@ contract DefaultMarket is Market {
         uint feeCosts = calcMarketFee(outcomeTokenCosts);
         costs = outcomeTokenCosts + feeCosts;
         // Check costs don't exceed max spending
-        if (costs > maxCosts)
-            // Tokens are more expensive
+        if (costs == 0 || costs > maxCosts)
+            // Amount of token is too small or tokens are more expensive
             revert();
         // Transfer tokens to markets contract and buy all outcomes
         if (   !eventContract.collateralToken().transferFrom(msg.sender, this, costs)
@@ -133,8 +133,8 @@ contract DefaultMarket is Market {
         uint fee = calcMarketFee(outcomeTokenProfits);
         profits = outcomeTokenProfits - fee;
         // Check profits are not too low
-        if (profits < minProfits)
-            // Profits are too low
+        if (profits == 0 || profits < minProfits)
+            // Amount of token is too small or profits are too low
             revert();
         // Transfer event tokens to markets contract to redeem all outcomes
         eventContract.outcomeTokens(outcomeTokenIndex).transferFrom(msg.sender, this, outcomeTokenCount);
