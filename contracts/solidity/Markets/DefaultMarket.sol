@@ -37,23 +37,21 @@ contract DefaultMarket is Market {
      *  Public functions
      */
     /// @dev Constructor validates and sets market properties and invests initial funding.
+    /// @param _creator Market creator.
     /// @param _eventContract Event contract.
     /// @param _marketMaker Market maker contract.
     /// @param _fee Market fee.
-    /// @param _funding Initial funding for market.
-    function DefaultMarket(Event _eventContract, MarketMaker _marketMaker, uint _fee, uint _funding)
+    function DefaultMarket(address _creator, Event _eventContract, MarketMaker _marketMaker, uint _fee)
         public
     {
-        if (address(_eventContract) == 0 || address(_marketMaker) == 0 || _fee >= FEE_RANGE || _funding == 0)
+        if (address(_eventContract) == 0 || address(_marketMaker) == 0 || _fee >= FEE_RANGE)
             // Values are null
             revert();
-        creator = msg.sender;
+        creator = _creator;
         createdAtBlock = block.number;
         eventContract = _eventContract;
         fee = _fee;
         marketMaker = _marketMaker;
-        // Invest initial funding
-        fund(_funding);
     }
 
     /// @dev Allows to fund the market with collateral tokens converting them into outcome tokens.

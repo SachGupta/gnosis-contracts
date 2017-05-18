@@ -14,13 +14,12 @@ contract DefaultMarketFactory is MarketFactory {
     /// @param eventContract Event contract.
     /// @param marketMaker Market maker contract.
     /// @param fee Market fee.
-    /// @param funding Initial funding for market.
     /// @return Returns market contract.
-    function createMarket(Event eventContract, MarketMaker marketMaker, uint fee, uint funding)
+    function createMarket(Event eventContract, MarketMaker marketMaker, uint fee)
         public
         returns (Market market)
     {
-        market = new DefaultMarket(eventContract, marketMaker, fee, funding);
-        MarketCreation(msg.sender, market, eventContract, marketMaker, fee, funding);
+        market = new DefaultMarket(msg.sender, eventContract, marketMaker, fee);
+        MarketCreation(msg.sender, market, eventContract, marketMaker, fee);
     }
 }
