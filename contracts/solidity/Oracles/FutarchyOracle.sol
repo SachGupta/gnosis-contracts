@@ -11,15 +11,28 @@ contract FutarchyOracle is Oracle {
     /*
      *  Storage
      */
+    address creator;
     Market[] public markets;
+    CategoricalEvent public categoricalEvent;
     uint public deadline;
     int public outcome;
     bool public isSet;
 
     /*
+     *  Modifiers
+     */
+    modifier isCreator () {
+        if (msg.sender != creator)
+            // Only creator is allowed to proceed.
+            revert();
+        _;
+    }
+
+    /*
      *  Public functions
      */
     /// @dev Constructor creates events and markets for futarchy oracle.
+    /// @param _creator Oracle creator.
     /// @param eventFactory Event factory contract.
     /// @param collateralToken Tokens used as collateral in exchange for outcome tokens.
     /// @param oracle Oracle contract used to resolve the event.
@@ -29,9 +42,9 @@ contract FutarchyOracle is Oracle {
     /// @param marketFactory Market factory contract.
     /// @param marketMaker Market maker contract.
     /// @param fee Market fee.
-    /// @param funding Initial funding for market.
     /// @param _deadline Decision deadline.
     function FutarchyOracle(
+        address _creator,
         EventFactory eventFactory,
         Token collateralToken,
         Oracle oracle,
@@ -41,16 +54,15 @@ contract FutarchyOracle is Oracle {
         MarketFactory marketFactory,
         MarketMaker marketMaker,
         uint fee,
-        uint funding,
         uint _deadline
     )
         public
     {
-        if (_deadline > now)
+        if (_deadline < now)
             // Deadline has passed already
             revert();
         // Create decision event
-        CategoricalEvent categoricalEvent = eventFactory.createCategoricalEvent(collateralToken, this, outcomeCount);
+        categoricalEvent = eventFactory.createCategoricalEvent(collateralToken, this, outcomeCount);
         // Create outcome events
         for (uint8 i=0; i<categoricalEvent.getOutcomeCount(); i++) {
             ScalarEvent scalarEvent = eventFactory.createScalarEvent(
@@ -59,9 +71,50 @@ contract FutarchyOracle is Oracle {
                 lowerBound,
                 upperBound
             );
-            markets.push(marketFactory.createMarket(scalarEvent, marketMaker, fee, funding));
+            markets.push(marketFactory.createMarket(scalarEvent, marketMaker, fee));
         }
+        creator = _creator;
         deadline = _deadline;
+    }
+
+    /// @dev Funds all markets with equal amount of funding.
+    /// @param funding Amount of funding.
+    function fund(uint funding)
+        public
+        isCreator
+    {
+        // Buy all outcomes
+        if (   !categoricalEvent.collateralToken().transferFrom(creator, this, funding)
+            || !categoricalEvent.collateralToken().approve(categoricalEvent, funding))
+            revert();
+        categoricalEvent.buyAllOutcomes(funding);
+        // Fund each market with outcome tokens from categorical event
+        for (uint8 i=0; i<markets.length; i++) {
+            Market market = markets[i];
+            if (!market.eventContract().collateralToken().approve(market, funding))
+                revert();
+            market.fund(funding);
+        }
+    }
+
+    /// @dev Closes market for winning outcome and redeems winnings and sends all collateral tokens to creator.
+    function close()
+        public
+        isCreator
+    {
+        if (!categoricalEvent.isWinningOutcomeSet())
+            revert();
+        // Close market and transfer all outcome tokens from winning outcome to this contract
+        Market market = markets[uint(getOutcome())];
+        if (!market.eventContract().isWinningOutcomeSet())
+            revert();
+        market.close();
+        market.eventContract().redeemWinnings();
+        market.withdrawFees();
+        // Redeem collateral token for winning outcome tokens and transfer collateral tokens to creator
+        categoricalEvent.redeemWinnings();
+        if (!categoricalEvent.collateralToken().transfer(creator, categoricalEvent.collateralToken().balanceOf(this)))
+            revert();
     }
 
     /// @dev Returns the amount of outcome tokens held by market.

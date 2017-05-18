@@ -20,7 +20,6 @@ contract FutarchyOracleFactory {
         MarketFactory marketFactory,
         MarketMaker marketMaker,
         uint fee,
-        uint funding,
         uint deadline
     );
 
@@ -52,7 +51,6 @@ contract FutarchyOracleFactory {
     /// @param marketFactory Market factory contract.
     /// @param marketMaker Market maker contract.
     /// @param fee Market fee.
-    /// @param funding Initial funding for market.
     /// @param deadline Decision deadline.
     /// @return Returns oracle contract.
     function createFutarchyOracle(
@@ -64,13 +62,13 @@ contract FutarchyOracleFactory {
         MarketFactory marketFactory,
         MarketMaker marketMaker,
         uint fee,
-        uint funding,
         uint deadline
     )
         public
         returns (FutarchyOracle futarchyOracle)
     {
         futarchyOracle = new FutarchyOracle(
+            msg.sender,
             eventFactory,
             collateralToken,
             oracle,
@@ -80,7 +78,6 @@ contract FutarchyOracleFactory {
             marketFactory,
             marketMaker,
             fee,
-            funding,
             deadline
         );
         FutarchyOracleCreation(
@@ -94,7 +91,6 @@ contract FutarchyOracleFactory {
             marketFactory,
             marketMaker,
             fee,
-            funding,
             deadline
         );
     }
