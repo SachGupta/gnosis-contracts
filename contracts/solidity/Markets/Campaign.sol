@@ -22,6 +22,7 @@ contract Campaign {
     uint public fee;
     uint public funding;
     uint public deadline;
+    uint public finalBalance;
     mapping (address => uint) public contributions;
     Stages public stage;
 
@@ -29,7 +30,8 @@ contract Campaign {
         AuctionStarted,
         AuctionSuccessful,
         AuctionFailed,
-        MarketCreated
+        MarketCreated,
+        MarketClosed
     }
 
     /*
@@ -98,7 +100,7 @@ contract Campaign {
         if (!eventContract.collateralToken().transferFrom(msg.sender, this, amount))
             revert();
         contributions[msg.sender] += amount;
-        if (raisedAmount == funding)
+        if (amount == maxAmount)
             stage = Stages.AuctionSuccessful;
     }
 
@@ -137,19 +139,24 @@ contract Campaign {
     function withdrawFeesFromMarket()
         public
         atStage(Stages.MarketCreated)
-        returns (uint)
     {
-        return market.withdrawFees();
+        if (!eventContract.isWinningOutcomeSet())
+            revert();
+        market.close();
+        market.withdrawFees();
+        eventContract.redeemWinnings();
+        finalBalance = eventContract.collateralToken().balanceOf(this);
+        stage = Stages.MarketClosed;
     }
 
     /// @dev Allows to withdraw fees from campaign contract to contributor.
     /// @return Fee amount.
     function withdrawFeesFromCampaign()
         public
-        atStage(Stages.MarketCreated)
+        atStage(Stages.MarketClosed)
         returns (uint fees)
     {
-        fees = eventContract.collateralToken().balanceOf(this) * contributions[msg.sender] / funding;
+        fees = finalBalance * contributions[msg.sender] / funding;
         contributions[msg.sender] = 0;
         if (!eventContract.collateralToken().transfer(msg.sender, fees))
             // Transfer failed
