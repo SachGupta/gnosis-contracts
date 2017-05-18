@@ -43,11 +43,8 @@ contract Campaign {
     }
 
     modifier timedTransitions() {
-        if (stage == Stages.AuctionStarted)
-            if (eventContract.collateralToken().balanceOf(this) >= funding)
-                stage = Stages.AuctionSuccessful;
-            else if (deadline < now)
-                stage = Stages.AuctionFailed;
+        if (stage == Stages.AuctionStarted && deadline < now)
+            stage = Stages.AuctionFailed;
         _;
     }
 
@@ -76,7 +73,7 @@ contract Campaign {
             || address(_marketMaker) == 0
             || _fee >= FEE_RANGE
             || _funding == 0
-            || deadline < now)
+            || _deadline < now)
             // Invalid arguments
             revert();
         eventContract = _eventContract;
@@ -101,6 +98,8 @@ contract Campaign {
         if (!eventContract.collateralToken().transferFrom(msg.sender, this, amount))
             revert();
         contributions[msg.sender] += amount;
+        if (raisedAmount == funding)
+            stage = Stages.AuctionSuccessful;
     }
 
     /// @dev Withdraws refund amount.
@@ -126,7 +125,9 @@ contract Campaign {
         atStage(Stages.AuctionSuccessful)
         returns (Market)
     {
-        market = marketFactory.createMarket(eventContract, marketMaker, fee, funding);
+        market = marketFactory.createMarket(eventContract, marketMaker, fee);
+        eventContract.collateralToken().approve(market, funding);
+        market.fund(funding);
         stage = Stages.MarketCreated;
         return market;
     }
