@@ -1,281 +1,169 @@
-pragma solidity ^0.4.0;
+pragma solidity 0.4.11;
 import "Oracles/AbstractOracle.sol";
-import "EventFactory/AbstractEventFactory.sol";
-import "MarketFactories/AbstractMarketFactory.sol";
-import "Tokens/AbstractToken.sol";
+import "Events/EventFactory.sol";
+import "Markets/AbstractMarketFactory.sol";
 
 
-/// @title Futarchy oracle contract - Allows resolving an event based on other events.
-/// @author Stefan George - <stefan.george@consensys.net>
-/// @author Martin Koeppelmann - <martin.koeppelmann@consensys.net>
+/// @title Futarchy oracle contract - Allows to create an oracle based on market behaviour
+/// @author Stefan George - <stefan@gnosis.pm>
 contract FutarchyOracle is Oracle {
 
     /*
-     *  External contracts
+     *  Storage
      */
-    EventFactory constant eventFactory = EventFactory({{EventFactory}});
-    MarketFactory constant marketFactory = MarketFactory({{DefaultMarketFactory}});
-    Token constant etherToken = Token({{EtherToken}});
-    address constant marketMaker = {{LMSRMarketMaker}};
+    address creator;
+    Market[] public markets;
+    CategoricalEvent public categoricalEvent;
+    uint public deadline;
+    int public outcome;
+    bool public isSet;
 
     /*
-     *  Constants
+     *  Modifiers
      */
-    // Oracle meta data
-    string constant public name = "Futarchy Oracle";
-
-    /*
-     *  Data structures
-     */
-    // proposalHash => FutarchyDecision
-    mapping (bytes32 => FutarchyDecision) public futarchyDecisions;
-
-    struct FutarchyDecision {
-        bytes32 marketHash1;
-        bytes32 marketHash2;
-        uint decisionTime;
-        bool isWinningOutcomeSet;
-        int winningOutcome;
+    modifier isCreator () {
+        if (msg.sender != creator)
+            // Only creator is allowed to proceed
+            revert();
+        _;
     }
 
     /*
-     *  Read and write functions
+     *  Public functions
      */
-    // @dev Contract constructor allows market contract to permanently trade event shares.
-    function FutarchyOracle() {
-        // Give permanent approval to market contract to trade event shares
-        eventFactory.permitPermanentApproval(marketFactory);
-    }
-
-    /// @dev Creates parent and depended eventFactory and marketFactory for futarchy decision. Returns success.
-    /// @param proposalHash Hash identifying proposal description.
-    /// @param decisionTime Time when parent event can be resolved.
-    /// @param lowerBound Lower bound for valid outcomes for depended eventFactory.
-    /// @param upperBound Upper bound for valid outcomes for depended eventFactory..
-    /// @param resolverAddress Resolver for depended eventFactory.
-    /// @param data Encoded data used to resolve event.
-    /// @param initialFunding Initial funding for marketFactory.
-    function createFutarchyDecision(bytes32 proposalHash,
-                                    uint decisionTime,
-                                    int lowerBound,
-                                    int upperBound,
-                                    address resolverAddress,
-                                    bytes32[] data,
-                                    uint initialFunding
+    /// @dev Constructor creates events and markets for futarchy oracle
+    /// @param _creator Oracle creator
+    /// @param eventFactory Event factory contract
+    /// @param collateralToken Tokens used as collateral in exchange for outcome tokens
+    /// @param oracle Oracle contract used to resolve the event
+    /// @param outcomeCount Number of event outcomes
+    /// @param lowerBound Lower bound for event outcome
+    /// @param upperBound Lower bound for event outcome
+    /// @param marketFactory Market factory contract
+    /// @param marketMaker Market maker contract
+    /// @param fee Market fee
+    /// @param _deadline Decision deadline
+    function FutarchyOracle(
+        address _creator,
+        EventFactory eventFactory,
+        Token collateralToken,
+        Oracle oracle,
+        uint8 outcomeCount,
+        int lowerBound,
+        int upperBound,
+        MarketFactory marketFactory,
+        MarketMaker marketMaker,
+        uint fee,
+        uint _deadline
     )
         public
     {
-        macro: $futarchyDecision = futarchyDecisions[proposalHash];
-        if ($futarchyDecision.decisionTime > 0 || now >= decisionTime) {
-            // Futarchy decision exists already or decision time is in the past
-            throw;
+        if (_deadline < now)
+            // Deadline has passed already
+            revert();
+        // Create decision event
+        categoricalEvent = eventFactory.createCategoricalEvent(collateralToken, this, outcomeCount);
+        // Create outcome events
+        for (uint8 i=0; i<categoricalEvent.getOutcomeCount(); i++) {
+            ScalarEvent scalarEvent = eventFactory.createScalarEvent(
+                categoricalEvent.outcomeTokens(i),
+                oracle,
+                lowerBound,
+                upperBound
+            );
+            markets.push(marketFactory.createMarket(scalarEvent, marketMaker, fee));
         }
-        $futarchyDecision.decisionTime = decisionTime;
-        // Create parent event traded in Ether
-        bytes32[] memory parentData = new bytes32[](1);
-        parentData[0] = proposalHash;
-        bytes32 parentEventHash = eventFactory.createEvent(proposalHash, false, 0, 0, 2, etherToken, this, parentData);
-        if (parentEventHash == 0) {
-            // Creation of parent event failed
-            throw;
-        }
-        // Buy all outcomes of parent event to create depended eventFactory
-        uint buyAllOutcomesCosts = initialFunding + eventFactory.calcBaseFeeForShares(etherToken, initialFunding);
-        buyAllOutcomesCosts += eventFactory.calcBaseFeeForShares(etherToken, buyAllOutcomesCosts);
-        if (   !etherToken.transferFrom(msg.sender, this, buyAllOutcomesCosts)
-            || !etherToken.approve(eventFactory, buyAllOutcomesCosts))
-        {
-            // Buy all outcomes failed
-            throw;
-        }
-        eventFactory.buyAllOutcomes(parentEventHash, buyAllOutcomesCosts);
-        // Create depended eventFactory traded in parent event shares
-        bytes32[2] memory dependedEventFactoryHashes = createEventFactory(proposalHash,
-                                                                          lowerBound,
-                                                                          upperBound,
-                                                                          resolverAddress,
-                                                                          data,
-                                                                          parentEventHash);
-        if (dependedEventFactoryHashes[0] == 0 || dependedEventFactoryHashes[1] == 0) {
-            // Creation of eventFactory failed
-            throw;
-        }
-        // Create marketFactory based on depended eventFactory
-        bytes32[2] memory dependedMarketFactoryHashes = createMarketFactory(dependedEventFactoryHashes, initialFunding);
-        if (dependedMarketFactoryHashes[0] == 0 || dependedMarketFactoryHashes[1] == 0) {
-            // Creation of marketFactory failed
-            throw;
-        }
-        // Add futarchy decision
-        $futarchyDecision.marketHash1 = dependedMarketFactoryHashes[0];
-        $futarchyDecision.marketHash2 = dependedMarketFactoryHashes[1];
-        $futarchyDecision.decisionTime = decisionTime;
+        creator = _creator;
+        deadline = _deadline;
     }
 
-    function createEventFactory(bytes32 proposalHash,
-                                int lowerBound,
-                                int upperBound,
-                                address resolverAddress,
-                                bytes32[] data,
-                                bytes32 parentEventHash
-    )
-        private
-        returns (bytes32[2] dependedEventFactoryHashes)
-    {
-        dependedEventFactoryHashes[0] = eventFactory.createEvent(proposalHash,
-                                                                 true,
-                                                                 lowerBound,
-                                                                 upperBound,
-                                                                 2,
-                                                                 eventFactory.getOutcomeToken(parentEventHash, 0),
-                                                                 resolverAddress,
-                                                                 data);
-        dependedEventFactoryHashes[1] = eventFactory.createEvent(proposalHash,
-                                                                 true,
-                                                                 lowerBound,
-                                                                 upperBound,
-                                                                 2,
-                                                                 eventFactory.getOutcomeToken(parentEventHash, 1),
-                                                                 resolverAddress,
-                                                                 data);
-    }
-
-    function createMarketFactory(bytes32[2] dependedEventFactoryHashes, uint shareCount)
-        private
-        returns (bytes32[2] dependedMarketFactoryHashes)
-    {
-        // MarketFactory have no fee
-        dependedMarketFactoryHashes[0] = marketFactory.createMarket(dependedEventFactoryHashes[0],
-                                                                    0,
-                                                                    shareCount,
-                                                                    marketMaker);
-        dependedMarketFactoryHashes[1] = marketFactory.createMarket(dependedEventFactoryHashes[1],
-                                                                    0,
-                                                                    shareCount,
-                                                                    marketMaker);
-    }
-
-    /// @dev Sets difficulty as winning outcome for a specific block. Returns success.
-    /// @param proposalHash Hash identifying proposal description.
-    /// @param data Not used.
-    function setOutcome(bytes32 proposalHash, bytes32[] data)
-        external
-    {
-        macro: $futarchyDecision = futarchyDecisions[proposalHash];
-        if (now < $futarchyDecision.decisionTime || $futarchyDecision.isWinningOutcomeSet) {
-            // Decision time is not reached yet or outcome was set already
-            throw;
-        }
-        uint[256] memory shareDistributionMarket1 = marketFactory.getShareDistribution($futarchyDecision.marketHash1);
-        uint[256] memory shareDistributionMarket2 = marketFactory.getShareDistribution($futarchyDecision.marketHash2);
-        if (int(shareDistributionMarket1[0] - shareDistributionMarket1[1]) > int(shareDistributionMarket2[0] - shareDistributionMarket2[1])) {
-            $futarchyDecision.winningOutcome = 0;
-        }
-        else {
-            $futarchyDecision.winningOutcome = 1;
-        }
-        $futarchyDecision.isWinningOutcomeSet = true;
-    }
-
-    /*
-     *  Read functions
-     */
-    /// @dev Validates and registers event. Returns event identifier.
-    /// @param data Array of oracle addresses used for event resolution.
-    /// @return proposalHash Returns proposal hash.
-    function registerEvent(bytes32[] data)
+    /// @dev Funds all markets with equal amount of funding
+    /// @param funding Amount of funding
+    function fund(uint funding)
         public
-        returns (bytes32 proposalHash)
+        isCreator
     {
-        proposalHash = data[0];
-        if (futarchyDecisions[proposalHash].decisionTime == 0) {
-            // There is no futarchy event
-            throw;
+        // Buy all outcomes
+        if (   !categoricalEvent.collateralToken().transferFrom(creator, this, funding)
+            || !categoricalEvent.collateralToken().approve(categoricalEvent, funding))
+            revert();
+        categoricalEvent.buyAllOutcomes(funding);
+        // Fund each market with outcome tokens from categorical event
+        for (uint8 i=0; i<markets.length; i++) {
+            Market market = markets[i];
+            if (!market.eventContract().collateralToken().approve(market, funding))
+                revert();
+            market.fund(funding);
         }
-        EventRegistration(msg.sender, proposalHash);
     }
 
-    /// @dev Returns if winning outcome is set.
-    /// @param proposalHash Hash identifying proposal description.
-    /// @return isSet Returns if outcome is set.
-    function isOutcomeSet(bytes32 proposalHash)
+    /// @dev Closes market for winning outcome and redeems winnings and sends all collateral tokens to creator
+    function close()
+        public
+        isCreator
+    {
+        if (!categoricalEvent.isWinningOutcomeSet())
+            revert();
+        // Close market and transfer all outcome tokens from winning outcome to this contract
+        Market market = markets[uint(getOutcome())];
+        if (!market.eventContract().isWinningOutcomeSet())
+            revert();
+        market.close();
+        market.eventContract().redeemWinnings();
+        market.withdrawFees();
+        // Redeem collateral token for winning outcome tokens and transfer collateral tokens to creator
+        categoricalEvent.redeemWinnings();
+        if (!categoricalEvent.collateralToken().transfer(creator, categoricalEvent.collateralToken().balanceOf(this)))
+            revert();
+    }
+
+    /// @dev Returns the amount of outcome tokens held by market
+    /// @return Outcome token distribution
+    function getOutcomeTokenDistribution(Market market)
+        public
+        returns (uint[] outcomeTokenDistribution)
+    {
+        outcomeTokenDistribution = new uint[](2);
+        for (uint i=0; i<outcomeTokenDistribution.length; i++)
+            outcomeTokenDistribution[i] = market.eventContract().outcomeTokens(i).balanceOf(market);
+    }
+
+    /// @dev Allows to set the oracle outcome based on the market with largest long position
+    function setOutcome()
+        public
+    {
+        if (isSet || deadline > now)
+            // Outcome was set already or deadline is not over yet
+            revert();
+        uint[] memory outcomeTokenDistribution = getOutcomeTokenDistribution(markets[0]);
+        uint highest = outcomeTokenDistribution[0] - outcomeTokenDistribution[1];
+        int highestIndex = 0;
+        for (uint8 i=1; i<markets.length; i++) {
+            outcomeTokenDistribution = getOutcomeTokenDistribution(markets[i]);
+            if ((outcomeTokenDistribution[0] - outcomeTokenDistribution[1]) > highest)
+                highestIndex = i;
+        }
+        outcome = highestIndex;
+        isSet = true;
+    }
+
+    /// @dev Returns if winning outcome is set for given event
+    /// @return Returns if outcome is set
+    function isOutcomeSet()
+        public
         constant
-        public
-        returns (bool isSet)
+        returns (bool)
     {
-        return futarchyDecisions[proposalHash].isWinningOutcomeSet;
+        return isSet;
     }
 
-    /// @dev Returns winning outcome/difficulty for a specific block number.
-    /// @param proposalHash Hash identifying proposal description.
-    /// @return outcome Returns outcome.
-    function getOutcome(bytes32 proposalHash)
-        constant
+    /// @dev Returns winning outcome for given event
+    /// @return Returns outcome
+    function getOutcome()
         public
-        returns (int outcome)
-    {
-        return futarchyDecisions[proposalHash].winningOutcome;
-    }
-
-    /// @dev Returns encoded futarchy decisions associated to proposal hashes.
-    /// @param proposalHashes Array of hashes identifying proposals.
-    /// @return allFutarchyDecisions Returns encoded futarchy decisions.
-    function getFutarchyDecisions(bytes32[] proposalHashes)
         constant
-        public
-        returns (uint[] allFutarchyDecisions)
+        returns (int)
     {
-        // Calculate array size
-        uint arrPos = 0;
-        for (uint i=0; i<proposalHashes.length; i++) {
-            macro: $futarchyDecision = futarchyDecisions[proposalHashes[i]];
-            if ($futarchyDecision.decisionTime > 0) {
-                arrPos += 6;
-            }
-        }
-        // Fill array
-        allFutarchyDecisions = new uint[](arrPos);
-        arrPos = 0;
-        for (i=0; i<proposalHashes.length; i++) {
-            macro: $futarchyDecision = futarchyDecisions[proposalHashes[i]];
-            allFutarchyDecisions[arrPos] = uint(proposalHashes[i]);
-            allFutarchyDecisions[arrPos + 1] = uint($futarchyDecision.marketHash1);
-            allFutarchyDecisions[arrPos + 2] = uint($futarchyDecision.marketHash2);
-            allFutarchyDecisions[arrPos + 3] = $futarchyDecision.decisionTime;
-            if ($futarchyDecision.isWinningOutcomeSet) {
-                allFutarchyDecisions[arrPos + 4] = 1;
-            }
-            else {
-                allFutarchyDecisions[arrPos + 4] = 0;
-            }
-            allFutarchyDecisions[arrPos + 5] = uint($futarchyDecision.winningOutcome);
-        }
-    }
-
-    /// @dev Returns data needed to identify an event.
-    /// @param proposalHash Hash identifying an event.
-    /// @return data Returns event data.
-    function getEventData(bytes32 proposalHash)
-        constant
-        public
-        returns (bytes32[] data)
-    {
-        data = new bytes32[](3);
-        data[0] = futarchyDecisions[proposalHash].marketHash1;
-        data[1] = futarchyDecisions[proposalHash].marketHash2;
-        data[2] = bytes32(futarchyDecisions[proposalHash].decisionTime);
-    }
-
-    /// @dev Returns total fees for oracle.
-    /// @param data Event data used for event resolution.
-    /// @return fee Returns fee.
-    /// @return token Returns token.
-    function getFee(bytes32[] data)
-        constant
-        public
-        returns (uint fee, address token)
-    {
-        fee = 0;
-        token = 0;
+        return outcome;
     }
 }

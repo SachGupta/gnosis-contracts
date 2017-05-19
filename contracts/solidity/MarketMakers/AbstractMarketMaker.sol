@@ -1,9 +1,10 @@
-/// @title Abstract market maker contract - Functions to be implemented by market maker contracts.
-contract MarketMaker {
-    function calcCostsBuying(bytes32 marketHash, uint initialFunding, uint[] shareDistribution, uint8 outcomeIndex, uint shareCount) constant returns (uint costs);
-    function calcEarningsSelling(bytes32 marketHash, uint initialFunding, uint[] shareDistribution, uint8 outcomeIndex, uint shareCount) constant returns (uint earnings);
+pragma solidity 0.4.11;
+import "Markets/AbstractMarket.sol";
 
-    // Market maker meta data
-    // This is not an abstract functions, because solc won't recognize generated getter functions for public variables as functions.
-    function name() constant returns (string) {}
+
+/// @title Abstract market maker contract - Functions to be implemented by market maker contracts
+contract MarketMaker {
+
+    function calcCosts(Market market, uint8 outcomeTokenIndex, uint outcomeTokenCount) public constant returns (uint);
+    function calcProfits(Market market, uint8 outcomeTokenIndex, uint outcomeTokenCount) public constant returns (uint);
 }

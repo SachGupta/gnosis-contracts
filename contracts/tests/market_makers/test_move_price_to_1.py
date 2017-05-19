@@ -8,46 +8,45 @@ class TestContract(AbstractTestContract):
 
     def __init__(self, *args, **kwargs):
         super(TestContract, self).__init__(*args, **kwargs)
-        self.deploy_contracts = [self.event_factory_name, self.outcome_token_name, self.outcome_token_library_name,
-                                 self.dao_name, self.math_library_name, self.lmsr_name,
-                                 self.market_factory_name, self.ultimate_oracle_name, self.ether_token_name]
+        self.math = self.create_contract('Utils/Math.sol')
+        self.event_factory = self.create_contract('Events/EventFactory.sol', libraries={'Math': self.math})
+        self.centralized_oracle_factory = self.create_contract('Oracles/CentralizedOracleFactory.sol')
+        self.market_factory = self.create_contract('Markets/DefaultMarketFactory.sol')
+        self.lmsr = self.create_contract('MarketMakers/LMSRMarketMaker.sol', libraries={'Math': self.math})
+        self.ether_token = self.create_contract('Tokens/EtherToken.sol', libraries={'Math': self.math})
+        self.token_abi = self.create_abi('Tokens/AbstractToken.sol')
+        self.market_abi = self.create_abi('Markets/DefaultMarket.sol')
+        self.event_abi = self.create_abi('Events/AbstractEvent.sol')
 
     def test(self):
         # Create event
-        event_hash = self.create_event()
+        description_hash = "d621d969951b20c5cf2008cbfc282a2d496ddfe75a76afe7b6b32f1470b8a449".decode('hex')
+        oracle_address = self.centralized_oracle_factory.createCentralizedOracle(description_hash)
+        event = self.contract_at(self.event_factory.createCategoricalEvent(self.ether_token.address, oracle_address, 2), self.event_abi)
         # Create market
-        market_hash = self.create_market(event_hash)
-        # User buys shares
-        user = 1
+        fee = 0  # 0%
+        market = self.contract_at(self.market_factory.createMarket(event.address, self.lmsr.address, fee), self.market_abi)
+        # Fund market
+        investor = 0
+        funding = 10*10**18
+        self.ether_token.deposit(value=funding, sender=keys[investor])
+        self.assertEqual(self.ether_token.balanceOf(accounts[investor]), funding)
+        self.ether_token.approve(market.address, funding, sender=keys[investor])
+        market.fund(funding, sender=keys[investor])
+        self.assertEqual(self.ether_token.balanceOf(accounts[investor]), 0)
+        # User buys ether tokens
+        trader = 1
         outcome = 1
-        opposite_outcome = 0
-        number_of_shares = 50 * 10 ** 18  # 10 Ether
+        token_count = 100 * 10 ** 18  # 100 Ether
         loop_count = 10
-        initial_funding = self.MIN_MARKET_BALANCE
-        share_distribution = [initial_funding, initial_funding]
-        costs = 0
-        self.buy_ether_tokens(user=user, amount=number_of_shares * loop_count + self.calc_base_fee_for_shares(
-            number_of_shares * loop_count), approved_contract=self.market_factory)
+        self.ether_token.deposit(value=token_count * loop_count, sender=keys[trader])
+        # User buys outcome tokens from market maker
+        costs = None
         for i in range(loop_count):
-            # Calculating costs for buying shares
-            costs = self.lmsr.calcCostsBuying("".zfill(64).decode('hex'), initial_funding, share_distribution, outcome,
-                                              number_of_shares)
-            # Commented out, because base fee is now 0
-            # # Attempt fails because costs are higher, base fee is missing
-            # self.assertEqual(
-            #     self.market_factory.buyShares(market_hash, outcome, number_of_shares, costs, sender=keys[user]), 0)
-            # Failed buying attempt does not influence costs
-            self.assertEqual(
-                self.lmsr.calcCostsBuying("".zfill(64).decode('hex'), initial_funding, share_distribution, outcome,
-                                          number_of_shares), costs)
-            # Buying shares successfully
-            costs_and_fee = costs + self.calc_base_fee_for_shares(number_of_shares)
-            self.market_factory.buyShares(market_hash, outcome, number_of_shares, costs_and_fee, sender=keys[user])
-            # User has more shares
-            self.assertEqual(self.event_token(event_hash, outcome, "balanceOf", user, [accounts[user]]),
-                             number_of_shares * (i + 1))
-            # Market maker increases shares of the opposite outcome
-            share_distribution[outcome] += costs - number_of_shares
-            share_distribution[opposite_outcome] += costs
+            # Calculate profit for selling tokens
+            costs = self.lmsr.calcCosts(market.address, outcome, token_count)
+            # Buying tokens
+            self.ether_token.approve(market.address, token_count, sender=keys[trader])
+            self.assertEqual(market.buy(outcome, token_count, costs, sender=keys[trader]), costs)
         # Price is equal to 1
-        self.assertEqual(costs, number_of_shares)
+        self.assertEqual(costs, token_count)

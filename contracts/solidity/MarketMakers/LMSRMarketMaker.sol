@@ -1,10 +1,10 @@
-pragma solidity ^0.4.0;
-import "Utils/MathLibrary.sol";
+pragma solidity 0.4.11;
+import "Utils/Math.sol";
 import "MarketMakers/AbstractMarketMaker.sol";
 
 
-/// @title LMSR market maker contract - Calculates share prices based on share distribution and initial funding.
-/// @author Stefan George - <stefan.george@consensys.net>
+/// @title LMSR market maker contract - Calculates share prices based on share distribution and initial funding
+/// @author Stefan George - <stefan@gnosis.pm>
 /// @author Martin Koeppelmann - <martin.koeppelmann@consensys.net>
 /// @author Michael Lu - <michael.lu@consensys.net>
 contract LMSRMarketMaker is MarketMaker {
@@ -14,90 +14,101 @@ contract LMSRMarketMaker is MarketMaker {
      */
     uint constant ONE = 0x10000000000000000;
 
-    // Market maker meta data
-    string constant public name = "LMSR Market Maker";
-
     /*
-     *  Read functions
+     *  Public functions
      */
-    /// @dev Returns costs to buy given number of shares.
-    /// @param marketHash Market hash identifying market.
-    /// @param initialFunding Initial funding for market maker.
-    /// @param shareDistribution Array of shares of all outcomes.
-    /// @param outcomeIndex Outcome selected to buy shares from.
-    /// @param shareCount Number of shares to buy.
-    /// @return costs Returns costs.
-    function calcCostsBuying(bytes32 marketHash, uint initialFunding, uint[] shareDistribution, uint8 outcomeIndex, uint shareCount)
-        constant
+    /// @dev Returns costs to buy given number of outcome tokens
+    /// @param market Market contract
+    /// @param outcomeTokenIndex Index of outcome to buy
+    /// @param outcomeTokenCount Number of outcome tokens to buy
+    /// @return Returns costs
+    function calcCosts(Market market, uint8 outcomeTokenIndex, uint outcomeTokenCount)
         public
+        constant
         returns (uint costs)
     {
-        // C = b * ln(e^(q1/b) + e^(q2/b) + ...)
-        // We have to invert it so that it is accurate
-        uint invB = MathLibrary.ln(shareDistribution.length * ONE) / 10000; // map initial funding to 10k
-        uint[2] memory shareRange = getShareRange(shareDistribution);
-        uint c1 = calcCosts(invB, shareRange, shareDistribution, initialFunding);
-        shareDistribution[outcomeIndex] -= shareCount;
-        uint c2 = calcCosts(invB, shareRange, shareDistribution, initialFunding);
+        uint[] memory outcomeTokenDistribution = getOutcomeTokenDistribution(market);
+        uint[2] memory outcomeTokenRange = getOutcomeTokenRange(outcomeTokenDistribution);
+        uint invB = Math.ln(outcomeTokenDistribution.length * ONE) / 10000;
+        uint funding = market.funding();
+        uint costsBefore = calcCurrentCosts(invB, outcomeTokenRange, outcomeTokenDistribution, funding);
+        outcomeTokenDistribution[outcomeTokenIndex] -= outcomeTokenCount;
+        uint costsAfter = calcCurrentCosts(invB, outcomeTokenRange, outcomeTokenDistribution, funding);
         // Calculate costs
-        costs = (c2-c1) * (initialFunding / 10000) * (100000 + 2) / 100000 / ONE;
-        if (costs > shareCount) {
+        costs = (costsAfter - costsBefore) * (funding / 10000) * (100000 + 2) / 100000 / ONE;
+        if (costs > outcomeTokenCount)
             // Make sure costs are not bigger than 1 per share
-            costs = shareCount;
-        }
+            costs = outcomeTokenCount;
     }
 
-    /// @dev Returns earnings for selling given number of shares.
-    /// @param marketHash Market hash identifying market.
-    /// @param initialFunding Initial funding for market maker.
-    /// @param shareDistribution Array of shares of all outcomes.
-    /// @param outcomeIndex Outcome selected to sell shares from.
-    /// @param shareCount Number of shares to sell.
-    /// @return earnings Returns earnings.
-    function calcEarningsSelling(bytes32 marketHash, uint initialFunding, uint[] shareDistribution, uint8 outcomeIndex, uint shareCount)
-        constant
+    /// @dev Returns profits for selling given number of outcome tokens
+    /// @param market Market contract
+    /// @param outcomeTokenIndex Index of outcome to sell
+    /// @param outcomeTokenCount Number of outcome tokens to sell
+    /// @return Returns profits
+    function calcProfits(Market market, uint8 outcomeTokenIndex, uint outcomeTokenCount)
         public
-        returns (uint earnings)
+        constant
+        returns (uint profits)
     {
-        // We have to invert it so that it is accurate
-        uint invB = MathLibrary.ln(shareDistribution.length * ONE) / 10000; // map initial funding to 10k
-        uint[2] memory shareRange = getShareRange(shareDistribution);
-        shareRange[1] += shareCount;
-        uint c1 = calcCosts(invB, shareRange, shareDistribution, initialFunding);
-        shareDistribution[outcomeIndex] += shareCount;
-        uint c2 = calcCosts(invB, shareRange, shareDistribution, initialFunding);
+        uint[] memory outcomeTokenDistribution = getOutcomeTokenDistribution(market);
+        uint[2] memory outcomeTokenRange = getOutcomeTokenRange(outcomeTokenDistribution);
+        uint invB = Math.ln(outcomeTokenDistribution.length * ONE) / 10000;
+        uint funding = market.funding();
+        outcomeTokenRange[1] += outcomeTokenCount;
+        uint costsBefore = calcCurrentCosts(invB, outcomeTokenRange, outcomeTokenDistribution, funding);
+        outcomeTokenDistribution[outcomeTokenIndex] += outcomeTokenCount;
+        uint costsAfter = calcCurrentCosts(invB, outcomeTokenRange, outcomeTokenDistribution, funding);
         // Calculate earnings
-        earnings = (c1-c2) * (initialFunding / 10000) * (100000 - 2) / 100000 / ONE;
+        profits = (costsBefore - costsAfter) * (funding / 10000) * (100000 - 2) / 100000 / ONE;
     }
 
-    function calcCosts(uint invB, uint[2] shareRange, uint[] shareDistribution, uint initialFunding)
-        private
+    /*
+     *  Private functions
+     */
+    /// @dev Returns current price for given outcome token
+    /// @param invB Cost indicator
+    /// @param outcomeTokenRange Lowest and highest number of outcome tokens owned by market
+    /// @param outcomeTokenDistribution Outcome tokens owned by market
+    /// @param funding Initial funding for market
+    /// @return Returns costs
+    function calcCurrentCosts(uint invB, uint[2] outcomeTokenRange, uint[] outcomeTokenDistribution, uint funding)
+        public
         returns(uint costs)
     {
-        // Inside the ln()
         uint innerSum = 0;
-        uint initialFundingDivisor = initialFunding / 10000;
-        for (uint8 i=0; i<shareDistribution.length; i++) {
-            innerSum += MathLibrary.eExp((shareRange[1] - shareRange[0] - (shareDistribution[i] - shareRange[0])) / initialFundingDivisor * invB);
-        }
-        costs = MathLibrary.ln(innerSum) * ONE / invB;
+        uint fundingDivisor = funding / 10000;
+        for (uint8 i=0; i<outcomeTokenDistribution.length; i++)
+            innerSum += Math.exp((outcomeTokenRange[1] - outcomeTokenRange[0] - (outcomeTokenDistribution[i] - outcomeTokenRange[0])) / fundingDivisor * invB);
+        costs = Math.ln(innerSum) * ONE / invB;
     }
 
-    function getShareRange(uint[] shareDistribution)
-        private
-        returns (uint[2] shareRange)
+    /// @dev Returns outcome tokens owned by market
+    /// @param market Market contract
+    /// @return Returns Outcome tokens owned by market
+    function getOutcomeTokenDistribution(Market market)
+        public
+        returns (uint[] outcomeTokenDistribution)
+    {
+        outcomeTokenDistribution = new uint[](market.eventContract().getOutcomeCount());
+        for (uint i=0; i<outcomeTokenDistribution.length; i++)
+            outcomeTokenDistribution[i] = market.eventContract().outcomeTokens(i).balanceOf(market);
+    }
+
+    /// @dev Returns lowest and highest number of outcome tokens owned by market
+    /// @return Returns lowest and highest number of outcome tokens
+    function getOutcomeTokenRange(uint[] outcomeTokenDistribution)
+        public
+        returns (uint[2] outcomeTokenRange)
     {
         // Lowest shares
-        shareRange[0] = shareDistribution[0];
+        outcomeTokenRange[0] = outcomeTokenDistribution[0];
         // Highest shares
-        shareRange[1] = shareDistribution[0];
-        for (uint8 i=0; i<shareDistribution.length; i++) {
-            if (shareDistribution[i] < shareRange[0]) {
-                shareRange[0] = shareDistribution[i];
-            }
-            if (shareDistribution[i]> shareRange[1]) {
-                shareRange[1] = shareDistribution[i];
-            }
-        }
+        outcomeTokenRange[1] = outcomeTokenDistribution[0];
+        for (uint8 i=0; i<outcomeTokenDistribution.length; i++)
+            if (outcomeTokenDistribution[i] < outcomeTokenRange[0])
+                outcomeTokenRange[0] = outcomeTokenDistribution[i];
+            else if (outcomeTokenDistribution[i] > outcomeTokenRange[1])
+                outcomeTokenRange[1] = outcomeTokenDistribution[i];
     }
 }
