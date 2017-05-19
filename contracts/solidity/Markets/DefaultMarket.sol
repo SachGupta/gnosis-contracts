@@ -99,12 +99,12 @@ contract DefaultMarket is Market {
         public
         returns (uint costs)
     {
-        // Calculate costs for bought outcome tokens
+        // Calculate costs to buy outcome tokens
         uint outcomeTokenCosts = marketMaker.calcCosts(this, outcomeTokenIndex, outcomeTokenCount);
         // Calculate fee charged by market
         uint fee = calcMarketFee(outcomeTokenCosts);
         costs = outcomeTokenCosts + fee;
-        // Check costs don't exceed max spending
+        // Check costs don't exceed max costs
         if (costs == 0 || costs > maxCosts)
             // Amount of token is too small or tokens are more expensive
             revert();
@@ -127,7 +127,7 @@ contract DefaultMarket is Market {
         public
         returns (uint profits)
     {
-        // Calculate profit for sold outcome tokens
+        // Calculate profits for selling outcome tokens
         uint outcomeTokenProfits = marketMaker.calcProfits(this, outcomeTokenIndex, outcomeTokenCount);
         // Calculate fee charged by market
         uint fee = calcMarketFee(outcomeTokenProfits);
@@ -136,7 +136,7 @@ contract DefaultMarket is Market {
         if (profits == 0 || profits < minProfits)
             // Amount of token is too small or profits are too low
             revert();
-        // Transfer event tokens to markets contract to redeem all outcomes
+        // Transfer outcome tokens to markets contract to sell all outcomes
         eventContract.outcomeTokens(outcomeTokenIndex).transferFrom(msg.sender, this, outcomeTokenCount);
         // Sell all outcomes
         eventContract.sellAllOutcomes(outcomeTokenProfits);
