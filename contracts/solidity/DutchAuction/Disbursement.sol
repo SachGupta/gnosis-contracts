@@ -2,7 +2,7 @@ pragma solidity 0.4.11;
 import "Tokens/AbstractToken.sol";
 
 
-/// @title Disbursement contract - allows to distribute tokens over time.
+/// @title Disbursement contract - allows to distribute tokens over time
 /// @author Stefan George - <stefan@gnosis.pm>
 contract Disbursement {
 
@@ -51,16 +51,16 @@ contract Disbursement {
     /*
      *  Public functions
      */
-    /// @dev Constructor function sets contract owner and wallet address, which is allowed to withdraw all tokens anytime.
-    /// @param _receiver Receiver of vested tokens.
-    /// @param _wallet Gnosis multisig wallet address.
-    /// @param _disbursementPeriod Vesting period in seconds.
-    /// @param _startDate Start date of disbursement period (cliff).
+    /// @dev Constructor function sets contract owner and wallet address, which is allowed to withdraw all tokens anytime
+    /// @param _receiver Receiver of vested tokens
+    /// @param _wallet Gnosis multisig wallet address
+    /// @param _disbursementPeriod Vesting period in seconds
+    /// @param _startDate Start date of disbursement period (cliff)
     function Disbursement(address _receiver, address _wallet, uint _disbursementPeriod, uint _startDate)
         public
     {
         if (_receiver == 0 || _wallet == 0 || _disbursementPeriod == 0)
-            // Arguments are null.
+            // Arguments are null
             revert();
         owner = msg.sender;
         receiver = _receiver;
@@ -71,21 +71,21 @@ contract Disbursement {
             startDate = now;
     }
 
-    /// @dev Setup function sets external contracts' addresses.
-    /// @param _token Token address.
+    /// @dev Setup function sets external contracts' addresses
+    /// @param _token Token address
     function setup(Token _token)
         public
         isOwner
     {
         if (address(token) != 0 || address(_token) == 0)
-            // Setup was executed already or address is null.
+            // Setup was executed already or address is null
             revert();
         token = _token;
     }
 
-    /// @dev Transfers tokens to a given address.
-    /// @param _to Address of token receiver.
-    /// @param _value Number of tokens to transfer.
+    /// @dev Transfers tokens to a given address
+    /// @param _to Address of token receiver
+    /// @param _value Number of tokens to transfer
     function withdraw(address _to, uint256 _value)
         public
         isReceiver
@@ -98,7 +98,7 @@ contract Disbursement {
         token.transfer(_to, _value);
     }
 
-    /// @dev Transfers all tokens to multisig wallet.
+    /// @dev Transfers all tokens to multisig wallet
     function walletWithdraw()
         public
         isWallet
@@ -109,8 +109,8 @@ contract Disbursement {
         token.transfer(wallet, balance);
     }
 
-    /// @dev Calculates the maximum amount of vested tokens.
-    /// @return Number of vested tokens to withdraw.
+    /// @dev Calculates the maximum amount of vested tokens
+    /// @return Number of vested tokens to withdraw
     function calcMaxWithdraw()
         public
         constant

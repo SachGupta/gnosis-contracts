@@ -3,7 +3,7 @@ import "Events/AbstractEvent.sol";
 import "Markets/DefaultMarketFactory.sol";
 
 
-/// @title Campaign contract - Allows to crowdfund a market.
+/// @title Campaign contract - Allows to crowdfund a market
 /// @author Stefan George - <stefan@gnosis.pm>
 contract Campaign {
 
@@ -53,13 +53,13 @@ contract Campaign {
     /*
      *  Public functions
      */
-    /// @dev Constructor validates and sets campaign properties.
-    /// @param _eventContract Event contract.
-    /// @param _marketFactory Market factory contract.
-    /// @param _marketMaker Market maker contract.
-    /// @param _fee Market fee.
-    /// @param _funding Initial funding for market.
-    /// @param _deadline Campaign deadline.
+    /// @dev Constructor validates and sets campaign properties
+    /// @param _eventContract Event contract
+    /// @param _marketFactory Market factory contract
+    /// @param _marketMaker Market maker contract
+    /// @param _fee Market fee
+    /// @param _funding Initial funding for market
+    /// @param _deadline Campaign deadline
     function Campaign(
         Event _eventContract,
         MarketFactory _marketFactory,
@@ -86,8 +86,8 @@ contract Campaign {
         deadline = _deadline;
     }
 
-    /// @dev Allows to contribute to required market funding.
-    /// @param amount Amount of collateral tokens.
+    /// @dev Allows to contribute to required market funding
+    /// @param amount Amount of collateral tokens
     function fund(uint amount)
         public
         timedTransitions
@@ -104,8 +104,8 @@ contract Campaign {
             stage = Stages.AuctionSuccessful;
     }
 
-    /// @dev Withdraws refund amount.
-    /// @return Refund amount.
+    /// @dev Withdraws refund amount
+    /// @return Refund amount
     function refund()
         public
         timedTransitions
@@ -119,8 +119,8 @@ contract Campaign {
             revert();
     }
 
-    /// @dev Allows to create market after successful funding.
-    /// @return Returns market address.
+    /// @dev Allows to create market after successful funding
+    /// @return Returns market address
     function createMarket()
         public
         timedTransitions
@@ -134,8 +134,8 @@ contract Campaign {
         return market;
     }
 
-    /// @dev Allows to withdraw fees from market contract to campaign contract.
-    /// @return Fee amount.
+    /// @dev Allows to withdraw fees from market contract to campaign contract
+    /// @return Fee amount
     function withdrawFeesFromMarket()
         public
         atStage(Stages.MarketCreated)
@@ -149,8 +149,8 @@ contract Campaign {
         stage = Stages.MarketClosed;
     }
 
-    /// @dev Allows to withdraw fees from campaign contract to contributor.
-    /// @return Fee amount.
+    /// @dev Allows to withdraw fees from campaign contract to contributor
+    /// @return Fee amount
     function withdrawFeesFromCampaign()
         public
         atStage(Stages.MarketClosed)

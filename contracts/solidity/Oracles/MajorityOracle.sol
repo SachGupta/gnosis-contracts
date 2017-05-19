@@ -2,7 +2,7 @@ pragma solidity 0.4.11;
 import "Oracles/AbstractOracle.sol";
 
 
-/// @title Majority oracle contract - Allows to resolve an event based on multiple oracles with majority vote.
+/// @title Majority oracle contract - Allows to resolve an event based on multiple oracles with majority vote
 /// @author Stefan George - <stefan@gnosis.pm>
 contract MajorityOracle is Oracle {
 
@@ -14,8 +14,8 @@ contract MajorityOracle is Oracle {
     /*
      *  Public functions
      */
-    /// @dev Allows to create an oracle for a majority vote based on other oracles.
-    /// @param _oracles List of oracles taking part in the majority vote.
+    /// @dev Allows to create an oracle for a majority vote based on other oracles
+    /// @param _oracles List of oracles taking part in the majority vote
     function MajorityOracle(Oracle[] _oracles)
         public
     {
@@ -28,9 +28,9 @@ contract MajorityOracle is Oracle {
         oracles = _oracles;
     }
 
-    /// @dev Allows to registers oracles for a majority vote.
-    /// @return Returns if outcome is set.
-    /// @return Returns outcome.
+    /// @dev Allows to registers oracles for a majority vote
+    /// @return Returns if outcome is set
+    /// @return Returns outcome
     function getStatusAndOutcome()
         public
         returns (bool outcomeSet, int outcome)
@@ -66,8 +66,8 @@ contract MajorityOracle is Oracle {
         }
     }
 
-    /// @dev Returns if winning outcome is set for given event.
-    /// @return Returns if outcome is set.
+    /// @dev Returns if winning outcome is set for given event
+    /// @return Returns if outcome is set
     function isOutcomeSet()
         public
         constant
@@ -77,8 +77,8 @@ contract MajorityOracle is Oracle {
         return outcomeSet;
     }
 
-    /// @dev Returns winning outcome for given event.
-    /// @return Returns outcome.
+    /// @dev Returns winning outcome for given event
+    /// @return Returns outcome
     function getOutcome()
         public
         constant

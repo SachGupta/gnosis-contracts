@@ -23,7 +23,7 @@ contract OutcomeTokenSwap {
     /*
      *  Public functions
      */
-    /// @dev Contract constructor sets event factory contract address.
+    /// @dev Contract constructor sets event factory contract address
     function OutcomeTokenSwap(EventFactory _eventFactory)
         public
     {
@@ -33,15 +33,15 @@ contract OutcomeTokenSwap {
         eventFactory = _eventFactory;
     }
 
-    /// @dev Creates categorical event if it does not exist and swaps outcome tokens for collateral tokens.
-    /// @param collateralToken Tokens used as collateral in exchange for outcome tokens.
-    /// @param oracle Oracle contract used to resolve the event.
-    /// @param outcomeCount Number of event outcomes.
-    /// @param trade Encoded trade parameters (nonce, token counts and outcome tokens index).
-    /// @param traders Encoded trader addresses.
-    /// @param v Encoded signature parameters of traders.
-    /// @param r Encoded signature parameters of traders.
-    /// @param s Encoded signature parameters of traders.
+    /// @dev Creates categorical event if it does not exist and swaps outcome tokens for collateral tokens
+    /// @param collateralToken Tokens used as collateral in exchange for outcome tokens
+    /// @param oracle Oracle contract used to resolve the event
+    /// @param outcomeCount Number of event outcomes
+    /// @param trade Encoded trade parameters (nonce, token counts and outcome tokens index)
+    /// @param traders Encoded trader addresses
+    /// @param v Encoded signature parameters of traders
+    /// @param r Encoded signature parameters of traders
+    /// @param s Encoded signature parameters of traders
     function swap(
         Token collateralToken,
         Oracle oracle,
@@ -62,16 +62,16 @@ contract OutcomeTokenSwap {
         settle(eventContract, trade, traders, v, r, s);
     }
 
-    /// @dev Creates scalar event if it does not exist and swaps outcome tokens for collateral tokens.
-    /// @param collateralToken Tokens used as collateral in exchange for outcome tokens.
-    /// @param oracle Oracle contract used to resolve the event.
-    /// @param lowerBound Lower bound for event outcome.
-    /// @param upperBound Lower bound for event outcome.
-    /// @param trade Encoded trade parameters (nonce, token counts and outcome tokens index).
-    /// @param traders Encoded trader addresses.
-    /// @param v Encoded signature parameters of traders.
-    /// @param r Encoded signature parameters of traders.
-    /// @param s Encoded signature parameters of traders.
+    /// @dev Creates scalar event if it does not exist and swaps outcome tokens for collateral tokens
+    /// @param collateralToken Tokens used as collateral in exchange for outcome tokens
+    /// @param oracle Oracle contract used to resolve the event
+    /// @param lowerBound Lower bound for event outcome
+    /// @param upperBound Lower bound for event outcome
+    /// @param trade Encoded trade parameters (nonce, token counts and outcome tokens index)
+    /// @param traders Encoded trader addresses
+    /// @param v Encoded signature parameters of traders
+    /// @param r Encoded signature parameters of traders
+    /// @param s Encoded signature parameters of traders
     function swap(
         Token collateralToken,
         Oracle oracle,
@@ -93,14 +93,14 @@ contract OutcomeTokenSwap {
         settle(eventContract, trade, traders, v, r, s);
     }
 
-    /// @dev Swaps two tokens in one transaction.
-    /// @param tokens Encoded exchanged tokens.
-    /// @param amounts Encoded exchanged amounts.
-    /// @param nonce Trade nonce for trading accounts.
-    /// @param traders Encoded trader addresses.
-    /// @param v Encoded signature parameters of traders.
-    /// @param r Encoded signature parameters of traders.
-    /// @param s Encoded signature parameters of traders.
+    /// @dev Swaps two tokens in one transaction
+    /// @param tokens Encoded exchanged tokens
+    /// @param amounts Encoded exchanged amounts
+    /// @param nonce Trade nonce for trading accounts
+    /// @param traders Encoded trader addresses
+    /// @param v Encoded signature parameters of traders
+    /// @param r Encoded signature parameters of traders
+    /// @param s Encoded signature parameters of traders
     function swap(
         Token[2] tokens,
         uint[2] amounts,
@@ -128,13 +128,13 @@ contract OutcomeTokenSwap {
     /*
      *  Internal functions
      */
-    /// @dev Settles token swap.
-    /// @param eventContract Event object.
-    /// @param trade Encoded trade parameters (nonce, token counts and outcome tokens index).
-    /// @param traders Encoded trader addresses.
-    /// @param v Encoded signature parameters of traders.
-    /// @param r Encoded signature parameters of traders.
-    /// @param s Encoded signature parameters of traders.
+    /// @dev Settles token swap
+    /// @param eventContract Event object
+    /// @param trade Encoded trade parameters (nonce, token counts and outcome tokens index)
+    /// @param traders Encoded trader addresses
+    /// @param v Encoded signature parameters of traders
+    /// @param r Encoded signature parameters of traders
+    /// @param s Encoded signature parameters of traders
     function settle(
         Event eventContract,
         uint[4] trade,
@@ -156,9 +156,9 @@ contract OutcomeTokenSwap {
         distributeOutcomeTokens(eventContract, trade, traders);
     }
 
-    /// @dev Validates that trade was signed by both parties.
-    /// @param traders Encoded trader addresses.
-    /// @param nonce Current trade nonce.
+    /// @dev Validates that trade was signed by both parties
+    /// @param traders Encoded trader addresses
+    /// @param nonce Current trade nonce
     function validateNonce(address[2] traders, uint nonce)
         internal
     {
@@ -169,12 +169,12 @@ contract OutcomeTokenSwap {
         nonces[nonceHash] += 1;
     }
 
-    /// @dev Validates that trade was signed by both parties.
-    /// @param tradeHash Hash identifying trade.
-    /// @param traders Encoded trader addresses.
-    /// @param v Encoded signature parameters of traders.
-    /// @param r Encoded signature parameters of traders.
-    /// @param s Encoded signature parameters of traders.
+    /// @dev Validates that trade was signed by both parties
+    /// @param tradeHash Hash identifying trade
+    /// @param traders Encoded trader addresses
+    /// @param v Encoded signature parameters of traders
+    /// @param r Encoded signature parameters of traders
+    /// @param s Encoded signature parameters of traders
     function validateSignatures(bytes32 tradeHash, address[2] traders, uint8[2] v, bytes32[2] r, bytes32[2] s)
         internal
     {
@@ -184,10 +184,10 @@ contract OutcomeTokenSwap {
             revert();
     }
 
-    /// @dev Transfers collateral tokens from maker and taker and buys all outcomes.
-    /// @param eventContract Event object.
-    /// @param traders Encoded trader addresses.
-    /// @param trade Encoded trade parameters (nonce, token counts and outcome tokens index).
+    /// @dev Transfers collateral tokens from maker and taker and buys all outcomes
+    /// @param eventContract Event object
+    /// @param traders Encoded trader addresses
+    /// @param trade Encoded trade parameters (nonce, token counts and outcome tokens index)
     function buyAllOutcomes(Event eventContract, uint[4] trade, address[2] traders)
         internal
     {
@@ -199,10 +199,10 @@ contract OutcomeTokenSwap {
         eventContract.buyAllOutcomes(trade[OUTCOME_TOKEN_COUNT]);
     }
 
-    /// @dev Distribute outcome tokens between maker and taker.
-    /// @param eventContract Event object.
-    /// @param traders Encoded trader addresses.
-    /// @param trade Encoded trade parameters (nonce, token counts and outcome tokens index).
+    /// @dev Distribute outcome tokens between maker and taker
+    /// @param eventContract Event object
+    /// @param traders Encoded trader addresses
+    /// @param trade Encoded trade parameters (nonce, token counts and outcome tokens index)
     function distributeOutcomeTokens(Event eventContract, uint[4] trade, address[2] traders)
         internal
     {

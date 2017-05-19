@@ -2,7 +2,7 @@ pragma solidity 0.4.11;
 import "Oracles/AbstractOracle.sol";
 
 
-/// @title Signed message oracle contract - Allows to set an outcome with a signed message.
+/// @title Signed message oracle contract - Allows to set an outcome with a signed message
 /// @author Stefan George - <stefan@gnosis.pm>
 contract SignedMessageOracle is Oracle {
 
@@ -19,7 +19,7 @@ contract SignedMessageOracle is Oracle {
      */
     modifier isSigner () {
         if (msg.sender != signer)
-            // Only signer is allowed to proceed.
+            // Only signer is allowed to proceed
             revert();
         _;
     }
@@ -27,11 +27,11 @@ contract SignedMessageOracle is Oracle {
     /*
      *  Public functions
      */
-    /// @dev Constructor sets signer address based on signature.
-    /// @param _descriptionHash Hash identifying off chain event description.
-    /// @param v Signature parameter.
-    /// @param r Signature parameter.
-    /// @param s Signature parameter.
+    /// @dev Constructor sets signer address based on signature
+    /// @param _descriptionHash Hash identifying off chain event description
+    /// @param v Signature parameter
+    /// @param r Signature parameter
+    /// @param s Signature parameter
     function SignedMessageOracle(bytes32 _descriptionHash, uint8 v, bytes32 r, bytes32 s)
         public
     {
@@ -39,8 +39,8 @@ contract SignedMessageOracle is Oracle {
         descriptionHash = _descriptionHash;
     }
 
-    /// @dev Replaces signer.
-    /// @param _signer New signer.
+    /// @dev Replaces signer
+    /// @param _signer New signer
     function replaceSigner(address _signer)
         public
         isSigner
@@ -51,11 +51,11 @@ contract SignedMessageOracle is Oracle {
         signer = _signer;
     }
 
-    /// @dev Sets outcome based on signed message.
-    /// @param _outcome Signed event outcome.
-    /// @param v Signature parameter.
-    /// @param r Signature parameter.
-    /// @param s Signature parameter.
+    /// @dev Sets outcome based on signed message
+    /// @param _outcome Signed event outcome
+    /// @param v Signature parameter
+    /// @param r Signature parameter
+    /// @param s Signature parameter
     function setOutcome(int _outcome, uint8 v, bytes32 r, bytes32 s)
         public
     {
@@ -67,8 +67,8 @@ contract SignedMessageOracle is Oracle {
         outcome = _outcome;
     }
 
-    /// @dev Returns if winning outcome is set for given event.
-    /// @return Returns if outcome is set.
+    /// @dev Returns if winning outcome is set for given event
+    /// @return Returns if outcome is set
     function isOutcomeSet()
         public
         constant
@@ -77,8 +77,8 @@ contract SignedMessageOracle is Oracle {
         return isSet;
     }
 
-    /// @dev Returns winning outcome for given event.
-    /// @return Returns outcome.
+    /// @dev Returns winning outcome for given event
+    /// @return Returns outcome
     function getOutcome()
         public
         constant

@@ -2,7 +2,7 @@ pragma solidity 0.4.11;
 import "Oracles/AbstractOracle.sol";
 
 
-/// @title Difficulty oracle contract - Oracle to resolve difficulty events at given block.
+/// @title Difficulty oracle contract - Oracle to resolve difficulty events at given block
 /// @author Stefan George - <stefan@gnosis.pm>
 contract DifficultyOracle is Oracle {
 
@@ -15,8 +15,8 @@ contract DifficultyOracle is Oracle {
     /*
      *  Public functions
      */
-    /// @dev Contract constructor validates and sets target block number.
-    /// @param _blockNumber Target block number.
+    /// @dev Contract constructor validates and sets target block number
+    /// @param _blockNumber Target block number
     function DifficultyOracle(uint _blockNumber)
         public
     {
@@ -26,7 +26,7 @@ contract DifficultyOracle is Oracle {
         blockNumber = _blockNumber;
     }
 
-    /// @dev Sets difficulty as winning outcome for specified block.
+    /// @dev Sets difficulty as winning outcome for specified block
     function setOutcome()
         public
     {
@@ -36,8 +36,8 @@ contract DifficultyOracle is Oracle {
         outcome = int(block.difficulty);
     }
 
-    /// @dev Returns if difficulty is set.
-    /// @return Returns if outcome is set.
+    /// @dev Returns if difficulty is set
+    /// @return Returns if outcome is set
     function isOutcomeSet()
         public
         constant
@@ -47,8 +47,8 @@ contract DifficultyOracle is Oracle {
         return outcome > 0;
     }
 
-    /// @dev Returns winning outcome for given event.
-    /// @return Returns outcome.
+    /// @dev Returns winning outcome for given event
+    /// @return Returns outcome
     function getOutcome()
         public
         constant

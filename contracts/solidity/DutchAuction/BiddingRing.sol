@@ -3,7 +3,7 @@ import "Tokens/AbstractToken.sol";
 import "AbstractDutchAuction.sol";
 
 
-/// @title Bidding ring contract - allows participants to coordinate around one price and bid together.
+/// @title Bidding ring contract - allows participants to coordinate around one price and bid together
 /// @author Stefan George - <stefan@gnosis.pm>
 contract BiddingRing {
 
@@ -47,7 +47,7 @@ contract BiddingRing {
         _;
     }
 
-    /// @dev Fallback function allows to submit a bid and transfer tokens later on.
+    /// @dev Fallback function allows to submit a bid and transfer tokens later on
     function()
         payable
     {
@@ -64,9 +64,9 @@ contract BiddingRing {
     /*
      *  Public functions
      */
-    /// @dev Constructor sets dutch auction and gnosis token address and max price paid by the bidding ring.
-    /// @param _dutchAuction Address of dutch auction contract.
-    /// @param _maxPrice Maximum price paid by participants.
+    /// @dev Constructor sets dutch auction and gnosis token address and max price paid by the bidding ring
+    /// @param _dutchAuction Address of dutch auction contract
+    /// @param _maxPrice Maximum price paid by participants
     function BiddingRing(DutchAuction _dutchAuction, uint _maxPrice)
         public
     {
@@ -80,7 +80,7 @@ contract BiddingRing {
         stage = Stages.ContributionsCollection;
     }
 
-    /// @dev Collects ether and updates contributions.
+    /// @dev Collects ether and updates contributions
     function contribute()
         public
         payable
@@ -91,7 +91,7 @@ contract BiddingRing {
         BidSubmission(msg.sender, msg.value);
     }
 
-    /// @dev Refunds ether and updates contributions.
+    /// @dev Refunds ether and updates contributions
     function refund()
         public
         atStage(Stages.ContributionsCollection)
@@ -103,7 +103,7 @@ contract BiddingRing {
         msg.sender.transfer(contribution);
     }
 
-    /// @dev Allows to send the collected ether to the auction contract when max price is reached.
+    /// @dev Allows to send the collected ether to the auction contract when max price is reached
     function bidProxy()
         public
         atStage(Stages.ContributionsCollection)
@@ -116,7 +116,7 @@ contract BiddingRing {
         dutchAuction.bid.value(this.balance)(0);
     }
 
-    /// @dev Allows to claim all tokens for the proxy contract.
+    /// @dev Allows to claim all tokens for the proxy contract
     function claimProxy()
         public
         atStage(Stages.ContributionsSent)
@@ -130,8 +130,8 @@ contract BiddingRing {
         stage = Stages.TokensClaimed;
     }
 
-    /// @dev Transfers tokens to the participant.
-    /// @return Returns token amount.
+    /// @dev Transfers tokens to the participant
+    /// @return Returns token amount
     function transferTokens()
         public
         atStage(Stages.TokensClaimed)
@@ -145,8 +145,8 @@ contract BiddingRing {
         gnosisToken.transfer(msg.sender, amount);
     }
 
-    /// @dev Transfers refunds to the participant.
-    /// @return Returns refund amount.
+    /// @dev Transfers refunds to the participant
+    /// @return Returns refund amount
     function transferRefunds()
         public
         atStage(Stages.TokensClaimed)

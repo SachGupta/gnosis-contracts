@@ -2,7 +2,7 @@ pragma solidity 0.4.11;
 import "Oracles/DifficultyOracle.sol";
 
 
-/// @title Difficulty oracle factory contract - Allows to create difficulty oracle contracts.
+/// @title Difficulty oracle factory contract - Allows to create difficulty oracle contracts
 /// @author Stefan George - <stefan@gnosis.pm>
 contract DifficultyOracleFactory {
 
@@ -14,9 +14,9 @@ contract DifficultyOracleFactory {
     /*
      *  Public functions
      */
-    /// @dev Creates a new difficulty oracle contract.
-    /// @param blockNumber Target block number.
-    /// @return Returns oracle contract.
+    /// @dev Creates a new difficulty oracle contract
+    /// @param blockNumber Target block number
+    /// @return Returns oracle contract
     function createDifficultyOracle(uint blockNumber)
         public
         returns (DifficultyOracle difficultyOracle)

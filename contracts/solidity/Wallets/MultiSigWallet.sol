@@ -1,7 +1,7 @@
 pragma solidity 0.4.11;
 
 
-/// @title Multisignature wallet - Allows multiple parties to agree on transactions before execution.
+/// @title Multisignature wallet - Allows multiple parties to agree on transactions before execution
 /// @author Stefan George - <stefan@gnosis.pm>
 contract MultiSigWallet {
 
@@ -106,7 +106,7 @@ contract MultiSigWallet {
         _;
     }
 
-    /// @dev Fallback function allows to deposit ether.
+    /// @dev Fallback function allows to deposit ether
     function()
         payable
     {
@@ -117,9 +117,9 @@ contract MultiSigWallet {
     /*
      * Public functions
      */
-    /// @dev Contract constructor sets initial owners and required number of confirmations.
-    /// @param _owners List of initial owners.
-    /// @param _required Number of required confirmations.
+    /// @dev Contract constructor sets initial owners and required number of confirmations
+    /// @param _owners List of initial owners
+    /// @param _required Number of required confirmations
     function MultiSigWallet(address[] _owners, uint _required)
         public
         validRequirement(_owners.length, _required)
@@ -133,8 +133,8 @@ contract MultiSigWallet {
         required = _required;
     }
 
-    /// @dev Allows to add a new owner. Transaction has to be sent by wallet.
-    /// @param owner Address of new owner.
+    /// @dev Allows to add a new owner. Transaction has to be sent by wallet
+    /// @param owner Address of new owner
     function addOwner(address owner)
         public
         onlyWallet
@@ -147,8 +147,8 @@ contract MultiSigWallet {
         OwnerAddition(owner);
     }
 
-    /// @dev Allows to remove an owner. Transaction has to be sent by wallet.
-    /// @param owner Address of owner.
+    /// @dev Allows to remove an owner. Transaction has to be sent by wallet
+    /// @param owner Address of owner
     function removeOwner(address owner)
         public
         onlyWallet
@@ -166,9 +166,9 @@ contract MultiSigWallet {
         OwnerRemoval(owner);
     }
 
-    /// @dev Allows to replace an owner with a new owner. Transaction has to be sent by wallet.
-    /// @param owner Address of owner to be replaced.
-    /// @param newOwner Address of new owner.
+    /// @dev Allows to replace an owner with a new owner. Transaction has to be sent by wallet
+    /// @param owner Address of owner to be replaced
+    /// @param newOwner Address of new owner
     function replaceOwner(address owner, address newOwner)
         public
         onlyWallet
@@ -186,8 +186,8 @@ contract MultiSigWallet {
         OwnerAddition(newOwner);
     }
 
-    /// @dev Allows to change the number of required confirmations. Transaction has to be sent by wallet.
-    /// @param _required Number of required confirmations.
+    /// @dev Allows to change the number of required confirmations. Transaction has to be sent by wallet
+    /// @param _required Number of required confirmations
     function changeRequirement(uint _required)
         public
         onlyWallet
@@ -197,11 +197,11 @@ contract MultiSigWallet {
         RequirementChange(_required);
     }
 
-    /// @dev Allows an owner to submit and confirm a transaction.
-    /// @param destination Transaction target address.
-    /// @param value Transaction ether value.
-    /// @param data Transaction data payload.
-    /// @return Returns transaction ID.
+    /// @dev Allows an owner to submit and confirm a transaction
+    /// @param destination Transaction target address
+    /// @param value Transaction ether value
+    /// @param data Transaction data payload
+    /// @return Returns transaction ID
     function submitTransaction(address destination, uint value, bytes data)
         public
         returns (uint transactionId)
@@ -210,8 +210,8 @@ contract MultiSigWallet {
         confirmTransaction(transactionId);
     }
 
-    /// @dev Allows an owner to confirm a transaction.
-    /// @param transactionId Transaction ID.
+    /// @dev Allows an owner to confirm a transaction
+    /// @param transactionId Transaction ID
     function confirmTransaction(uint transactionId)
         public
         ownerExists(msg.sender)
@@ -224,8 +224,8 @@ contract MultiSigWallet {
             executeTransaction(transactionId);
     }
 
-    /// @dev Allows an owner to revoke a confirmation for a transaction.
-    /// @param transactionId Transaction ID.
+    /// @dev Allows an owner to revoke a confirmation for a transaction
+    /// @param transactionId Transaction ID
     function revokeConfirmation(uint transactionId)
         public
         ownerExists(msg.sender)
@@ -236,8 +236,8 @@ contract MultiSigWallet {
         Revocation(msg.sender, transactionId);
     }
 
-    /// @dev Allows anyone to execute a confirmed transaction.
-    /// @param transactionId Transaction ID.
+    /// @dev Allows anyone to execute a confirmed transaction
+    /// @param transactionId Transaction ID
     function executeTransaction(uint transactionId)
         public
         ownerExists(msg.sender)
@@ -255,9 +255,9 @@ contract MultiSigWallet {
         }
     }
 
-    /// @dev Returns the confirmation status of a transaction.
-    /// @param transactionId Transaction ID.
-    /// @return Confirmation status.
+    /// @dev Returns the confirmation status of a transaction
+    /// @param transactionId Transaction ID
+    /// @return Confirmation status
     function isConfirmed(uint transactionId)
         public
         constant
@@ -275,11 +275,11 @@ contract MultiSigWallet {
     /*
      * Internal functions
      */
-    /// @dev Adds a new transaction to the transaction mapping, if transaction does not exist yet.
-    /// @param destination Transaction target address.
-    /// @param value Transaction ether value.
-    /// @param data Transaction data payload.
-    /// @return Returns transaction ID.
+    /// @dev Adds a new transaction to the transaction mapping, if transaction does not exist yet
+    /// @param destination Transaction target address
+    /// @param value Transaction ether value
+    /// @param data Transaction data payload
+    /// @return Returns transaction ID
     function addTransaction(address destination, uint value, bytes data)
         internal
         notNull(destination)
@@ -299,9 +299,9 @@ contract MultiSigWallet {
     /*
      * Web3 call functions
      */
-    /// @dev Returns number of confirmations of a transaction.
-    /// @param transactionId Transaction ID.
-    /// @return Number of confirmations.
+    /// @dev Returns number of confirmations of a transaction
+    /// @param transactionId Transaction ID
+    /// @return Number of confirmations
     function getConfirmationCount(uint transactionId)
         public
         constant
@@ -312,10 +312,10 @@ contract MultiSigWallet {
                 count += 1;
     }
 
-    /// @dev Returns total number of transactions after filers are applied.
-    /// @param pending Include pending transactions.
-    /// @param executed Include executed transactions.
-    /// @return Total number of transactions after filters are applied.
+    /// @dev Returns total number of transactions after filers are applied
+    /// @param pending Include pending transactions
+    /// @param executed Include executed transactions
+    /// @return Total number of transactions after filters are applied
     function getTransactionCount(bool pending, bool executed)
         public
         constant
@@ -327,8 +327,8 @@ contract MultiSigWallet {
                 count += 1;
     }
 
-    /// @dev Returns list of owners.
-    /// @return List of owner addresses.
+    /// @dev Returns list of owners
+    /// @return List of owner addresses
     function getOwners()
         public
         constant
@@ -337,9 +337,9 @@ contract MultiSigWallet {
         return owners;
     }
 
-    /// @dev Returns array with owner addresses, which confirmed transaction.
-    /// @param transactionId Transaction ID.
-    /// @return Returns array of owner addresses.
+    /// @dev Returns array with owner addresses, which confirmed transaction
+    /// @param transactionId Transaction ID
+    /// @return Returns array of owner addresses
     function getConfirmations(uint transactionId)
         public
         constant
@@ -358,12 +358,12 @@ contract MultiSigWallet {
             _confirmations[i] = confirmationsTemp[i];
     }
 
-    /// @dev Returns list of transaction IDs in defined range.
-    /// @param from Index start position of transaction array.
-    /// @param to Index end position of transaction array.
-    /// @param pending Include pending transactions.
-    /// @param executed Include executed transactions.
-    /// @return Returns array of transaction IDs.
+    /// @dev Returns list of transaction IDs in defined range
+    /// @param from Index start position of transaction array
+    /// @param to Index end position of transaction array
+    /// @param pending Include pending transactions
+    /// @param executed Include executed transactions
+    /// @return Returns array of transaction IDs
     function getTransactionIds(uint from, uint to, bool pending, bool executed)
         public
         constant

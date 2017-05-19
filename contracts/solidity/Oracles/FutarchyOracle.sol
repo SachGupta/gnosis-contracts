@@ -4,7 +4,7 @@ import "Events/EventFactory.sol";
 import "Markets/AbstractMarketFactory.sol";
 
 
-/// @title Futarchy oracle contract - Allows to create an oracle based on market behaviour.
+/// @title Futarchy oracle contract - Allows to create an oracle based on market behaviour
 /// @author Stefan George - <stefan@gnosis.pm>
 contract FutarchyOracle is Oracle {
 
@@ -23,7 +23,7 @@ contract FutarchyOracle is Oracle {
      */
     modifier isCreator () {
         if (msg.sender != creator)
-            // Only creator is allowed to proceed.
+            // Only creator is allowed to proceed
             revert();
         _;
     }
@@ -31,18 +31,18 @@ contract FutarchyOracle is Oracle {
     /*
      *  Public functions
      */
-    /// @dev Constructor creates events and markets for futarchy oracle.
-    /// @param _creator Oracle creator.
-    /// @param eventFactory Event factory contract.
-    /// @param collateralToken Tokens used as collateral in exchange for outcome tokens.
-    /// @param oracle Oracle contract used to resolve the event.
-    /// @param outcomeCount Number of event outcomes.
-    /// @param lowerBound Lower bound for event outcome.
-    /// @param upperBound Lower bound for event outcome.
-    /// @param marketFactory Market factory contract.
-    /// @param marketMaker Market maker contract.
-    /// @param fee Market fee.
-    /// @param _deadline Decision deadline.
+    /// @dev Constructor creates events and markets for futarchy oracle
+    /// @param _creator Oracle creator
+    /// @param eventFactory Event factory contract
+    /// @param collateralToken Tokens used as collateral in exchange for outcome tokens
+    /// @param oracle Oracle contract used to resolve the event
+    /// @param outcomeCount Number of event outcomes
+    /// @param lowerBound Lower bound for event outcome
+    /// @param upperBound Lower bound for event outcome
+    /// @param marketFactory Market factory contract
+    /// @param marketMaker Market maker contract
+    /// @param fee Market fee
+    /// @param _deadline Decision deadline
     function FutarchyOracle(
         address _creator,
         EventFactory eventFactory,
@@ -77,8 +77,8 @@ contract FutarchyOracle is Oracle {
         deadline = _deadline;
     }
 
-    /// @dev Funds all markets with equal amount of funding.
-    /// @param funding Amount of funding.
+    /// @dev Funds all markets with equal amount of funding
+    /// @param funding Amount of funding
     function fund(uint funding)
         public
         isCreator
@@ -97,7 +97,7 @@ contract FutarchyOracle is Oracle {
         }
     }
 
-    /// @dev Closes market for winning outcome and redeems winnings and sends all collateral tokens to creator.
+    /// @dev Closes market for winning outcome and redeems winnings and sends all collateral tokens to creator
     function close()
         public
         isCreator
@@ -117,8 +117,8 @@ contract FutarchyOracle is Oracle {
             revert();
     }
 
-    /// @dev Returns the amount of outcome tokens held by market.
-    /// @return Outcome token distribution.
+    /// @dev Returns the amount of outcome tokens held by market
+    /// @return Outcome token distribution
     function getOutcomeTokenDistribution(Market market)
         public
         returns (uint[] outcomeTokenDistribution)
@@ -128,7 +128,7 @@ contract FutarchyOracle is Oracle {
             outcomeTokenDistribution[i] = market.eventContract().outcomeTokens(i).balanceOf(market);
     }
 
-    /// @dev Allows to set the oracle outcome based on the market with largest long position.
+    /// @dev Allows to set the oracle outcome based on the market with largest long position
     function setOutcome()
         public
     {
@@ -147,8 +147,8 @@ contract FutarchyOracle is Oracle {
         isSet = true;
     }
 
-    /// @dev Returns if winning outcome is set for given event.
-    /// @return Returns if outcome is set.
+    /// @dev Returns if winning outcome is set for given event
+    /// @return Returns if outcome is set
     function isOutcomeSet()
         public
         constant
@@ -157,8 +157,8 @@ contract FutarchyOracle is Oracle {
         return isSet;
     }
 
-    /// @dev Returns winning outcome for given event.
-    /// @return Returns outcome.
+    /// @dev Returns winning outcome for given event
+    /// @return Returns outcome
     function getOutcome()
         public
         constant

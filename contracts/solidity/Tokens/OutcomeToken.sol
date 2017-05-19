@@ -2,7 +2,7 @@ pragma solidity 0.4.11;
 import "Tokens/StandardTokenWithOverflowProtection.sol";
 
 
-/// @title Outcome token contract - Issuing and revoking outcome tokens.
+/// @title Outcome token contract - Issuing and revoking outcome tokens
 /// @author Stefan George - <stefan@gnosis.pm>
 contract OutcomeToken is StandardTokenWithOverflowProtection {
 
@@ -22,7 +22,7 @@ contract OutcomeToken is StandardTokenWithOverflowProtection {
      */
     modifier isEventContract () {
         if (msg.sender != eventContract)
-            // Only event contract is allowed to proceed.
+            // Only event contract is allowed to proceed
             revert();
         _;
     }
@@ -30,16 +30,16 @@ contract OutcomeToken is StandardTokenWithOverflowProtection {
     /*
      *  Public functions
      */
-    /// @dev Constructor sets events contract address.
+    /// @dev Constructor sets events contract address
     function OutcomeToken()
         public
     {
         eventContract = msg.sender;
     }
     
-    /// @dev Events contract issues new tokens for address. Returns success.
-    /// @param _for Address of receiver.
-    /// @param outcomeTokenCount Number of tokens to issue.
+    /// @dev Events contract issues new tokens for address. Returns success
+    /// @param _for Address of receiver
+    /// @param outcomeTokenCount Number of tokens to issue
     function issue(address _for, uint outcomeTokenCount)
         public
         isEventContract
@@ -53,9 +53,9 @@ contract OutcomeToken is StandardTokenWithOverflowProtection {
         Issue(_for, outcomeTokenCount);
     }
 
-    /// @dev Events contract revokes tokens for address. Returns success.
-    /// @param _for Address of token holder.
-    /// @param outcomeTokenCount Number of tokens to revoke.
+    /// @dev Events contract revokes tokens for address. Returns success
+    /// @param _for Address of token holder
+    /// @param outcomeTokenCount Number of tokens to revoke
     function revoke(address _for, uint outcomeTokenCount)
         public
         isEventContract

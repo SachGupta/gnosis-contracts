@@ -2,7 +2,7 @@ pragma solidity 0.4.11;
 import "Oracles/AbstractOracle.sol";
 
 
-/// @title Centralized oracle contract - Allows the contract owner to set an outcome.
+/// @title Centralized oracle contract - Allows the contract owner to set an outcome
 /// @author Stefan George - <stefan@gnosis.pm>
 contract CentralizedOracle is Oracle {
 
@@ -19,7 +19,7 @@ contract CentralizedOracle is Oracle {
      */
     modifier isOwner () {
         if (msg.sender != owner)
-            // Only owner is allowed to proceed.
+            // Only owner is allowed to proceed
             revert();
         _;
     }
@@ -27,8 +27,8 @@ contract CentralizedOracle is Oracle {
     /*
      *  Public functions
      */
-    /// @dev Constructor sets owner address and description hash.
-    /// @param _descriptionHash Hash identifying off chain event description.
+    /// @dev Constructor sets owner address and description hash
+    /// @param _descriptionHash Hash identifying off chain event description
     function CentralizedOracle(address _owner, bytes32 _descriptionHash)
         public
     {
@@ -39,8 +39,8 @@ contract CentralizedOracle is Oracle {
         descriptionHash = _descriptionHash;
     }
 
-    /// @dev Replaces owner.
-    /// @param _owner New owner.
+    /// @dev Replaces owner
+    /// @param _owner New owner
     function replaceOwner(address _owner)
         public
         isOwner
@@ -51,8 +51,8 @@ contract CentralizedOracle is Oracle {
         owner = _owner;
     }
 
-    /// @dev Sets event outcome.
-    /// @param _outcome Event outcome.
+    /// @dev Sets event outcome
+    /// @param _outcome Event outcome
     function setOutcome(int _outcome)
         public
         isOwner
@@ -64,8 +64,8 @@ contract CentralizedOracle is Oracle {
         outcome = _outcome;
     }
 
-    /// @dev Returns if winning outcome is set for given event.
-    /// @return Returns if outcome is set.
+    /// @dev Returns if winning outcome is set for given event
+    /// @return Returns if outcome is set
     function isOutcomeSet()
         public
         constant
@@ -74,8 +74,8 @@ contract CentralizedOracle is Oracle {
         return isSet;
     }
 
-    /// @dev Returns winning outcome for given event.
-    /// @return Returns outcome.
+    /// @dev Returns winning outcome for given event
+    /// @return Returns outcome
     function getOutcome()
         public
         constant

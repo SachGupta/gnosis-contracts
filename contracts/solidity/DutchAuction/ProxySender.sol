@@ -3,7 +3,7 @@ import "Tokens/AbstractToken.sol";
 import "AbstractDutchAuction.sol";
 
 
-/// @title Proxy sender contract - allows to participate in the auction by sending ETH to the contract.
+/// @title Proxy sender contract - allows to participate in the auction by sending ETH to the contract
 /// @author Stefan George - <stefan@gnosis.pm>
 contract ProxySender {
 
@@ -45,7 +45,7 @@ contract ProxySender {
         _;
     }
 
-    /// @dev Fallback function allows to submit a bid and transfer tokens later on.
+    /// @dev Fallback function allows to submit a bid and transfer tokens later on
     function()
         payable
     {
@@ -62,8 +62,8 @@ contract ProxySender {
     /*
      *  Public functions
      */
-    /// @dev Constructor sets dutch auction and gnosis token address.
-    /// @param _dutchAuction Address of dutch auction contract.
+    /// @dev Constructor sets dutch auction and gnosis token address
+    /// @param _dutchAuction Address of dutch auction contract
     function ProxySender(DutchAuction _dutchAuction)
         public
     {
@@ -74,7 +74,7 @@ contract ProxySender {
         stage = Stages.ContributionsCollection;
     }
 
-    /// @dev Forwards ETH to the auction contract and updates contributions.
+    /// @dev Forwards ETH to the auction contract and updates contributions
     function contribute()
         public
         payable
@@ -89,7 +89,7 @@ contract ProxySender {
         BidSubmission(msg.sender, msg.value);
     }
 
-    /// @dev Allows to claim all tokens for the proxy contract.
+    /// @dev Allows to claim all tokens for the proxy contract
     function claimProxy()
         public
         atStage(Stages.ContributionsCollection)
@@ -103,8 +103,8 @@ contract ProxySender {
         stage = Stages.TokensClaimed;
     }
 
-    /// @dev Transfers tokens to the participant.
-    /// @return Returns token amount.
+    /// @dev Transfers tokens to the participant
+    /// @return Returns token amount
     function transferTokens()
         public
         atStage(Stages.TokensClaimed)
@@ -118,8 +118,8 @@ contract ProxySender {
         gnosisToken.transfer(msg.sender, amount);
     }
 
-    /// @dev Transfers refunds to the participant.
-    /// @return Returns refund amount.
+    /// @dev Transfers refunds to the participant
+    /// @return Returns refund amount
     function transferRefunds()
         public
         atStage(Stages.TokensClaimed)

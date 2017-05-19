@@ -2,7 +2,7 @@ pragma solidity 0.4.11;
 import "Tokens/StandardTokenWithOverflowProtection.sol";
 
 
-/// @title Token contract - Token exchanging Ether 1:1.
+/// @title Token contract - Token exchanging Ether 1:1
 /// @author Stefan George - <stefan@gnosis.pm>
 contract EtherToken is StandardTokenWithOverflowProtection {
 
@@ -22,7 +22,7 @@ contract EtherToken is StandardTokenWithOverflowProtection {
     /*
      *  Public functions
      */
-    /// @dev Buys tokens with Ether, exchanging them 1:1.
+    /// @dev Buys tokens with Ether, exchanging them 1:1
     function deposit()
         public
         payable
@@ -32,8 +32,8 @@ contract EtherToken is StandardTokenWithOverflowProtection {
         Deposit(msg.sender, msg.value);
     }
 
-    /// @dev Sells tokens in exchange for Ether, exchanging them 1:1.
-    /// @param amount Number of tokens to sell.
+    /// @dev Sells tokens in exchange for Ether, exchanging them 1:1
+    /// @param amount Number of tokens to sell
     function withdraw(uint amount)
         public
     {

@@ -1,7 +1,7 @@
 pragma solidity 0.4.11;
 
 
-/// @title Math library - Allows calculation of logarithmic and exponential functions.
+/// @title Math library - Allows calculation of logarithmic and exponential functions
 /// @author Alan Lu - <alan.lu@gnosis.pm>
 /// @author Stefan George - <stefan@gnosis.pm>
 library Math {
@@ -16,7 +16,7 @@ library Math {
      *  Public functions
      */
     /// @dev This function takes two unsigned 256-bit integers and multiplies them, returning a 512-bit result split
-    ///      into a high 256-bit limb, a middle 128-bit limb, and a low 128-bit limb.
+    ///      into a high 256-bit limb, a middle 128-bit limb, and a low 128-bit limb
     /// @param a Factor A
     /// @param b Factor B
     /// @return ab32 High bits
@@ -40,7 +40,7 @@ library Math {
 
     /// @dev This function takes a unsigned 384-bit integer and divides it by a 256-bit integer, returning a high-bits
     ///      truncated 256-bit quotient and a remainder. The 384-bit dividend is represented as a high 256-bit limb and
-    ///      a low 128-bit limb.
+    ///      a low 128-bit limb
     /// @notice This code is adapted from Fast Division of Large Integers by Karl Hasselström Algorithm 3.4:
     ///         Divide-and-conquer division (3 by 2) Karl got it from Burnikel and Ziegler and the GMP lib implementation
     /// @param a21 High bits
@@ -85,9 +85,9 @@ library Math {
         r = (((rhi - rsub21) << 128) + a0 - rsub0) >> shift;
     }
 
-    /// @dev This function returns a 256-bit truncated a * b / divisor, where the division is integer division.
+    /// @dev This function returns a 256-bit truncated a * b / divisor, where the division is integer division
     ///      The overflow from a * b is handled in a 512-bit buffer, so this method calculates the expression correctly
-    ///      for high values of a and b.
+    ///      for high values of a and b
     /// @param a Factor A
     /// @param b Factor B
     /// @param divisor Divisor
@@ -106,9 +106,9 @@ library Math {
         return (ab32_q1 << 128) + a;
     }
 
-    /// @dev Returns natural exponential function value of given x.
-    /// @param x X.
-    /// @return Returns e**x.
+    /// @dev Returns natural exponential function value of given x
+    /// @param x x
+    /// @return Returns e**x
     function exp(uint x)
         public
         constant
@@ -136,9 +136,9 @@ library Math {
         return shift * result;
     }
 
-    /// @dev Returns natural logarithm value of given x.
-    /// @param x X.
-    /// @return Returns ln(x).
+    /// @dev Returns natural logarithm value of given x
+    /// @param x x
+    /// @return Returns ln(x)
     function ln(uint x)
         public
         constant
@@ -186,9 +186,9 @@ library Math {
         return (ilog2 * ONE + result - const) * ONE / log2e;
     }
 
-    /// @dev Returns base 2 logarithm value of given x.
-    /// @param x X.
-    /// @return Returns logarithmic value.
+    /// @dev Returns base 2 logarithm value of given x
+    /// @param x x
+    /// @return Returns logarithmic value
     function floorLog2(uint x)
         public
         constant
@@ -207,9 +207,9 @@ library Math {
         }
     }
 
-    /// @dev Returns if an add operation causes an overflow.
-    /// @param a First addend.
-    /// @param b Second addend.
+    /// @dev Returns if an add operation causes an overflow
+    /// @param a First addend
+    /// @param b Second addend
     /// @return Did an overflow occur?
     function safeToAdd(uint a, uint b)
         public
@@ -218,9 +218,9 @@ library Math {
         return (a + b >= a);
     }
 
-    /// @dev Returns if an subtraction operation causes an overflow.
-    /// @param a Minuend.
-    /// @param b Subtrahend.
+    /// @dev Returns if an subtraction operation causes an overflow
+    /// @param a Minuend
+    /// @param b Subtrahend
     /// @return Did an overflow occur?
     function safeToSubtract(uint a, uint b)
         public

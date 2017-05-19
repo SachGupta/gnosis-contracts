@@ -4,7 +4,7 @@ import "Tokens/OutcomeToken.sol";
 import "Oracles/AbstractOracle.sol";
 
 
-/// @title Event contract - Provide basic functionality required by different event types.
+/// @title Event contract - Provide basic functionality required by different event types
 /// @author Stefan George - <stefan@gnosis.pm>
 contract Event {
 
@@ -20,10 +20,10 @@ contract Event {
     /*
      *  Public functions
      */
-    /// @dev Contract constructor validates and sets basic event properties.
-    /// @param _collateralToken Tokens used as collateral in exchange for outcome tokens.
-    /// @param _oracle Oracle contract used to resolve the event.
-    /// @param outcomeCount Number of event outcomes.
+    /// @dev Contract constructor validates and sets basic event properties
+    /// @param _collateralToken Tokens used as collateral in exchange for outcome tokens
+    /// @param _oracle Oracle contract used to resolve the event
+    /// @param outcomeCount Number of event outcomes
     function Event(Token _collateralToken, Oracle _oracle, uint outcomeCount)
         public
     {
@@ -37,8 +37,8 @@ contract Event {
             outcomeTokens.push(new OutcomeToken());
     }
 
-    /// @dev Buys equal number of tokens of all outcomes, exchanging collateral tokens and all outcome tokens 1:1.
-    /// @param collateralTokenCount Number of collateral tokens.
+    /// @dev Buys equal number of tokens of all outcomes, exchanging collateral tokens and all outcome tokens 1:1
+    /// @param collateralTokenCount Number of collateral tokens
     function buyAllOutcomes(uint collateralTokenCount)
         public
     {
@@ -46,13 +46,13 @@ contract Event {
         if (!collateralToken.transferFrom(msg.sender, this, collateralTokenCount))
             // Transfer failed
             revert();
-        // Issue new event tokens to owner.
+        // Issue new event tokens to owner
         for (uint8 i=0; i<outcomeTokens.length; i++)
             outcomeTokens[i].issue(msg.sender, collateralTokenCount);
     }
 
-    /// @dev Sells equal number of tokens of all outcomes, exchanging collateral tokens and all outcome tokens 1:1.
-    /// @param outcomeTokenCount Number of outcome tokens.
+    /// @dev Sells equal number of tokens of all outcomes, exchanging collateral tokens and all outcome tokens 1:1
+    /// @param outcomeTokenCount Number of outcome tokens
     function sellAllOutcomes(uint outcomeTokenCount)
         public
     {
@@ -65,7 +65,7 @@ contract Event {
             revert();
     }
 
-    /// @dev Sets winning event outcome if resolved by oracle.
+    /// @dev Sets winning event outcome if resolved by oracle
     function setWinningOutcome()
         public
     {
@@ -97,8 +97,8 @@ contract Event {
         return outcomeTokens;
     }
 
-    /// @dev Returns the amount of outcome tokens held by owner.
-    /// @return Outcome token distribution.
+    /// @dev Returns the amount of outcome tokens held by owner
+    /// @return Outcome token distribution
     function getOutcomeTokenDistribution(address owner)
         public
         constant
@@ -109,11 +109,11 @@ contract Event {
             outcomeTokenDistribution[i] = outcomeTokens[i].balanceOf(owner);
     }
 
-    /// @dev Calculates and returns event hash.
-    /// @return Returns event hash.
+    /// @dev Calculates and returns event hash
+    /// @return Returns event hash
     function getEventHash() public constant returns (bytes32);
 
-    /// @dev Exchanges user's winning outcome tokens for collateral tokens.
-    /// @return Returns user's winnings.
+    /// @dev Exchanges user's winning outcome tokens for collateral tokens
+    /// @return Returns user's winnings
     function redeemWinnings() public returns (uint);
 }

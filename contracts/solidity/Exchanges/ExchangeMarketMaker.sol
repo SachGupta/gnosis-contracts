@@ -36,7 +36,7 @@ contract ExchangeMarketMaker {
     /// @notice Send amount `supplies[i]` of token `tokens[i]` to this contract to create exchange for token pair
     /// @param tokens The token pair to be handled by the exchange
     /// @param supplies Amount of each currency to fund exchange with
-    /// @return exchangeIdentifier The identifier for newly created exchange.
+    /// @return exchangeIdentifier The identifier for newly created exchange
     function addExchange(Token[2] tokens, uint[2] supplies)
         public
         returns (bytes32 exchangeIdentifier)
@@ -72,7 +72,7 @@ contract ExchangeMarketMaker {
     }
 
     /// @notice Send `calcCosts(exchangeIdentifier, tokenIndex, amount)` of `tokens[1-tokenIndex]` to buy `amount` of
-    ///         `tokens[tokenIndex]` from exchange.
+    ///         `tokens[tokenIndex]` from exchange
     /// @param exchangeIdentifier The ID of the exchange
     /// @param tokenIndex Index of the token to be bought from the exchange
     /// @param amount Amount of `tokens[tokenIndex]` to buy from exchange

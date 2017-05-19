@@ -2,17 +2,17 @@ pragma solidity 0.4.11;
 import "Events/AbstractEvent.sol";
 
 
-/// @title Categorical event contract - Categorical events resolve to an outcome from a list of outcomes.
+/// @title Categorical event contract - Categorical events resolve to an outcome from a list of outcomes
 /// @author Stefan George - <stefan@gnosis.pm>
 contract CategoricalEvent is Event {
 
     /*
      *  Public functions
      */
-    /// @dev Contract constructor validates and sets basic event properties.
-    /// @param _collateralToken Tokens used as collateral in exchange for outcome tokens.
-    /// @param _oracle Oracle contract used to resolve the event.
-    /// @param outcomeCount Number of event outcomes.
+    /// @dev Contract constructor validates and sets basic event properties
+    /// @param _collateralToken Tokens used as collateral in exchange for outcome tokens
+    /// @param _oracle Oracle contract used to resolve the event
+    /// @param outcomeCount Number of event outcomes
     function CategoricalEvent(
         Token _collateralToken,
         Oracle _oracle,
@@ -24,8 +24,8 @@ contract CategoricalEvent is Event {
 
     }
 
-    /// @dev Exchanges user's winning outcome tokens for collateral tokens.
-    /// @return Returns user's winnings.
+    /// @dev Exchanges user's winning outcome tokens for collateral tokens
+    /// @return Returns user's winnings
     function redeemWinnings()
         public
         returns (uint winnings)
@@ -43,8 +43,8 @@ contract CategoricalEvent is Event {
             revert();
     }
 
-    /// @dev Calculates and returns event hash.
-    /// @return Returns event hash.
+    /// @dev Calculates and returns event hash
+    /// @return Returns event hash
     function getEventHash()
         public
         constant

@@ -2,7 +2,7 @@ pragma solidity 0.4.11;
 import "Events/AbstractEvent.sol";
 
 
-/// @title Scalar event contract - Scalar events resolve to a number within a range.
+/// @title Scalar event contract - Scalar events resolve to a number within a range
 /// @author Stefan George - <stefan@gnosis.pm>
 contract ScalarEvent is Event {
 
@@ -22,11 +22,11 @@ contract ScalarEvent is Event {
     /*
      *  Public functions
      */
-    /// @dev Contract constructor validates and sets basic event properties.
-    /// @param _collateralToken Tokens used as collateral in exchange for outcome tokens.
-    /// @param _oracle Oracle contract used to resolve the event.
-    /// @param _lowerBound Lower bound for event outcome.
-    /// @param _upperBound Lower bound for event outcome.
+    /// @dev Contract constructor validates and sets basic event properties
+    /// @param _collateralToken Tokens used as collateral in exchange for outcome tokens
+    /// @param _oracle Oracle contract used to resolve the event
+    /// @param _lowerBound Lower bound for event outcome
+    /// @param _upperBound Lower bound for event outcome
     function ScalarEvent(
         Token _collateralToken,
         Oracle _oracle,
@@ -43,8 +43,8 @@ contract ScalarEvent is Event {
         upperBound = _upperBound;
     }
 
-    /// @dev Exchanges user's winning outcome tokens for collateral tokens.
-    /// @return Returns user's winnings.
+    /// @dev Exchanges user's winning outcome tokens for collateral tokens
+    /// @return Returns user's winnings
     function redeemWinnings()
         public
         returns (uint winnings)
@@ -77,8 +77,8 @@ contract ScalarEvent is Event {
             revert();
     }
 
-    /// @dev Calculates and returns event hash.
-    /// @return Returns event hash.
+    /// @dev Calculates and returns event hash
+    /// @return Returns event hash
     function getEventHash()
         public
         constant

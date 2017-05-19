@@ -3,7 +3,7 @@ import "Events/CategoricalEvent.sol";
 import "Events/ScalarEvent.sol";
 
 
-/// @title Event factory contract - Allows create categorical and scalar events.
+/// @title Event factory contract - Allows create categorical and scalar events
 /// @author Stefan George - <stefan@gnosis.pm>
 contract EventFactory {
 
@@ -22,11 +22,11 @@ contract EventFactory {
     /*
      *  Public functions
      */
-    /// @dev Creates a new categorical event and adds it to the event mapping.
-    /// @param collateralToken Tokens used as collateral in exchange for outcome tokens.
-    /// @param oracle Oracle contract used to resolve the event.
-    /// @param outcomeCount Number of event outcomes.
-    /// @return Returns event contract.
+    /// @dev Creates a new categorical event and adds it to the event mapping
+    /// @param collateralToken Tokens used as collateral in exchange for outcome tokens
+    /// @param oracle Oracle contract used to resolve the event
+    /// @param outcomeCount Number of event outcomes
+    /// @return Returns event contract
     function createCategoricalEvent(
         Token collateralToken,
         Oracle oracle,
@@ -48,12 +48,12 @@ contract EventFactory {
         CategoricalEventCreation(msg.sender, eventContract, collateralToken, oracle, outcomeCount);
     }
 
-    /// @dev Creates a new scalar event and adds it to the event mapping.
-    /// @param collateralToken Tokens used as collateral in exchange for outcome tokens.
-    /// @param oracle Oracle contract used to resolve the event.
-    /// @param lowerBound Lower bound for event outcome.
-    /// @param upperBound Lower bound for event outcome.
-    /// @return Returns event contract.
+    /// @dev Creates a new scalar event and adds it to the event mapping
+    /// @param collateralToken Tokens used as collateral in exchange for outcome tokens
+    /// @param oracle Oracle contract used to resolve the event
+    /// @param lowerBound Lower bound for event outcome
+    /// @param upperBound Lower bound for event outcome
+    /// @return Returns event contract
     function createScalarEvent(
         Token collateralToken,
         Oracle oracle,

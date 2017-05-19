@@ -3,7 +3,7 @@ import "Events/AbstractEvent.sol";
 import "MarketMakers/AbstractMarketMaker.sol";
 
 
-/// @title Abstract market contract - Functions to be implemented by market contracts.
+/// @title Abstract market contract - Functions to be implemented by market contracts
 contract Market {
 
     address public creator;

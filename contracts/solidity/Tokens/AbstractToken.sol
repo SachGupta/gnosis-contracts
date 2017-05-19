@@ -2,7 +2,7 @@
 pragma solidity 0.4.11;
 
 
-/// @title Abstract token contract - Functions to be implemented by token contracts.
+/// @title Abstract token contract - Functions to be implemented by token contracts
 contract Token {
 
     event Transfer(address indexed from, address indexed to, uint value);

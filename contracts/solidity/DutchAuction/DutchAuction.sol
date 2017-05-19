@@ -2,7 +2,7 @@ pragma solidity 0.4.11;
 import "Tokens/AbstractToken.sol";
 
 
-/// @title Dutch auction contract - distribution of Gnosis tokens using an auction.
+/// @title Dutch auction contract - distribution of Gnosis tokens using an auction
 /// @author Stefan George - <stefan@gnosis.pm>
 contract DutchAuction {
 
@@ -84,15 +84,15 @@ contract DutchAuction {
     /*
      *  Public functions
      */
-    /// @dev Contract constructor function sets owner.
-    /// @param _wallet Gnosis wallet.
-    /// @param _ceiling Auction ceiling.
-    /// @param _priceFactor Auction price factor.
+    /// @dev Contract constructor function sets owner
+    /// @param _wallet Gnosis wallet
+    /// @param _ceiling Auction ceiling
+    /// @param _priceFactor Auction price factor
     function DutchAuction(address _wallet, uint _ceiling, uint _priceFactor)
         public
     {
         if (_wallet == 0 || _ceiling == 0 || _priceFactor == 0)
-            // Arguments are null.
+            // Arguments are null
             revert();
         owner = msg.sender;
         wallet = _wallet;
@@ -101,15 +101,15 @@ contract DutchAuction {
         stage = Stages.AuctionDeployed;
     }
 
-    /// @dev Setup function sets external contracts' addresses.
-    /// @param _gnosisToken Gnosis token address.
+    /// @dev Setup function sets external contracts' addresses
+    /// @param _gnosisToken Gnosis token address
     function setup(Token _gnosisToken)
         public
         isOwner
         atStage(Stages.AuctionDeployed)
     {
         if (address(_gnosisToken) == 0)
-            // Argument is null.
+            // Argument is null
             revert();
         gnosisToken = _gnosisToken;
         // Validate token balance
@@ -118,7 +118,7 @@ contract DutchAuction {
         stage = Stages.AuctionSetUp;
     }
 
-    /// @dev Starts auction and sets startBlock.
+    /// @dev Starts auction and sets startBlock
     function startAuction()
         public
         isWallet
@@ -128,9 +128,9 @@ contract DutchAuction {
         startBlock = block.number;
     }
 
-    /// @dev Changes auction ceiling and start price factor before auction is started.
-    /// @param _ceiling Updated auction ceiling.
-    /// @param _priceFactor Updated start price factor.
+    /// @dev Changes auction ceiling and start price factor before auction is started
+    /// @param _ceiling Updated auction ceiling
+    /// @param _priceFactor Updated start price factor
     function changeSettings(uint _ceiling, uint _priceFactor)
         public
         isWallet
@@ -140,8 +140,8 @@ contract DutchAuction {
         priceFactor = _priceFactor;
     }
 
-    /// @dev Calculates current token price.
-    /// @return Returns token price.
+    /// @dev Calculates current token price
+    /// @return Returns token price
     function calcCurrentTokenPrice()
         public
         timedTransitions
@@ -152,8 +152,8 @@ contract DutchAuction {
         return calcTokenPrice();
     }
 
-    /// @dev Returns correct stage, even if a function with timedTransitions modifier has not yet been called yet.
-    /// @return Returns current auction stage.
+    /// @dev Returns correct stage, even if a function with timedTransitions modifier has not yet been called yet
+    /// @return Returns current auction stage
     function updateStage()
         public
         timedTransitions
@@ -162,8 +162,8 @@ contract DutchAuction {
         return stage;
     }
 
-    /// @dev Allows to send a bid to the auction.
-    /// @param receiver Bid will be assigned to this address if set.
+    /// @dev Allows to send a bid to the auction
+    /// @param receiver Bid will be assigned to this address if set
     function bid(address receiver)
         public
         payable
@@ -172,19 +172,19 @@ contract DutchAuction {
         atStage(Stages.AuctionStarted)
         returns (uint amount)
     {
-        // If a bid is done on behalf of a user via ShapeShift, the receiver address is set.
+        // If a bid is done on behalf of a user via ShapeShift, the receiver address is set
         if (receiver == 0)
             receiver = msg.sender;
         amount = msg.value;
-        // Prevent that more than 90% of tokens are sold. Only relevant if cap not reached.
+        // Prevent that more than 90% of tokens are sold. Only relevant if cap not reached
         uint maxWei = (MAX_TOKENS_SOLD / 10**18) * calcTokenPrice() - totalReceived;
         uint maxWeiBasedOnTotalReceived = ceiling - totalReceived;
         if (maxWeiBasedOnTotalReceived < maxWei)
             maxWei = maxWeiBasedOnTotalReceived;
-        // Only invest maximum possible amount.
+        // Only invest maximum possible amount
         if (amount > maxWei) {
             amount = maxWei;
-            // Send change back to receiver address. In case of a ShapeShift bid the user receives the change back directly.
+            // Send change back to receiver address. In case of a ShapeShift bid the user receives the change back directly
             receiver.transfer(msg.value - amount);
         }
         // Forward funding to ether wallet
@@ -192,13 +192,13 @@ contract DutchAuction {
         bids[receiver] += amount;
         totalReceived += amount;
         if (maxWei == amount)
-            // When maxWei is equal to the big amount the auction is ended and finalizeAuction is triggered.
+            // When maxWei is equal to the big amount the auction is ended and finalizeAuction is triggered
             finalizeAuction();
         BidSubmission(receiver, amount);
     }
 
-    /// @dev Claims tokens for bidder after auction.
-    /// @param receiver Tokens will be assigned to this address if set.
+    /// @dev Claims tokens for bidder after auction
+    /// @param receiver Tokens will be assigned to this address if set
     function claimTokens(address receiver)
         public
         isValidPayload(receiver)
@@ -212,8 +212,8 @@ contract DutchAuction {
         gnosisToken.transfer(receiver, tokenCount);
     }
 
-    /// @dev Calculates stop price.
-    /// @return Returns stop price.
+    /// @dev Calculates stop price
+    /// @return Returns stop price
     function calcStopPrice()
         constant
         public
@@ -222,8 +222,8 @@ contract DutchAuction {
         return totalReceived * 10**18 / MAX_TOKENS_SOLD + 1;
     }
 
-    /// @dev Calculates token price.
-    /// @return Returns token price.
+    /// @dev Calculates token price
+    /// @return Returns token price
     function calcTokenPrice()
         constant
         public
