@@ -25,7 +25,8 @@ class TestContract(AbstractTestContract):
                                     self.centralized_oracle_abi)
         oracle_3 = self.contract_at(self.centralized_oracle_factory.createCentralizedOracle(description_hash, sender=keys[owner_3]),
                                     self.centralized_oracle_abi)
-        majority_oracle = self.contract_at(self.majority_oracle_factory.createMajorityOracle([oracle_1.address, oracle_2.address, oracle_3.address]))
+        majority_oracle = self.contract_at(self.majority_oracle_factory.createMajorityOracle([oracle_1.address, oracle_2.address, oracle_3.address]),
+                                           self.majority_oracle_abi)
         # Majority oracle cannot be resolved yet
         self.assertFalse(majority_oracle.isOutcomeSet())
         # Set outcome in first centralized oracle

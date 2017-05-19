@@ -3,7 +3,7 @@ import "Oracles/AbstractOracle.sol";
 import "Tokens/AbstractToken.sol";
 
 
-/// @title Ultimate oracle contract - Allows to swap oracle result for ultimate oracle result.
+/// @title Ultimate oracle contract - Allows to swap oracle result for ultimate oracle result
 /// @author Stefan George - <stefan@gnosis.pm>
 contract UltimateOracle is Oracle {
 
@@ -29,13 +29,13 @@ contract UltimateOracle is Oracle {
     /*
      *  Public functions
      */
-    /// @dev Constructor sets Ultimate Oracle properties.
-    /// @param _oracle Oracle address.
-    /// @param _collateralToken Collateral token address.
-    /// @param _spreadMultiplier Defines the spread as a multiple of the money bet on other outcomes.
-    /// @param _challengePeriod Time to challenge oracle outcome.
-    /// @param _challengeAmount Amount to challenge the outcome.
-    /// @param _frontRunnerPeriod Time to overbid the front-runner.
+    /// @dev Constructor sets Ultimate oracle properties
+    /// @param _oracle Oracle address
+    /// @param _collateralToken Collateral token address
+    /// @param _spreadMultiplier Defines the spread as a multiple of the money bet on other outcomes
+    /// @param _challengePeriod Time to challenge oracle outcome
+    /// @param _challengeAmount Amount to challenge the outcome
+    /// @param _frontRunnerPeriod Time to overbid the front-runner
     function UltimateOracle(
         Oracle _oracle,
         Token _collateralToken,
@@ -48,7 +48,7 @@ contract UltimateOracle is Oracle {
     {
         if (   address(_oracle) == 0
             || address(_collateralToken) == 0
-            || _spreadMultiplier == 0
+            || _spreadMultiplier < 2
             || _challengePeriod == 0
             || _challengeAmount == 0
             || _frontRunnerPeriod == 0)
@@ -62,7 +62,7 @@ contract UltimateOracle is Oracle {
         frontRunnerPeriod = _frontRunnerPeriod;
     }
 
-    /// @dev Allows to set oracle outcome.
+    /// @dev Allows to set oracle outcome
     function setOutcome()
         public
     {
@@ -75,8 +75,8 @@ contract UltimateOracle is Oracle {
         outcomeSetTimestamp = now;
     }
 
-    /// @dev Allows to challenge the oracle outcome.
-    /// @param _outcome Outcome to bid on.
+    /// @dev Allows to challenge the oracle outcome
+    /// @param _outcome Outcome to bid on
     function challengeOutcome(int _outcome)
         public
     {
@@ -93,9 +93,9 @@ contract UltimateOracle is Oracle {
         frontRunnerSetTimestamp = now;
     }
 
-    /// @dev Allows to challenge the oracle outcome.
-    /// @param _outcome Outcome to bid on.
-    /// @param amount Amount to bid.
+    /// @dev Allows to challenge the oracle outcome
+    /// @param _outcome Outcome to bid on
+    /// @param amount Amount to bid
     function voteForOutcome(int _outcome, uint amount)
         public
     {
@@ -118,8 +118,8 @@ contract UltimateOracle is Oracle {
         }
     }
 
-    /// @dev Withdraws winnings for user.
-    /// @return Returns winnings.
+    /// @dev Withdraws winnings for user
+    /// @return Returns winnings
     function withdraw()
         public
         returns (uint amount)
@@ -133,8 +133,8 @@ contract UltimateOracle is Oracle {
             revert();
     }
 
-    /// @dev Checks if time to challenge the outcome is over.
-    /// @return Returns if challenge period is over.
+    /// @dev Checks if time to challenge the outcome is over
+    /// @return Returns if challenge period is over
     function isChallengePeriodOver()
         public
         returns (bool)
@@ -142,8 +142,8 @@ contract UltimateOracle is Oracle {
         return outcomeSetTimestamp != 0 && now - outcomeSetTimestamp > challengePeriod;
     }
 
-    /// @dev Checks if time to overbid the front runner is over.
-    /// @return Returns if front runner period is over.
+    /// @dev Checks if time to overbid the front runner is over
+    /// @return Returns if front runner period is over
     function isFrontRunnerPeriodOver()
         public
         returns (bool)
@@ -151,8 +151,8 @@ contract UltimateOracle is Oracle {
         return frontRunnerSetTimestamp != 0 && now - frontRunnerSetTimestamp > frontRunnerPeriod;
     }
 
-    /// @dev Checks if outcome was challenged.
-    /// @return Returns if outcome was challenged.
+    /// @dev Checks if outcome was challenged
+    /// @return Returns if outcome was challenged
     function isChallenged()
         public
         returns (bool)
@@ -160,8 +160,8 @@ contract UltimateOracle is Oracle {
         return frontRunnerSetTimestamp > 0;
     }
 
-    /// @dev Returns if winning outcome is set for given event.
-    /// @return Returns if outcome is set.
+    /// @dev Returns if winning outcome is set for given event
+    /// @return Returns if outcome is set
     function isOutcomeSet()
         public
         constant
@@ -171,8 +171,8 @@ contract UltimateOracle is Oracle {
                || isFrontRunnerPeriodOver();
     }
 
-    /// @dev Returns winning outcome for given event.
-    /// @return Returns outcome.
+    /// @dev Returns winning outcome for given event
+    /// @return Returns outcome
     function getOutcome()
         public
         constant
