@@ -125,17 +125,16 @@ class EthDeploy:
         sub_dirs = [x[0] for x in os.walk(absolute_path)]
         extra_args = ' '.join(['{}={}'.format(d.split('/')[-1], d) for d in sub_dirs])
         # compile code
-        combined = self.solidity.combined(code, path=path, optimize=self.optimize, extra_args=extra_args)
+        combined = self.solidity.combined(code, path=path, libraries=self.references, optimize=self.optimize, extra_args=extra_args)
         bytecode = combined[-1][1]['bin_hex']
         abi = combined[-1][1]['abi']
         return bytecode, abi
 
-    def replace_library_placeholders(self, bytecode):
-        for library_name, library_address in self.references.iteritems():
-            bytecode = bytecode.replace('__{}{}'.format(library_name, '_' * (38 - len(library_name))), library_address)
-        return bytecode
-
     def deploy(self, _from, file_path, bytecode, sourcecode, libraries, value, params, label, abi):
+        # replace library placeholders
+        if libraries:
+            for library_name, library_address in libraries.iteritems():
+                self.references[library_name] = self.replace_references(self.strip_0x(library_address))
         if file_path:
             if self.contract_dir:
                 file_path = '{}/{}'.format(self.contract_dir, file_path)
@@ -145,11 +144,6 @@ class EthDeploy:
         if sourcecode:
             # compile code
             bytecode, abi = self.compile_code(code=sourcecode)
-        # replace library placeholders
-        if libraries:
-            for library_name, library_address in libraries:
-                self.references[library_name] = self.strip_0x(library_address)
-        bytecode = self.replace_library_placeholders(bytecode)
         if params:
             translator = ContractTranslator(abi)
             # replace constructor placeholders
