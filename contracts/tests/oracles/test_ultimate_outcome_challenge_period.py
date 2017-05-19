@@ -20,12 +20,14 @@ class TestContract(AbstractTestContract):
         description_hash = "d621d969951b20c5cf2008cbfc282a2d496ddfe75a76afe7b6b32f1470b8a449".decode('hex')
         centralized_oracle = self.contract_at(self.centralized_oracle_factory.createCentralizedOracle(description_hash,),
                                               self.centralized_oracle_abi)
+        spread_multiplier = 3
         challenge_period = 200  # 200s
         challenge_amount = 100  # 100 Wei
         front_runner_period = 50  # 50s
         ultimate_oracle = self.contract_at(
             self.ultimate_oracle_factory.createUltimateOracle(centralized_oracle.address, self.ether_token.address,
-                                                              challenge_period, challenge_amount, front_runner_period),
+                                                              spread_multiplier, challenge_period, challenge_amount,
+                                                              front_runner_period),
             self.ultimate_oracle_abi)
         # Set outcome in central oracle
         centralized_oracle.setOutcome(1)
