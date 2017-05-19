@@ -1,3 +1,8 @@
+#DEPRECATED!
+
+Please use (https://github.com/gnosis/gnosis-contracts/)
+
+
 Gnosis Smart Contracts
 ===================
 
