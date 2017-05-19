@@ -22,7 +22,7 @@ class TestContract(AbstractTestContract):
 
     def test(self):
         # Create event
-        description_hash = "1"
+        description_hash = "d621d969951b20c5cf2008cbfc282a2d496ddfe75a76afe7b6b32f1470b8a449".decode('hex')
         oracle = self.contract_at(self.centralized_oracle_factory.createCentralizedOracle(description_hash), self.oracle_abi)
         event = self.contract_at(self.event_factory.createCategoricalEvent(self.ether_token.address, oracle.address, 2), self.event_abi)
         # Create campaign
